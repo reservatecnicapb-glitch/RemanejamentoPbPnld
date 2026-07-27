@@ -1,5 +1,5 @@
 
- 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -10,10 +10,10 @@
   const EMAILJS_PUBLIC_KEY  = 'ZZ1hLISPSSzmVmprM';
   const EMAILJS_SERVICE_ID  = 'service_hlz8bzg';
   const EMAILJS_TEMPLATE_ID = 'template_4fsb0j1';
- 
+
   // Destinatários fixos
   const EMAIL_DESTINATARIOS = 'reservatecnicapb@gmail.com';
- 
+
   (function() { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); })();
 </script>
 <meta charset="UTF-8">
@@ -28,7 +28,7 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #1a1a2e; font-size: 14px; }
   a { text-decoration: none; color: inherit; }
- 
+
   :root {
     --green: #1d6941;
     --green-dark: #155233;
@@ -46,7 +46,7 @@
     --red: #cc2222;
     --white: #ffffff;
   }
- 
+
   .min-h-screen { min-height: 100vh; display: flex; flex-direction: column; }
   .flex { display: flex; }
   .items-center { align-items: center; }
@@ -66,7 +66,7 @@
   .overflow-x-auto { overflow-x: auto; }
   .w-full { width: 100%; }
   .cursor-pointer { cursor: pointer; }
- 
+
   /* GOV TOP BAR */
   .gov-bar {
     background: var(--blue);
@@ -81,7 +81,7 @@
   .gov-bar a { color: white; opacity: 0.9; font-size: 11px; }
   .gov-bar a:hover { opacity: 1; text-decoration: underline; }
   .gov-bar .gov-brand { font-weight: 700; font-size: 12px; opacity: 1; }
- 
+
   /* HEADER */
   header {
     background: white;
@@ -123,7 +123,7 @@
     font-size: 9px; border-radius: 9px;
     padding: 1px 4px; font-weight: 700;
   }
- 
+
   /* BOTÃO DE LOGIN (antes de logar) */
   .btn-login {
     display: flex; align-items: center; gap: 7px;
@@ -135,7 +135,7 @@
     transition: background 0.15s;
   }
   .btn-login:hover { background: var(--green-dark); }
- 
+
   /* USER PILL (depois de logar) */
   .user-pill {
     display: flex; align-items: center; gap: 10px;
@@ -149,7 +149,7 @@
   }
   .user-info .name { font-size: 12px; font-weight: 600; color: var(--gray-90); }
   .user-info .role { font-size: 10px; color: var(--gray-60); }
- 
+
   /* MAIN NAV */
   nav.main-nav {
     background: var(--green);
@@ -169,7 +169,7 @@
     border-bottom-color: var(--yellow);
     color: white; font-weight: 600;
   }
- 
+
   /* BREADCRUMB */
   .breadcrumb-bar {
     background: white; border-bottom: 1px solid var(--gray-30);
@@ -180,14 +180,14 @@
   }
   .breadcrumb-bar a:hover { color: var(--green); }
   .breadcrumb-bar .current { color: var(--green); font-weight: 600; }
- 
+
   /* MAIN */
   main {
     flex: 1; padding: 24px;
     max-width: 1600px; margin: 0 auto; width: 100%;
     display: flex; flex-direction: column; gap: 20px;
   }
- 
+
   /* CARDS */
   .card {
     background: white;
@@ -207,7 +207,7 @@
     text-transform: uppercase; letter-spacing: 0.04em;
   }
   .card-body { padding: 20px; }
- 
+
   /* HERO BANNER */
   .hero-banner {
     background: linear-gradient(to right, #eaf6f0, #e0f4ef);
@@ -236,7 +236,7 @@
     transition: all 0.15s;
   }
   .hero-meta .btn-update:hover { background: var(--green); color: white; }
- 
+
   /* ENTITY DATA GRID */
   .entity-grid {
     display: grid;
@@ -249,7 +249,7 @@
   }
   .entity-field .field-value { font-size: 13px; color: var(--gray-80); margin-top: 4px; }
   .entity-field .field-value.bold { font-weight: 700; color: var(--gray-90); }
- 
+
   /* STATUS BADGES */
   .badge {
     display: inline-flex; align-items: center; gap: 4px;
@@ -260,7 +260,7 @@
   .badge-new { background: var(--yellow); color: #4a3800; font-size: 10px; padding: 2px 7px; }
   .badge-available { background: #d1fae5; color: #065f46; }
   .badge-reserved { background: #fef3c7; color: #92400e; }
- 
+
   /* TABS */
   .tabs { display: flex; border-bottom: 1px solid var(--gray-30); overflow-x: auto; }
   .tab-btn {
@@ -276,7 +276,7 @@
     color: var(--green); font-weight: 600;
     background: rgba(29,105,65,0.04);
   }
- 
+
   /* STATS GRID */
   .stats-grid {
     display: grid;
@@ -299,7 +299,7 @@
   .stat-icon.rose { background: #ffe4e6; color: #be123c; }
   .stat-number { font-size: 22px; font-weight: 700; color: var(--gray-90); font-family: monospace; }
   .stat-label { font-size: 10px; color: var(--gray-60); text-transform: uppercase; font-weight: 600; letter-spacing: 0.04em; }
- 
+
   /* SUB-TABS */
   .sub-tabs-bar {
     display: flex; align-items: center; justify-content: space-between;
@@ -322,7 +322,7 @@
     font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   }
   .period-info { font-size: 12px; color: var(--gray-60); display: flex; align-items: center; gap: 5px; }
- 
+
   /* FILTERS */
   .filters-section { background: white; border: 1px solid var(--gray-30); border-radius: 8px; }
   .filter-grid {
@@ -381,7 +381,7 @@
     box-shadow: 0 1px 3px rgba(29,105,65,0.3);
   }
   .btn-primary:hover { background: var(--green-dark); }
- 
+
   /* TABLE */
   .results-section { background: white; border: 1px solid var(--gray-30); border-radius: 8px; overflow: hidden; }
   .results-header {
@@ -431,7 +431,7 @@
   }
   .btn-request:hover { background: var(--green-dark); }
   .btn-request:disabled { background: var(--gray-40); cursor: not-allowed; }
- 
+
   /* PAGINATION */
   .pagination {
     padding: 12px 20px; border-top: 1px solid var(--gray-30);
@@ -449,7 +449,7 @@
   .page-btn:hover { background: var(--gray-20); }
   .page-btn.active { background: var(--green); color: white; border-color: var(--green); font-weight: 700; }
   .page-btn.nav { border: 1px solid var(--gray-30); color: var(--gray-60); }
- 
+
   /* FOOTER */
   footer { background: #0e3a6e; color: white; margin-top: 20px; }
   .footer-inner {
@@ -479,7 +479,7 @@
     font-size: 11px; opacity: 0.75;
   }
   .footer-bottom .version { background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; }
- 
+
   /* SORT / EXPORT */
   .sort-select {
     font-size: 12px; border: 1px solid var(--gray-40); border-radius: 5px;
@@ -491,7 +491,7 @@
     cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 600;
   }
   .export-btn:hover { text-decoration: underline; }
- 
+
   /* VIEW TOGGLE */
   .view-toggle { display: flex; gap: 4px; background: var(--gray-20); border-radius: 6px; padding: 3px; }
   .view-btn {
@@ -501,7 +501,7 @@
     transition: all 0.15s; font-family: 'Inter', sans-serif;
   }
   .view-btn.active { background: white; color: var(--green); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
- 
+
   /* MAP */
   #map-container { display: none; position: relative; }
   #map-container.visible { display: block; }
@@ -548,10 +548,10 @@
   .table-view { display: block; }
   .table-view.hidden { display: none; }
   tr.map-highlight td { background: rgba(29,105,65,0.08) !important; }
- 
+
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes pulse { 0%,100% { box-shadow: 0 0 0 6px rgba(245,158,11,0.35); } 50% { box-shadow: 0 0 0 12px rgba(245,158,11,0.1); } }
- 
+
   @media (max-width: 768px) {
     main { padding: 16px; }
     .header-inner { padding: 10px 16px; }
@@ -562,7 +562,7 @@
     .breadcrumb-nav { display: none; }
     .user-info { display: none; }
   }
- 
+
   /* ============================================================
      PÁGINA DE LOGIN
      ============================================================ */
@@ -575,7 +575,7 @@
   #login-page.active { display: flex; }
   #main-page { display: flex; flex-direction: column; min-height: 100vh; }
   #main-page.hidden-page { display: none; }
- 
+
   .login-wrapper {
     flex: 1;
     display: flex;
@@ -608,11 +608,11 @@
   .login-title { color: white; }
   .login-title h1 { font-size: 16px; font-weight: 700; }
   .login-title p { font-size: 11px; opacity: 0.85; margin-top: 2px; }
- 
+
   .login-body { padding: 32px; }
   .login-body h2 { font-size: 18px; font-weight: 700; color: var(--gray-90); margin-bottom: 6px; }
   .login-body .login-subtitle { font-size: 13px; color: var(--gray-60); margin-bottom: 28px; }
- 
+
   .form-group { margin-bottom: 18px; }
   .form-group label {
     display: block; font-size: 11px; font-weight: 600;
@@ -633,12 +633,12 @@
     color: var(--gray-60); font-size: 16px; padding: 2px;
   }
   .input-with-icon .toggle-password:hover { color: var(--gray-90); }
- 
+
   .login-help {
     font-size: 12px; color: var(--gray-60);
     margin-top: 5px;
   }
- 
+
   .btn-login-submit {
     width: 100%; padding: 12px;
     background: var(--green); color: white;
@@ -650,7 +650,7 @@
     margin-top: 8px;
   }
   .btn-login-submit:hover { background: var(--green-dark); }
- 
+
   .login-divider {
     border: none; border-top: 1px solid var(--gray-30);
     margin: 24px 0;
@@ -662,7 +662,7 @@
     font-size: 12px; color: var(--green); font-weight: 600;
   }
   .login-footer-links a:hover { text-decoration: underline; }
- 
+
   .login-alert {
     background: #fef2f2; border: 1px solid #fecaca;
     border-radius: 6px; padding: 10px 14px;
@@ -671,7 +671,7 @@
     margin-bottom: 16px;
   }
   .login-alert.show { display: flex; }
- 
+
   /* Dropdown do usuário */
   .user-dropdown-wrap { position: relative; }
   .user-dropdown {
@@ -697,7 +697,7 @@
 </style>
 </head>
 <body>
- 
+
 <!-- ============================================================
      PÁGINA DE LOGIN
      ============================================================ -->
@@ -711,7 +711,7 @@
       <a href="#">Acessibilidade</a>
     </div>
   </div>
- 
+
   <div class="login-wrapper">
     <div class="login-card">
       <div class="login-card-header">
@@ -721,16 +721,16 @@
           <p>Programa Nacional do Livro e do Material Didático</p>
         </div>
       </div>
- 
+
       <div class="login-body">
         <h2>Acesso ao Sistema</h2>
         <p class="login-subtitle">Informe seu código INEP e senha para entrar.</p>
- 
+
         <div class="login-alert" id="login-alert">
           <i class="ri-error-warning-line"></i>
           <span id="login-alert-msg">INEP ou senha incorretos. Tente novamente.</span>
         </div>
- 
+
         <div class="form-group">
           <label for="inep-input">Código INEP da Escola</label>
           <div class="input-with-icon">
@@ -739,7 +739,7 @@
           </div>
           <div class="login-help">Código de 8 dígitos da escola no Censo Escolar</div>
         </div>
- 
+
         <div class="form-group">
           <label for="senha-input">Senha</label>
           <div class="input-with-icon">
@@ -751,37 +751,37 @@
           </div>
           <div class="login-help">Sua senha foi gerada automaticamente e enviada ao e-mail cadastrado</div>
         </div>
- 
+
         <button class="btn-login-submit" id="btn-entrar">
           <i class="ri-login-circle-line"></i> Entrar
         </button>
- 
+
         <hr class="login-divider">
- 
- 
+
+
       </div>
     </div>
   </div>
- 
+
   <!-- Footer simples na login -->
   <div style="text-align:center;padding:16px;font-size:11px;color:var(--gray-60);">
     © 2026 Ministério da Educação · FNDE · Versão 4.18.2
   </div>
 </div>
- 
- 
+
+
 <!-- ============================================================
      PÁGINA PRINCIPAL (depois de logar)
      ============================================================ -->
 <div id="main-page" class="hidden-page">
 <div class="min-h-screen">
- 
+
   <!-- TOP BAR -->
   <div class="gov-bar">
     <a href="#" class="gov-brand">gov.br</a>
     <span style="opacity:0.7">Portal do Governo Brasileiro</span>
   </div>
- 
+
   <!-- HEADER -->
   <header>
     <div class="header-inner">
@@ -808,10 +808,10 @@
         </div>
       </div>
     </div>
- 
- 
+
+
   <main>
- 
+
     <!-- ENTITY DATA (preenchido dinamicamente pelo login) -->
     <div class="card">
       <div class="card-header">
@@ -827,7 +827,7 @@
         <!-- Preenchido pelo JS após login -->
       </div>
     </div>
- 
+
     <!-- TABS -->
     <div class="card" style="overflow:visible;">
       <div class="tabs">
@@ -838,10 +838,10 @@
         <button class="tab-btn" data-tab="reserva"><i class="ri-archive-line"></i>Reserva Técnica</button>
       </div>
     </div>
- 
+
     <!-- CONTEÚDO DE REMANEJAMENTO -->
     <div id="tab-content-remanejamento">
- 
+
     <!-- STATS -->
     <div class="stats-grid">
       <div class="stat-card">
@@ -862,7 +862,7 @@
         </div>
       </div>
     </div>
- 
+
     <!-- SUB-TABS -->
     <div class="sub-tabs-bar">
       <div class="sub-tabs">
@@ -872,7 +872,7 @@
         <button class="sub-tab"        data-rem="historico" onclick="remShowTab('historico')" id="rem-tab-historico"><i class="ri-history-line"></i>Histórico</button>
       </div>
     </div>
- 
+
     <!-- ABA MAPA -->
     <div id="rem-mapa">
       <div class="results-section">
@@ -932,7 +932,7 @@
         </div>
       </div>
     </div>
- 
+
     <!-- ABA LIVROS SOBRANDO -->
     <div id="rem-sobrando" style="display:none;">
       <div class="card" id="sob-form-card" style="margin-bottom:16px;">
@@ -966,7 +966,7 @@
         <div id="sob-lista"></div>
       </div>
     </div>
- 
+
     <!-- ABA PEDIDOS -->
     <div id="rem-pedidos" style="display:none;">
       <!-- Pedidos Enviados -->
@@ -992,7 +992,7 @@
         <div id="ped-recebidos-lista"></div>
       </div>
     </div>
- 
+
     <!-- ABA HISTÓRICO (só admin) -->
     <div id="rem-historico" style="display:none;">
       <div class="results-section">
@@ -1006,16 +1006,16 @@
         <div id="hist-lista"></div>
       </div>
     </div>
- 
+
     </div><!-- /tab-content-remanejamento -->
- 
- 
+
+
     <!-- CONTEÚDO DE RESERVA TÉCNICA -->
     <div id="tab-content-reserva" style="display:none;">
- 
+
       <!-- ESCOLA: formulário de solicitação -->
       <div id="rt-escola-view">
- 
+
         <!-- Cabeçalho automático -->
         <div class="card" style="margin-bottom:16px;">
           <div class="card-header">
@@ -1027,7 +1027,7 @@
           </div>
           <div class="entity-grid" id="rt-cabecalho-grid" style="padding:20px;"></div>
         </div>
- 
+
         <!-- Meus pedidos / Fazer novo pedido -->
         <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
           <div class="sub-tabs" style="background:var(--gray-10);border:1px solid var(--gray-30);border-radius:8px;padding:4px;display:inline-flex;gap:4px;">
@@ -1036,7 +1036,7 @@
           </div>
           <span style="font-size:12px;color:var(--gray-60);"><i class="ri-time-line"></i> Pedidos em ordem de chegada</span>
         </div>
- 
+
         <!-- MEUS PEDIDOS -->
         <div id="rt-meus-pedidos">
           <div class="card">
@@ -1056,7 +1056,7 @@
             </div>
           </div>
         </div>
- 
+
         <!-- NOVO PEDIDO -->
         <div id="rt-novo-pedido" style="display:none;">
           <div class="card">
@@ -1069,14 +1069,14 @@
             <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
               <!-- Container dinâmico de itens -->
               <div id="rt-itens-container" style="display:flex;flex-direction:column;gap:12px;"></div>
- 
+
               <!-- Botão adicionar livro -->
               <div>
                 <button onclick="rtAdicionarItem()" style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border:2px dashed var(--green);border-radius:8px;background:var(--green-light);color:var(--green);font-weight:600;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;">
                   <i class="ri-add-circle-line" style="font-size:17px;"></i> Adicionar outro livro
                 </button>
               </div>
- 
+
               <div>
                 <label class="form-label">Justificativa</label>
                 <textarea id="rt-justificativa" rows="3" style="width:100%;padding:8px 10px;font-size:13px;border:1px solid var(--gray-40);border-radius:6px;font-family:'Inter',sans-serif;resize:vertical;outline:none;" placeholder="Descreva o motivo da solicitação..."></textarea>
@@ -1090,7 +1090,7 @@
           </div>
         </div>
       </div>
- 
+
       <!-- ADMIN: painel de todos os pedidos -->
       <div id="rt-admin-view" style="display:none;">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
@@ -1116,9 +1116,9 @@
           <div id="rt-lista-admin"></div>
         </div>
       </div>
- 
+
     </div>
- 
+
     <!-- PAINEL SUPORTE -->
     <div id="modal-suporte" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:20px;">
       <div style="background:white;border-radius:12px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
@@ -1154,7 +1154,7 @@
         </div>
       </div>
     </div>
- 
+
     <!-- MODAL COMPROVANTE -->
     <!-- MODAL ESTATÍSTICAS ESCOLAS -->
     <div id="modal-estatisticas" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:20px;">
@@ -1172,7 +1172,7 @@
         </div>
       </div>
     </div>
- 
+
     <div id="modal-comprovante" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:20px;">
       <div style="background:white;border-radius:12px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
         <div style="padding:16px 20px;border-bottom:1px solid var(--gray-30);display:flex;align-items:center;justify-content:space-between;">
@@ -1186,7 +1186,7 @@
         </div>
       </div>
     </div>
- 
+
     <!-- MODAL RASTREAMENTO -->
     <div id="modal-rastreamento" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:20px;">
       <div style="background:white;border-radius:12px;max-width:520px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
@@ -1197,15 +1197,15 @@
         <div id="rastreamento-body" style="padding:24px;"></div>
       </div>
     </div>
- 
+
   </main>
- 
+
   <!-- FOOTER -->
- 
+
 </div><!-- /min-h-screen -->
 </div><!-- /main-page -->
- 
- 
+
+
 <script>
 // ─── SUPABASE CONFIG ──────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://dujbnispmwejupnmmmye.supabase.co';
@@ -1237,13 +1237,13 @@ const ESCOLAS_MOCK = {
     lat: -7.1201, lng: -34.8460
   },
 };
- 
+
 // senha mocada igual para todas: "senha123"
 const SENHA_MOCK = 'senha123';
- 
+
 // ─── ESTADO ──────────────────────────────────────────────────────────────────
 let usuarioLogado = null;
- 
+
 function remAtualizarStats() {
   const sob = document.getElementById('stat-sobrando');
   const ped = document.getElementById('stat-pedidos');
@@ -1259,7 +1259,7 @@ function remAtualizarStats() {
     ped.textContent = meusPedidos;
   }
 }
- 
+
 // ─── NAVEGAÇÃO ENTRE PÁGINAS ──────────────────────────────────────────────────
 function showLogin() {
   document.getElementById('login-page').classList.add('active');
@@ -1268,7 +1268,7 @@ function showLogin() {
   document.getElementById('senha-input').value = '';
   document.getElementById('login-alert').classList.remove('show');
 }
- 
+
 function showMain() {
   document.getElementById('login-page').classList.remove('active');
   document.getElementById('main-page').classList.remove('hidden-page');
@@ -1294,7 +1294,7 @@ function showMain() {
     remCarregarSobrando();
   }, 50);
 }
- 
+
 // ─── LOGIN ────────────────────────────────────────────────────────────────────
 document.getElementById('btn-entrar').addEventListener('click', fazerLogin);
 document.getElementById('senha-input').addEventListener('keydown', e => {
@@ -1303,22 +1303,22 @@ document.getElementById('senha-input').addEventListener('keydown', e => {
 document.getElementById('inep-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('senha-input').focus();
 });
- 
+
 async function fazerLogin() {
   const inep  = document.getElementById('inep-input').value.trim().toUpperCase();
   const senha = document.getElementById('senha-input').value.trim();
   const alertEl = document.getElementById('login-alert');
   const msg   = document.getElementById('login-alert-msg');
   const btn   = document.getElementById('btn-entrar');
- 
+
   if (!inep || !senha) {
     msg.textContent = 'Preencha o INEP e a senha para continuar.';
     alertEl.classList.add('show'); return;
   }
- 
+
   btn.disabled = true;
   btn.innerHTML = '<i class="ri-loader-4-line" style="animation:spin 1s linear infinite;"></i> Entrando...';
- 
+
   try {
     // Verifica se é login de GRE (formato GRE01 a GRE16)
     const greMatch = inep.match(/^GRE(\d{1,2})$/);
@@ -1348,22 +1348,22 @@ async function fazerLogin() {
       showMain();
       return;
     }
- 
+
     // Consulta tabela usuarios (escolas e admin)
     const resUser = await fetch(
       `${SUPABASE_URL}/rest/v1/usuarios?inep=eq.${inep}&senha=eq.${senha}&select=*&limit=1`,
       { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
     );
     const users = await resUser.json();
- 
+
     if (!users || users.length === 0) {
       msg.textContent = 'INEP ou senha incorretos.';
       alertEl.classList.add('show'); return;
     }
- 
+
     const user = users[0];
     alertEl.classList.remove('show');
- 
+
     if (user.is_admin) {
       // Admin
       usuarioLogado = { isAdmin: true, inep: 'admin', nome: 'Administrador do Sistema', municipio: 'João Pessoa - PB', gre: '—', estado: 'Paraíba' };
@@ -1378,12 +1378,12 @@ async function fazerLogin() {
       );
       const escolas = await resEscola.json();
       const e = escolas[0];
- 
+
       if (!e) {
         msg.textContent = 'Escola não encontrada. Entre em contato com a administração.';
         alertEl.classList.add('show'); return;
       }
- 
+
       usuarioLogado = {
         inep:      String(e.inep || '').trim(),
         nome:      e.nome || '',
@@ -1396,11 +1396,11 @@ async function fazerLogin() {
       };
       preencherDadosUsuario(usuarioLogado);
     }
- 
+
     remAtualizarStats();
     remAjustarAbaHistorico();
     showMain();
- 
+
   } catch(err) {
     msg.textContent = 'Erro de conexão. Tente novamente.';
     alertEl.classList.add('show');
@@ -1410,7 +1410,7 @@ async function fazerLogin() {
     btn.innerHTML = '<i class="ri-login-circle-line"></i> Entrar';
   }
 }
- 
+
 // ─── PREENCHER DADOS DA ENTIDADE COM O USUÁRIO LOGADO ────────────────────────
 function preencherDadosUsuario(escola) {
   // Avatar: iniciais do nome
@@ -1421,7 +1421,7 @@ function preencherDadosUsuario(escola) {
     ? escola.nome.substring(0, 28) + '...'
     : escola.nome;
   document.getElementById('user-role-display').textContent = 'INEP ' + escola.inep;
- 
+
   // Dados da entidade
   const grid = document.getElementById('entity-grid');
   grid.innerHTML = `
@@ -1431,14 +1431,14 @@ function preencherDadosUsuario(escola) {
     <div class="entity-field"><div class="field-label">Município / UF</div><div class="field-value">${escola.municipio}</div></div>
   `;
 }
- 
+
 // ─── LOGOUT ───────────────────────────────────────────────────────────────────
 document.getElementById('btn-logout').addEventListener('click', () => {
   usuarioLogado = null;
   document.getElementById('user-dropdown').classList.remove('open');
   showLogin();
 });
- 
+
 // ─── DROPDOWN DO USUÁRIO ──────────────────────────────────────────────────────
 document.getElementById('btn-user-dropdown').addEventListener('click', (e) => {
   e.stopPropagation();
@@ -1447,7 +1447,7 @@ document.getElementById('btn-user-dropdown').addEventListener('click', (e) => {
 document.addEventListener('click', () => {
   document.getElementById('user-dropdown').classList.remove('open');
 });
- 
+
 // ─── TOGGLE SENHA ─────────────────────────────────────────────────────────────
 document.getElementById('toggle-senha').addEventListener('click', () => {
   const input = document.getElementById('senha-input');
@@ -1460,7 +1460,7 @@ document.getElementById('toggle-senha').addEventListener('click', () => {
     icon.className = 'ri-eye-line';
   }
 });
- 
+
 // ─── TABS ─────────────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1471,14 +1471,14 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById('tab-content-reserva').style.display       = tab === 'reserva'        ? '' : 'none';
   });
 });
- 
+
 document.querySelectorAll('.sub-tab').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   });
 });
- 
+
 document.querySelectorAll('.main-nav a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
@@ -1486,24 +1486,24 @@ document.querySelectorAll('.main-nav a').forEach(a => {
     a.classList.add('active');
   });
 });
- 
+
 document.querySelectorAll('.page-btn:not(.nav)').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.page-btn:not(.nav)').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   });
 });
- 
- 
+
+
 // ─── MAP LOGIC ────────────────────────────────────────────────────────────────
 // ─── MAP LOGIC ──────────────────────────────────────────────────────────────
 const schools = []; // carregado do Supabase em initMap()
- 
+
 let map = null;
 let mapInitialized = false;
- 
+
 // ─── SUPABASE ─────────────────────────────────────────────────────────────────
- 
+
 async function fetchEscolasSupabase() {
   try {
     let all = [], from = 0;
@@ -1534,23 +1534,23 @@ async function fetchEscolasSupabase() {
     return null;
   }
 }
- 
+
 async function initMap() {
   if (mapInitialized) return;
   mapInitialized = true;
- 
+
   map = L.map('school-map', { zoomControl: true }).setView([-7.155, -34.865], 12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 18
   }).addTo(map);
- 
+
   // Loading indicator
   const loadEl = document.createElement('div');
   loadEl.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000;background:white;padding:14px 22px;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.15);font-size:13px;color:var(--gray-80);display:flex;align-items:center;gap:8px;';
   loadEl.innerHTML = '<i class="ri-loader-4-line" style="font-size:18px;color:var(--green);animation:spin 1s linear infinite;"></i> Carregando escolas...';
   document.getElementById('school-map').appendChild(loadEl);
- 
+
   // Tenta buscar do Supabase; fallback para o array local
   const fromDB = await fetchEscolasSupabase();
   if (fromDB && fromDB.length > 0) {
@@ -1558,15 +1558,15 @@ async function initMap() {
     // Normaliza inep pra string em todos os registros
     fromDB.forEach(s => { s.inep = String(s.inep || '').trim(); schools.push(s); });
   }
- 
+
   loadEl.remove();
- 
+
   // Marca escola do usuário (comparação normalizada)
   const myInep = String(usuarioLogado?.inep || '').trim();
   schools.forEach(s => { s.inep = String(s.inep || '').trim(); s.isMySchool = !!usuarioLogado && s.inep === myInep; });
- 
+
   const mySchool = schools.find(s => s.isMySchool) || schools[0];
- 
+
   schools.forEach(school => {
     if (!school.lat || !school.lng || isNaN(school.lat) || isNaN(school.lng)) return;
     const temSobrando = remLivrosSobrando.some(x => String(x.inep).trim() === school.inep);
@@ -1584,7 +1584,7 @@ async function initMap() {
     marker.on('click', () => showInfoPanel(school));
     mapMarkers.push({ marker, school });
   });
- 
+
   if (mySchool && mySchool.lat) {
     map.setView([mySchool.lat, mySchool.lng], 13);
     [5000, 15000, 30000].forEach(r => {
@@ -1595,9 +1595,9 @@ async function initMap() {
     });
   }
 }
- 
+
 let mapEscolaSelecionada = null;
- 
+
 function showInfoPanel(school) {
   mapEscolaSelecionada = school;
   const panel = document.getElementById('map-info-panel');
@@ -1606,10 +1606,10 @@ function showInfoPanel(school) {
     `<i class="ri-map-pin-2-line"></i> ${school.address} · ${school.city}`;
   const booksEl = document.getElementById('map-info-books');
   const btn = document.getElementById('map-solicitar-btn');
- 
+
   // Compara pelo INEP, não pelo flag isMySchool que pode estar errado após busca
   const isOwn = String(school.inep).trim() === String(usuarioLogado?.inep).trim();
- 
+
   if (isOwn) {
     booksEl.innerHTML = '<p style="color:var(--gray-60);font-size:12px;">Esta é a sua escola.</p>';
     btn.style.display = 'none';
@@ -1630,23 +1630,23 @@ function showInfoPanel(school) {
   }
   panel.classList.add('visible');
 }
- 
+
 function remMapaSolicitar() {
   if (!mapEscolaSelecionada) return;
   const school = mapEscolaSelecionada;
   const sob = remLivrosSobrando.filter(x => String(x.inep).trim() === String(school.inep).trim());
   if (sob.length === 0) return;
- 
+
   // Fecha painel do mapa
   document.getElementById('map-info-panel').classList.remove('visible');
- 
+
   // Vai pra aba pedidos e mostra formulário
   remShowTab('pedidos');
- 
+
   // Injeta formulário no topo da aba pedidos
   const existing = document.getElementById('ped-form-mapa');
   if (existing) existing.remove();
- 
+
   const formDiv = document.createElement('div');
   formDiv.id = 'ped-form-mapa';
   formDiv.style.cssText = 'background:#f0f8f4;border:2px solid var(--green);border-radius:8px;padding:20px;margin:16px;';
@@ -1674,24 +1674,24 @@ function remMapaSolicitar() {
       <button class="btn btn-outline" onclick="document.getElementById('ped-form-mapa').remove();remCarregarPedidos();">Cancelar</button>
       <button class="btn btn-primary" onclick="remConfirmarPedidoMapa()"><i class="ri-send-plane-line"></i> Enviar Pedido</button>
     </div>`;
- 
+
   const pedLista = document.getElementById('ped-lista');
   pedLista.parentNode.insertBefore(formDiv, pedLista);
 }
- 
+
 async function remConfirmarPedidoMapa() {
   const sel = document.getElementById('ped-livro-sel');
   const idSob = parseInt(sel?.value);
   const qtd = parseInt(document.getElementById('ped-qtd-mapa')?.value);
   const errEl = document.getElementById('ped-mapa-error');
- 
+
   if (!idSob) { errEl.style.display=''; errEl.textContent='Selecione um livro.'; return; }
   if (!qtd || qtd < 1) { errEl.style.display=''; errEl.textContent='Informe a quantidade.'; return; }
- 
+
   const item = remLivrosSobrando.find(x => x.id === idSob);
   if (!item) return;
   if (qtd > item.qtd) { errEl.style.display=''; errEl.textContent=`Quantidade máxima disponível: ${item.qtd}.`; return; }
- 
+
   const e = usuarioLogado;
   const proto = gerarProtocolo('REM');
   await sbPost('pedidos_remanejamento', {
@@ -1702,21 +1702,21 @@ async function remConfirmarPedidoMapa() {
     qtd,
     status: 'pendente'
   });
- 
+
   document.getElementById('ped-form-mapa').remove();
   alert(`✅ Pedido ${proto} enviado! Aguardando aceite da escola ofertante.`);
   await remCarregarPedidos();
 }
- 
+
 document.getElementById('map-info-close').addEventListener('click', () => {
   document.getElementById('map-info-panel').classList.remove('visible');
 });
- 
+
 // ─── REMANEJAMENTO — ESTADO ───────────────────────────────────────────────────
 let remLivrosSobrando = [];
 let remPedidos = [];
 const remItemCount = { sob:0 };
- 
+
 // ─── HELPERS SUPABASE ─────────────────────────────────────────────────────────
 const sbHeaders = () => ({
   'apikey': SUPABASE_KEY,
@@ -1724,38 +1724,38 @@ const sbHeaders = () => ({
   'Content-Type': 'application/json',
   'Prefer': 'return=representation'
 });
- 
+
 async function sbGet(tabela, params = '') {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}?${params}`, { headers: sbHeaders() });
   return r.json();
 }
- 
+
 async function sbPost(tabela, body) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}`, {
     method: 'POST', headers: sbHeaders(), body: JSON.stringify(body)
   });
   return r.json();
 }
- 
+
 async function sbPatch(tabela, filtro, body) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}?${filtro}`, {
     method: 'PATCH', headers: {...sbHeaders(), 'Prefer': 'return=minimal'}, body: JSON.stringify(body)
   });
   return r.ok;
 }
- 
+
 async function sbDelete(tabela, filtro) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}?${filtro}`, {
     method: 'DELETE', headers: sbHeaders()
   });
   return r.ok;
 }
- 
+
 // Gera protocolo único
 function gerarProtocolo(prefix) {
   return `${prefix}-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
 }
- 
+
 function calcDist(lat1, lng1, lat2, lng2) {
   const R = 6371;
   const dLat = (lat2-lat1)*Math.PI/180;
@@ -1763,7 +1763,7 @@ function calcDist(lat1, lng1, lat2, lng2) {
   const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
- 
+
 function remShowTab(tab) {
   ['mapa','sobrando','pedidos','historico'].forEach(t => {
     const el = document.getElementById('rem-'+t);
@@ -1775,7 +1775,7 @@ function remShowTab(tab) {
   if (tab === 'pedidos')   remCarregarPedidos();
   if (tab === 'historico') remCarregarHistorico();
 }
- 
+
 // ─── MULTI-ITEM FORM ──────────────────────────────────────────────────────────
 function remAdicionarItem(prefix) {
   const id = ++remItemCount[prefix];
@@ -1823,12 +1823,12 @@ function remAdicionarItem(prefix) {
     </div>`;
   container.appendChild(div);
 }
- 
+
 function remRemoverItem(prefix, id) {
   const el = document.getElementById(prefix+'-item-'+id);
   if (el) el.remove();
 }
- 
+
 function remCascataSeries(prefix, id) {
   const mat = document.getElementById(`${prefix}-mat-${id}`).value;
   const selSer = document.getElementById(`${prefix}-ser-${id}`);
@@ -1840,7 +1840,7 @@ function remCascataSeries(prefix, id) {
   PNLD2026[mat].series.forEach(s => selSer.insertAdjacentHTML('beforeend', `<option>${s}</option>`));
   selSer.disabled = false;
 }
- 
+
 function remCascataLivros(prefix, id) {
   const mat = document.getElementById(`${prefix}-mat-${id}`).value;
   const selLiv = document.getElementById(`${prefix}-liv-${id}`);
@@ -1849,8 +1849,8 @@ function remCascataLivros(prefix, id) {
   PNLD2026[mat].livros.forEach(l => selLiv.insertAdjacentHTML('beforeend', `<option value="${l.codigo}">${l.nome} — ${l.codigo}</option>`));
   selLiv.disabled = false;
 }
- 
- 
+
+
 // ─── CARREGAR SOBRANDO ────────────────────────────────────────────────────────
 async function remCarregarSobrando() {
   document.getElementById('sob-lista').innerHTML = '<div style="padding:30px;text-align:center;color:var(--gray-60);">Carregando...</div>';
@@ -1858,11 +1858,11 @@ async function remCarregarSobrando() {
   const isGre   = usuarioLogado?.isGre;
   const myInep  = usuarioLogado?.inep;
   const greNum  = usuarioLogado?.gre;
- 
+
   // Esconde formulário de cadastro para GRE
   const formCard = document.getElementById('sob-form-card');
   if (formCard) formCard.style.display = isGre ? 'none' : '';
- 
+
   let filtro;
   if (isAdmin) {
     filtro = 'ativo=eq.true&order=id.desc&select=*,escolas(nome,cidade,lat,lng,gre)';
@@ -1872,7 +1872,7 @@ async function remCarregarSobrando() {
   } else {
     filtro = `ativo=eq.true&inep=eq.${myInep}&order=id.desc&select=*,escolas(nome,cidade,lat,lng,gre)`;
   }
- 
+
   const data = await sbGet('livros_sobrando', filtro);
   let mapped = (data || []).map(x => ({
     id: x.id, inep: x.inep, escola: x.escolas?.nome || '', cidade: x.escolas?.cidade || '',
@@ -1881,15 +1881,15 @@ async function remCarregarSobrando() {
     mat: x.mat, serie: x.serie, titulo: x.titulo, codigo: x.codigo, qtd: x.qtd,
     data: new Date(x.data).toLocaleDateString('pt-BR')
   }));
- 
+
   // GRE filtra só as escolas da sua região
   if (isGre) mapped = mapped.filter(x => x.greEscola === greNum);
- 
+
   remLivrosSobrando = mapped;
   remRenderLista();
   remAtualizarStats();
 }
- 
+
 async function remCadastrar(tipo) {
   const prefix = 'sob';
   const errEl = document.getElementById(prefix+'-error');
@@ -1912,7 +1912,7 @@ async function remCadastrar(tipo) {
   remItemCount[prefix] = 0;
   await remCarregarSobrando();
 }
- 
+
 function remRenderLista() {
   const isAdmin = usuarioLogado?.isAdmin;
   const isGre   = usuarioLogado?.isGre;
@@ -1925,15 +1925,15 @@ function remRenderLista() {
   const mySchool = schools.find(s => s.inep === usuarioLogado?.inep);
   if (mySchool && isAdmin) lista.sort((a,b) => { const aOwn=a.inep===usuarioLogado?.inep, bOwn=b.inep===usuarioLogado?.inep; if(aOwn&&!bOwn)return -1; if(!aOwn&&bOwn)return 1; return calcDist(mySchool.lat,mySchool.lng,a.lat,a.lng)-calcDist(mySchool.lat,mySchool.lng,b.lat,b.lng); });
   if (lista.length === 0) { document.getElementById('sob-lista').innerHTML = `<div style="padding:40px 20px;text-align:center;color:var(--gray-60);"><i class="ri-inbox-line" style="font-size:36px;opacity:0.3;display:block;margin-bottom:10px;"></i><p>Nenhum livro cadastrado ainda.</p></div>`; return; }
-  document.getElementById('sob-lista').innerHTML = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Escola</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Matéria / Série</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Qtde.</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Distância</th><th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ação</th></tr></thead><tbody>${lista.map((item,i) => { const isOwn=item.inep===usuarioLogado?.inep; const dist=mySchool&&!isOwn?calcDist(mySchool.lat,mySchool.lng,item.lat,item.lng):null; const distStr=dist!==null?(dist<1?'< 1 km':dist.toFixed(1)+' km'):'—'; return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}"><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;font-size:12px;">${item.escola}${isOwn?` <span style="font-size:10px;background:#d1fae5;color:#065f46;padding:1px 6px;border-radius:3px;font-weight:700;">você</span>`:''}</div><div style="font-size:11px;color:var(--gray-60);">INEP ${item.inep}</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${item.titulo}</div><div style="font-size:11px;color:var(--gray-60);font-family:monospace;">${item.codigo}</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);color:var(--gray-80);">${item.mat}<br><span style="font-size:11px;color:var(--gray-60);">${item.serie}</span></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;font-family:monospace;font-weight:700;font-size:15px;color:var(--green);">${item.qtd}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;color:var(--gray-80);font-size:12px;">${distStr}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:right;"><div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;">${isAdmin?`<button onclick="remRemoverRegistro(${item.id})" class="btn-sm-action" style="color:#cc2222;"><i class="ri-delete-bin-line"></i></button>`:''} ${!isOwn?`<button onclick="remFazerPedido(${item.id})" class="btn-request"><i class="ri-shake-hands-line"></i> Solicitar</button>`:'<span style="font-size:11px;color:var(--gray-60);">Seu cadastro</span>'}</div></td></tr>`; }).join('')}</tbody></table></div>`;
+  document.getElementById('sob-lista').innerHTML = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Escola</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Matéria / Série</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Qtde.</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Distância</th><th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ação</th></tr></thead><tbody>${lista.map((item,i) => { const isOwn=item.inep===usuarioLogado?.inep; const dist=mySchool&&!isOwn?calcDist(mySchool.lat,mySchool.lng,item.lat,item.lng):null; const distStr=dist!==null?(dist<1?'< 1 km':dist.toFixed(1)+' km'):'—'; return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}"><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;font-size:12px;">${item.escola}${isOwn?` <span style="font-size:10px;background:#d1fae5;color:#065f46;padding:1px 6px;border-radius:3px;font-weight:700;">você</span>`:''}</div><div style="font-size:11px;color:var(--gray-60);">INEP ${item.inep}</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${item.titulo}</div><div style="font-size:11px;color:var(--gray-60);font-family:monospace;">${item.codigo}</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);color:var(--gray-80);">${item.mat}<br><span style="font-size:11px;color:var(--gray-60);">${item.serie}</span></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;font-family:monospace;font-weight:700;font-size:15px;color:var(--green);">${item.qtd}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;color:var(--gray-80);font-size:12px;">${distStr}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:right;"><div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;">${isAdmin?`<button onclick="remRemoverRegistro(${item.id})" class="btn-sm-action" style="color:#cc2222;"><i class="ri-delete-bin-line"></i></button>`:''} ${!isOwn?`<button onclick="remFazerPedido(${item.id})" class="btn-request"><i class="ri-shake-hands-line"></i> Solicitar</button>`:`<div style="display:flex;align-items:center;gap:4px;"><span style="font-size:11px;color:var(--gray-60);">Seu cadastro</span><button onclick="remRemoverRegistro(${item.id})" class="btn-sm-action" style="color:#cc2222;" title="Remover"><i class="ri-delete-bin-line"></i></button></div>`}</div></td></tr>`; }).join('')}</tbody></table></div>`;
 }
- 
+
 async function remRemoverRegistro(id) {
   if (!confirm('Remover este livro?')) return;
   await sbPatch('livros_sobrando', `id=eq.${id}`, { ativo: false });
   await remCarregarSobrando();
 }
- 
+
 async function remFazerPedido(idSob) {
   const item = remLivrosSobrando.find(x => x.id === idSob);
   if (!item) return;
@@ -1943,7 +1943,7 @@ async function remFazerPedido(idSob) {
   alert(`✅ Pedido ${proto} enviado! Aguardando aceite da escola ofertante.`);
   await remCarregarPedidos();
 }
- 
+
 async function remCarregarPedidos() {
   ['ped-enviados-lista','ped-recebidos-lista'].forEach(id => {
     document.getElementById(id).innerHTML = '<div style="padding:30px;text-align:center;color:var(--gray-60);">Carregando...</div>';
@@ -1965,11 +1965,11 @@ async function remCarregarPedidos() {
   remRenderPedidos();
   remAtualizarStats();
 }
- 
+
 function remRenderPedidos() {
   const isAdmin=usuarioLogado?.isAdmin, myInep=usuarioLogado?.inep, isGre=usuarioLogado?.isGre, greNum=usuarioLogado?.gre;
   const STATUS={pendente:{label:'Aguardando aceite',bg:'#dbeafe',color:'#1351b4'},aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'}};
- 
+
   let enviados, recebidos;
   if (isAdmin) {
     enviados = remPedidos; recebidos = [];
@@ -1982,7 +1982,7 @@ function remRenderPedidos() {
     enviados  = remPedidos.filter(p => p.inepSolicitante === myInep);
     recebidos = remPedidos.filter(p => p.inepOfertante   === myInep);
   }
- 
+
   document.getElementById('ped-enviados-count').textContent  = enviados.length  + ' pedidos';
   document.getElementById('ped-recebidos-count').textContent = recebidos.length + ' pedidos';
   function renderTabela(lista, elId, tipo) {
@@ -2019,12 +2019,12 @@ function remRenderPedidos() {
   renderTabela(enviados,  'ped-enviados-lista',  'enviados');
   renderTabela(recebidos, 'ped-recebidos-lista', 'recebidos');
 }
- 
+
 async function remAtualizarPedido(id, status) {
   await sbPatch('pedidos_remanejamento', `id=eq.${id}`, { status });
   await remCarregarPedidos();
 }
- 
+
 async function remRenderHistorico() {
   document.getElementById('hist-lista').innerHTML = '<div style="padding:30px;text-align:center;color:var(--gray-60);">Carregando...</div>';
   const data = await sbGet('pedidos_remanejamento', 'status=neq.pendente&order=id.desc&select=*,livros_sobrando(titulo,mat,serie),solicitante:escolas!pedidos_remanejamento_inep_solicitante_fkey(nome),ofertante:escolas!pedidos_remanejamento_inep_ofertante_fkey(nome)');
@@ -2036,22 +2036,22 @@ async function remRenderHistorico() {
   if(lista.length===0){document.getElementById('hist-lista').innerHTML=`<div style="padding:40px 20px;text-align:center;color:var(--gray-60);"><i class="ri-history-line" style="font-size:36px;opacity:0.3;display:block;margin-bottom:10px;"></i><p>Nenhum histórico ainda.</p></div>`;return;}
   document.getElementById('hist-lista').innerHTML=`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Protocolo</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Solicitante</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ofertante</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Resultado</th></tr></thead><tbody>${lista.map((p,i)=>{const s=STATUS[p.status]||{label:p.status,bg:'#f3f4f6',color:'#374151'};return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}"><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-family:monospace;font-weight:700;">${p.protocolo}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${p.titulo}</div><div style="font-size:11px;color:var(--gray-60);">${p.mat} · ${p.serie} · ${p.qtd} un.</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;">${p.escolaSolicitante}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;color:var(--gray-80);">${p.escolaOfertante}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;"><span style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;background:${s.bg};color:${s.color};">${s.label}</span></td></tr>`;}).join('')}</tbody></table></div>`;
 }
- 
+
 // Mostrar/ocultar aba Histórico conforme perfil
 function remAjustarAbaHistorico() {
   const btn = document.getElementById('rem-tab-historico');
   if (btn) btn.style.display = (usuarioLogado?.isAdmin || usuarioLogado?.isGre) ? '' : 'none';
 }
- 
+
 // ─── ADMIN MOCK ───────────────────────────────────────────────────────────────
 const ADMIN_INEP  = 'admin';
 const ADMIN_SENHA = 'admin123';
- 
- 
+
+
 // ─── RESERVA TÉCNICA — ESTADO ─────────────────────────────────────────────────
 let rtPedidos = [];
 let rtNextId = 1;
- 
+
 // Carrega pedidos de reserva do Supabase
 async function rtCarregarPedidos() {
   const data = await sbGet('pedidos_reserva', 'order=id.asc&select=*,escolas(nome,cidade)');
@@ -2066,16 +2066,16 @@ async function rtCarregarPedidos() {
     status: p.status
   }));
 }
- 
+
 const STATUS_CONFIG = {
   solicitado:    { label: 'Solicitado',         color: '#1351b4', bg: '#dbeafe', icon: 'ri-file-text-line' },
   em_separacao:  { label: 'Em separação',       color: '#92400e', bg: '#fef3c7', icon: 'ri-archive-2-line' },
   saiu_entrega:  { label: 'Saiu para entrega',  color: '#0f766e', bg: '#ccfbf1', icon: 'ri-truck-line' },
   entregue:      { label: 'Entregue',           color: '#065f46', bg: '#d1fae5', icon: 'ri-checkbox-circle-fill' },
 };
- 
+
 const STATUS_ORDEM = ['solicitado', 'em_separacao', 'saiu_entrega', 'entregue'];
- 
+
 // ─── RESERVA TÉCNICA — VIEWS ──────────────────────────────────────────────────
 function rtAtualizarView() {
   const isAdmin = usuarioLogado && usuarioLogado.isAdmin;
@@ -2086,7 +2086,7 @@ function rtAtualizarView() {
     else { rtPreencherCabecalho(); rtRenderMeusPedidos(); }
   });
 }
- 
+
 function rtPreencherCabecalho() {
   if (!usuarioLogado) return;
   const e = usuarioLogado;
@@ -2099,7 +2099,7 @@ function rtPreencherCabecalho() {
     <div class="entity-field"><div class="field-label">Data</div><div class="field-value">${new Date().toLocaleDateString('pt-BR')}</div></div>
   `;
 }
- 
+
 function rtRenderMeusPedidos() {
   if (!usuarioLogado) return;
   const meus = rtPedidos.filter(p => p.inep === usuarioLogado.inep);
@@ -2144,6 +2144,7 @@ function rtRenderMeusPedidos() {
             <div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;">
               <button class="btn-sm-action" title="Rastrear" onclick="abrirRastreamento(${p.id})"><i class="ri-map-pin-time-line"></i></button>
               <button class="btn-sm-action" title="Comprovante" onclick="abrirComprovante(${p.id})"><i class="ri-file-text-line"></i></button>
+              ${p.status === 'solicitado' ? `<button class="btn-sm-action" title="Cancelar pedido" onclick="rtCancelarPedido(${p.id})" style="color:#cc2222;"><i class="ri-delete-bin-line"></i></button>` : ''}
             </div>
           </td>
         </tr>`;
@@ -2151,7 +2152,14 @@ function rtRenderMeusPedidos() {
     </tbody>
   </table></div>`;
 }
- 
+
+async function rtCancelarPedido(id) {
+  if (!confirm('Cancelar este pedido? Esta ação não pode ser desfeita.')) return;
+  await sbDelete('pedidos_reserva', `id=eq.${id}`);
+  await rtCarregarPedidos();
+  rtRenderMeusPedidos();
+}
+
 // ─── ADMIN LISTA ──────────────────────────────────────────────────────────────
 let admFiltro = 'todos';
 function admShowTab(tab) {
@@ -2161,7 +2169,7 @@ function admShowTab(tab) {
   });
   admRenderLista(tab);
 }
- 
+
 function admRenderLista(filtro) {
   const lista = rtPedidos.filter(p =>
     filtro === 'todos'     ? true :
@@ -2224,7 +2232,7 @@ function admRenderLista(filtro) {
     </tbody>
   </table></div>`;
 }
- 
+
 async function admAvancarStatus(id) {
   const p = rtPedidos.find(x => x.id === id);
   if (!p) return;
@@ -2236,7 +2244,7 @@ async function admAvancarStatus(id) {
     admRenderLista(admFiltro);
   }
 }
- 
+
 // ─── CATÁLOGO PNLD 2026 ───────────────────────────────────────────────────────
 const PNLD2026 = {
   'Matemática': {
@@ -2381,7 +2389,7 @@ const PNLD2026 = {
     ]
   },
 };
- 
+
 // ─── PESQUISA DO MAPA ─────────────────────────────────────────────────────────
 // Popula matérias ao carregar
 (function() {
@@ -2389,9 +2397,9 @@ const PNLD2026 = {
   if (!sel) return;
   Object.keys(PNLD2026).forEach(m => sel.insertAdjacentHTML('beforeend', `<option value="${m}">${m}</option>`));
 })();
- 
+
 let mapMarkers = [];
- 
+
 function mapCascataSeries() {
   const mat = document.getElementById('map-sel-mat').value;
   const selSer = document.getElementById('map-sel-ser');
@@ -2403,7 +2411,7 @@ function mapCascataSeries() {
   PNLD2026[mat].series.forEach(s => selSer.insertAdjacentHTML('beforeend', `<option>${s}</option>`));
   selSer.disabled = false;
 }
- 
+
 function mapCascataLivros() {
   const mat = document.getElementById('map-sel-mat').value;
   const selLiv = document.getElementById('map-sel-liv');
@@ -2412,26 +2420,26 @@ function mapCascataLivros() {
   PNLD2026[mat].livros.forEach(l => selLiv.insertAdjacentHTML('beforeend', `<option value="${l.codigo}">${l.nome}</option>`));
   selLiv.disabled = false;
 }
- 
+
 function remMapaBuscar() {
   const mat    = document.getElementById('map-sel-mat')?.value || '';
   const ser    = document.getElementById('map-sel-ser')?.value || '';
   const livEl  = document.getElementById('map-sel-liv');
   const livCod = livEl?.value || '';
   const resultsEl = document.getElementById('map-search-results');
- 
+
   if (!mat) { remMapaRestaurar(); resultsEl.style.display = 'none'; return; }
- 
+
   const matches = remLivrosSobrando.filter(x => {
     const matOk = x.mat === mat;
     const serOk = !ser    || x.serie  === ser;
     const livOk = !livCod || x.codigo === livCod;
     return matOk && serOk && livOk;
   });
- 
+
   // Normaliza todos os INEPs para string limpa
   const inepsMatch = new Set(matches.map(x => String(x.inep).trim()));
- 
+
   // Destaca marcadores no mapa (school.inep já está normalizado desde initMap)
   mapMarkers.forEach(({ marker, school }) => {
     const match = inepsMatch.has(school.inep);
@@ -2449,10 +2457,10 @@ function remMapaBuscar() {
       marker.setZIndexOffset(0);
     }
   });
- 
+
   // Usa matches.length (baseado nos dados reais) como contagem
   const count = matches.length;
- 
+
   // Se encontrou escola(s), centraliza o mapa na primeira
   if (count > 0 && map) {
     const primeira = matches[0];
@@ -2469,7 +2477,7 @@ function remMapaBuscar() {
   resultsEl.style.color = count > 0 ? 'var(--green)' : '#991b1b';
   resultsEl.style.display = '';
 }
- 
+
 function remMapaRestaurar() {
   mapMarkers.forEach(({ marker, school }) => {
     const temSobrando = remLivrosSobrando.some(x => String(x.inep).trim() === school.inep);
@@ -2483,7 +2491,7 @@ function remMapaRestaurar() {
     marker.setZIndexOffset(school.isMySchool ? 500 : 0);
   });
 }
- 
+
 function remMapaLimpar() {
   const mat = document.getElementById('map-sel-mat');
   const ser = document.getElementById('map-sel-ser');
@@ -2495,10 +2503,10 @@ function remMapaLimpar() {
   if (r) r.style.display = 'none';
   remMapaRestaurar();
 }
- 
+
 // ─── MULTI-ITEM FORM ──────────────────────────────────────────────────────────
 let rtItemCount = 0;
- 
+
 function rtAdicionarItem() {
   const id = ++rtItemCount;
   const materias = Object.keys(PNLD2026);
@@ -2553,12 +2561,12 @@ function rtAdicionarItem() {
     </div>`;
   container.appendChild(div);
 }
- 
+
 function rtRemoverItem(id) {
   const el = document.getElementById('rt-item-' + id);
   if (el) el.remove();
 }
- 
+
 function rtAtualizarSeries(id) {
   const mat = document.getElementById('rt-mat-' + id).value;
   const selSer = document.getElementById('rt-ser-' + id);
@@ -2571,7 +2579,7 @@ function rtAtualizarSeries(id) {
   series.forEach(s => selSer.insertAdjacentHTML('beforeend', `<option>${s}</option>`));
   selSer.disabled = false;
 }
- 
+
 function rtAtualizarLivros(id) {
   const mat = document.getElementById('rt-mat-' + id).value;
   const selLiv = document.getElementById('rt-liv-' + id);
@@ -2582,7 +2590,7 @@ function rtAtualizarLivros(id) {
   });
   selLiv.disabled = false;
 }
- 
+
 function rtShowTab(tab) {
   document.getElementById('rt-meus-pedidos').style.display = tab === 'meus' ? '' : 'none';
   document.getElementById('rt-novo-pedido').style.display  = tab === 'novo' ? '' : 'none';
@@ -2590,19 +2598,19 @@ function rtShowTab(tab) {
   document.getElementById('rt-tab-novo').classList.toggle('active', tab === 'novo');
   if (tab === 'novo' && rtItemCount === 0) rtAdicionarItem();
 }
- 
+
 // ─── ENVIAR PEDIDO (escola) ───────────────────────────────────────────────────
 async function rtEnviarPedido() {
   const just   = document.getElementById('rt-justificativa').value.trim();
   const errEl  = document.getElementById('rt-form-error');
   const itensEl = document.querySelectorAll('[id^="rt-item-"]');
- 
+
   if (itensEl.length === 0) {
     errEl.style.display = '';
     errEl.textContent = 'Adicione pelo menos um livro ao pedido.';
     return;
   }
- 
+
   const itens = [];
   for (const el of itensEl) {
     const idNum = el.id.replace('rt-item-','');
@@ -2620,11 +2628,11 @@ async function rtEnviarPedido() {
     }
     itens.push({ mat, serie: ser, titulo: livNome, codigo: livCod, qtd, tipo });
   }
- 
+
   errEl.style.display = 'none';
   const e = usuarioLogado;
   const protocolo = gerarProtocolo('RT');
- 
+
   // Salva cada item no Supabase
   for (const item of itens) {
     await sbPost('pedidos_reserva', {
@@ -2634,7 +2642,7 @@ async function rtEnviarPedido() {
       justificativa: just, status: 'solicitado'
     });
   }
- 
+
   // Monta tabela de livros para o email
   // Monta o email completo como HTML
   const tabelaLinhas = itens.map((item, i) => `
@@ -2646,7 +2654,7 @@ async function rtEnviarPedido() {
       <td style="text-align:center;padding:6px 8px;border:1px solid #ccc;">${item.tipo}</td>
       <td style="text-align:center;padding:6px 8px;border:1px solid #ccc;">${item.qtd}</td>
     </tr>`).join('');
- 
+
   const conteudo = `
     <div style="font-family:Arial,sans-serif;font-size:13px;color:#222;max-width:800px;">
       <h2 style="border-bottom:2px solid #333;padding-bottom:8px;">ORDEM DE ENTREGA Nº ${protocolo}</h2>
@@ -2699,7 +2707,7 @@ async function rtEnviarPedido() {
         João Pessoa/PB. Tel.: 3612-5645 / 99150-9280
       </p>
     </div>`;
- 
+
   // Envia email via EmailJS
   try {
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
@@ -2713,18 +2721,18 @@ async function rtEnviarPedido() {
     console.warn('Erro ao enviar email:', emailErr);
     // Não bloqueia o fluxo se o email falhar
   }
- 
+
   // Limpa form
   document.getElementById('rt-itens-container').innerHTML = '';
   document.getElementById('rt-justificativa').value = '';
   rtItemCount = 0;
- 
+
   await rtCarregarPedidos();
   rtShowTab('meus');
   rtRenderMeusPedidos();
   if (rtPedidos.length > 0) abrirComprovante(rtPedidos[rtPedidos.length - 1].id);
 }
- 
+
 // ─── COMPROVANTE ──────────────────────────────────────────────────────────────
 function abrirComprovante(id) {
   const p = rtPedidos.find(x => x.id === id);
@@ -2748,7 +2756,7 @@ function abrirComprovante(id) {
       <td style="padding:8px 12px;border:1px solid var(--gray-30);font-weight:600;color:var(--gray-80);background:var(--gray-10);">Quantidade</td>
       <td style="padding:8px 12px;border:1px solid var(--gray-30);color:var(--gray-90);">${item.qtd} exemplares</td>
     </tr>`).join('');
- 
+
   document.getElementById('comprovante-body').innerHTML = `
     <div style="text-align:center;margin-bottom:24px;">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-60);">Governo do Estado da Paraíba</div>
@@ -2790,50 +2798,50 @@ function abrirSuporte() {
     suporteCarregar();
   }
 }
- 
+
 function fecharSuporte() {
   document.getElementById('modal-suporte').style.display = 'none';
 }
- 
+
 async function suporteEnviar() {
   const assunto  = document.getElementById('suporte-assunto').value.trim();
   const mensagem = document.getElementById('suporte-mensagem').value.trim();
   const errEl    = document.getElementById('suporte-error');
   const okEl     = document.getElementById('suporte-success');
- 
+
   if (!assunto || !mensagem) {
     errEl.style.display = ''; errEl.textContent = 'Preencha o assunto e a mensagem.'; return;
   }
   errEl.style.display = 'none';
- 
+
   await sbPost('chamados_suporte', {
     inep: usuarioLogado.inep,
     assunto, mensagem, status: 'aberto'
   });
- 
+
   document.getElementById('suporte-assunto').value = '';
   document.getElementById('suporte-mensagem').value = '';
   okEl.style.display = '';
   setTimeout(() => { okEl.style.display = 'none'; fecharSuporte(); }, 2000);
 }
- 
+
 async function suporteCarregar() {
   document.getElementById('suporte-lista').innerHTML = '<div style="padding:20px;text-align:center;color:var(--gray-60);">Carregando...</div>';
   const data = await sbGet('chamados_suporte', 'order=id.desc&select=*,escolas(nome,cidade)');
   const lista = data || [];
   document.getElementById('suporte-count').textContent = lista.length + ' chamados';
- 
+
   if (lista.length === 0) {
     document.getElementById('suporte-lista').innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray-60);"><i class="ri-inbox-line" style="font-size:36px;opacity:0.3;display:block;margin-bottom:10px;"></i><p>Nenhum chamado.</p></div>';
     return;
   }
- 
+
   const STATUS = {
     aberto:      { label:'Aberto',      bg:'#dbeafe', color:'#1351b4' },
     respondido:  { label:'Respondido',  bg:'#d1fae5', color:'#065f46' },
     fechado:     { label:'Fechado',     bg:'#f3f4f6', color:'#374151' },
   };
- 
+
   document.getElementById('suporte-lista').innerHTML = lista.map(c => {
     const s = STATUS[c.status] || STATUS.aberto;
     return `<div style="border:1px solid var(--gray-30);border-radius:8px;padding:16px;margin-bottom:12px;">
@@ -2857,23 +2865,23 @@ async function suporteCarregar() {
     </div>`;
   }).join('');
 }
- 
+
 async function suporteResponder(id) {
   const resposta = document.getElementById('resp-'+id)?.value.trim();
   if (!resposta) return;
   await sbPatch('chamados_suporte', `id=eq.${id}`, { resposta, status: 'respondido' });
   suporteCarregar();
 }
- 
+
 async function suporteFechar(id) {
   await sbPatch('chamados_suporte', `id=eq.${id}`, { status: 'fechado' });
   suporteCarregar();
 }
- 
+
 function fecharComprovante() {
   document.getElementById('modal-comprovante').style.display = 'none';
 }
- 
+
 // ─── RASTREAMENTO ─────────────────────────────────────────────────────────────
 function abrirRastreamento(id) {
   const p = rtPedidos.find(x => x.id === id);
@@ -2919,7 +2927,7 @@ function abrirRastreamento(id) {
 function fecharRastreamento() {
   document.getElementById('modal-rastreamento').style.display = 'none';
 }
- 
+
 // ─── INTEGRAR LOGIN COM ADMIN ─────────────────────────────────────────────────
 // Atualiza abas ao trocar de aba principal
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -2933,7 +2941,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     }
   });
 });
- 
+
 // Fechar modais clicando fora
 document.getElementById('modal-comprovante').addEventListener('click', function(e) {
   if (e.target === this) fecharComprovante();
@@ -2941,23 +2949,23 @@ document.getElementById('modal-comprovante').addEventListener('click', function(
 document.getElementById('modal-rastreamento').addEventListener('click', function(e) {
   if (e.target === this) fecharRastreamento();
 });
- 
+
 // ─── ESTATÍSTICAS ESCOLAS ─────────────────────────────────────────────────────
 async function abrirEstatisticas() {
   document.getElementById('modal-estatisticas').style.display = 'flex';
   document.getElementById('estat-lista').innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray-60);">Carregando...</div>';
- 
+
   const [escolas, stats] = await Promise.all([
     sbGet('escolas', 'select=nome,inep,cidade&order=nome'),
     sbGet('estatisticas_escolas', 'select=*')
   ]);
- 
+
   const statsMap = {};
   (stats || []).forEach(s => { statsMap[String(s.inep).trim()] = s; });
- 
+
   const lista = (escolas || []);
   document.getElementById('estat-count').textContent = lista.length + ' escolas';
- 
+
   document.getElementById('estat-lista').innerHTML = `
     <div style="overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
@@ -2994,35 +3002,17 @@ async function abrirEstatisticas() {
       </table>
     </div>`;
 }
- 
+
 function fecharEstatisticas() {
   document.getElementById('modal-estatisticas').style.display = 'none';
 }
- 
+
 document.getElementById('modal-estatisticas').addEventListener('click', function(e) {
   if (e.target === this) fecharEstatisticas();
 });
- 
+
 // ─── INICIAR NA TELA DE LOGIN ─────────────────────────────────────────────────
 showLogin();
 </script>
 </body>
 </html>
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
