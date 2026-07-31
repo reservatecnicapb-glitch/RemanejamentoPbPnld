@@ -1842,10 +1842,11 @@ function remCascataSeries(prefix, id) {
 
 function remCascataLivros(prefix, id) {
   const mat = document.getElementById(`${prefix}-mat-${id}`).value;
+  const ser = document.getElementById(`${prefix}-ser-${id}`)?.value || '';
   const selLiv = document.getElementById(`${prefix}-liv-${id}`);
   selLiv.innerHTML = '<option value="">Selecione...</option>';
   if (!mat || !PNLD2026[mat]) { selLiv.disabled = true; return; }
-  PNLD2026[mat].livros.forEach(l => selLiv.insertAdjacentHTML('beforeend', `<option value="${l.codigo}">${l.nome}</option>`));
+  getLivrosPorSerie(mat, ser).forEach(l => selLiv.insertAdjacentHTML('beforeend', `<option value="${l.codigo}">${l.nome}</option>`));
   selLiv.disabled = false;
 }
 
@@ -1924,7 +1925,7 @@ function remRenderLista() {
   const mySchool = schools.find(s => s.inep === usuarioLogado?.inep);
   if (mySchool && isAdmin) lista.sort((a,b) => { const aOwn=a.inep===usuarioLogado?.inep, bOwn=b.inep===usuarioLogado?.inep; if(aOwn&&!bOwn)return -1; if(!aOwn&&bOwn)return 1; return calcDist(mySchool.lat,mySchool.lng,a.lat,a.lng)-calcDist(mySchool.lat,mySchool.lng,b.lat,b.lng); });
   if (lista.length === 0) { document.getElementById('sob-lista').innerHTML = `<div style="padding:40px 20px;text-align:center;color:var(--gray-60);"><i class="ri-inbox-line" style="font-size:36px;opacity:0.3;display:block;margin-bottom:10px;"></i><p>Nenhum livro cadastrado ainda.</p></div>`; return; }
-  document.getElementById('sob-lista').innerHTML = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Escola</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Matéria / Série</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Qtde.</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Distância</th><th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ação</th></tr></thead><tbody>${lista.map((item,i) => { const isOwn=item.inep===usuarioLogado?.inep; const dist=mySchool&&!isOwn?calcDist(mySchool.lat,mySchool.lng,item.lat,item.lng):null; const distStr=dist!==null?(dist<1?'< 1 km':dist.toFixed(1)+' km'):'—'; return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}"><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;font-size:12px;">${item.escola}${isOwn?` <span style="font-size:10px;background:#d1fae5;color:#065f46;padding:1px 6px;border-radius:3px;font-weight:700;">você</span>`:''}</div><div style="font-size:11px;color:var(--gray-60);">INEP ${item.inep}</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${item.titulo}</div><div style="font-size:11px;color:var(--gray-60);font-family:monospace;">${item.codigo}</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);color:var(--gray-80);">${item.mat}<br><span style="font-size:11px;color:var(--gray-60);">${item.serie}</span></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;font-family:monospace;font-weight:700;font-size:15px;color:var(--green);">${item.qtd}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;color:var(--gray-80);font-size:12px;">${distStr}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:right;"><div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;">${isAdmin?`<button onclick="remRemoverRegistro(${item.id})" class="btn-sm-action" style="color:#cc2222;"><i class="ri-delete-bin-line"></i></button>`:''} ${!isOwn?`<button onclick="remFazerPedido(${item.id})" class="btn-request"><i class="ri-shake-hands-line"></i> Solicitar</button>`:`<div style="display:flex;align-items:center;gap:4px;"><span style="font-size:11px;color:var(--gray-60);">Seu cadastro</span><button onclick="remRemoverRegistro(${item.id})" class="btn-sm-action" style="color:#cc2222;" title="Remover"><i class="ri-delete-bin-line"></i></button></div>`}</div></td></tr>`; }).join('')}</tbody></table></div>`;
+  document.getElementById('sob-lista').innerHTML = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Escola</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Matéria / Série</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Qtde.</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Distância</th><th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ação</th></tr></thead><tbody>${lista.map((item,i) => { const isOwn=item.inep===usuarioLogado?.inep; const dist=mySchool&&!isOwn?calcDist(mySchool.lat,mySchool.lng,item.lat,item.lng):null; const distStr=dist!==null?(dist<1?'< 1 km':dist.toFixed(1)+' km'):'—'; return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}"><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;font-size:12px;">${item.escola}${isOwn?` <span style="font-size:10px;background:#d1fae5;color:#065f46;padding:1px 6px;border-radius:3px;font-weight:700;">você</span>`:''}</div><div style="font-size:11px;color:var(--gray-60);">INEP ${item.inep}</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${item.titulo}</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);color:var(--gray-80);">${item.mat}<br><span style="font-size:11px;color:var(--gray-60);">${item.serie}</span></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;font-family:monospace;font-weight:700;font-size:15px;color:var(--green);">${item.qtd}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;color:var(--gray-80);font-size:12px;">${distStr}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:right;"><div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;">${isAdmin?`<button onclick="remRemoverRegistro(${item.id})" class="btn-sm-action" style="color:#cc2222;"><i class="ri-delete-bin-line"></i></button>`:''} ${!isOwn?`<button onclick="remFazerPedido(${item.id})" class="btn-request"><i class="ri-shake-hands-line"></i> Solicitar</button>`:`<div style="display:flex;align-items:center;gap:4px;"><span style="font-size:11px;color:var(--gray-60);">Seu cadastro</span><button onclick="remRemoverRegistro(${item.id})" class="btn-sm-action" style="color:#cc2222;" title="Remover"><i class="ri-delete-bin-line"></i></button></div>`}</div></td></tr>`; }).join('')}</tbody></table></div>`;
 }
 
 async function remRemoverRegistro(id) {
@@ -2245,256 +2246,391 @@ async function admAvancarStatus(id) {
 }
 
 // ─── CATÁLOGO PNLD 2026 ───────────────────────────────────────────────────────
+const SERIES_EM  = ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'];
+const SERIES_EJA_FINAIS  = ['6º ano - EJA (E. Fundamental)','7º ano - EJA (E. Fundamental)','8º ano - EJA (E. Fundamental)','9º ano - EJA (E. Fundamental)'];
+const SERIES_EJA_INICIAIS = ['1º ao 5º ano - EJA (Anos Iniciais)'];
+
 const PNLD2026 = {
   'Matemática': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA PLUS - Matemática Paiva',                       codigo:'0013P260101202814' },
-      { nome:'MODERNA SuperAÇÃO! Matemática',                          codigo:'0014P260101202814' },
-      { nome:'MODERNA EM AÇÃO - Matemática',                           codigo:'0015P260101202814' },
-      { nome:'360° MATEMÁTICA',                                        codigo:'0038P260101202814' },
-      { nome:'MATEMÁTICA POR TODA PARTE',                              codigo:'0039P260101202814' },
-      { nome:'INTERAÇÃO MATEMÁTICA E SUAS TECNOLOGIAS',                codigo:'0068P260101202814' },
-      { nome:'IDENTIDADE SARAIVA',                                     codigo:'0086P260101202814' },
-      { nome:'SER PROTAGONISTA MATEMÁTICA E SUAS TECNOLOGIAS',         codigo:'0099P260101202814' },
-      { nome:'DO SEU JEITO',                                           codigo:'0111P260101202814' },
-      { nome:'Integrando Saberes Matemática',                          codigo:'0118P260101202814' },
-      { nome:'ENTRE SABERES: MATEMÁTICA E SUAS TECNOLOGIAS',           codigo:'0122P260101202814' },
-      { nome:'Nos dias de hoje',                                       codigo:'0131P260101202814' },
-    ]
+    series: [...SERIES_EM, ...SERIES_EJA_FINAIS],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA PLUS - Matemática Paiva',                       codigo:'0013P260101202814' },
+        { nome:'MODERNA SuperAÇÃO! Matemática',                          codigo:'0014P260101202814' },
+        { nome:'MODERNA EM AÇÃO - Matemática',                           codigo:'0015P260101202814' },
+        { nome:'360° MATEMÁTICA',                                        codigo:'0038P260101202814' },
+        { nome:'MATEMÁTICA POR TODA PARTE',                              codigo:'0039P260101202814' },
+        { nome:'INTERAÇÃO MATEMÁTICA E SUAS TECNOLOGIAS',                codigo:'0068P260101202814' },
+        { nome:'IDENTIDADE SARAIVA',                                     codigo:'0086P260101202814' },
+        { nome:'SER PROTAGONISTA MATEMÁTICA E SUAS TECNOLOGIAS',         codigo:'0099P260101202814' },
+        { nome:'DO SEU JEITO',                                           codigo:'0111P260101202814' },
+        { nome:'Integrando Saberes Matemática',                          codigo:'0118P260101202814' },
+        { nome:'ENTRE SABERES: MATEMÁTICA E SUAS TECNOLOGIAS',           codigo:'0122P260101202814' },
+        { nome:'Nos dias de hoje',                                       codigo:'0131P260101202814' },
+      ],
+      'default_eja_finais': [
+        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0015P260102213000' },
+        { nome:'NOVA EJA MODERNA - Matemática',                          codigo:'0015P260102213000' },
+        { nome:'Práticas em Matemática',                                 codigo:'0015P260102213000' },
+      ],
+    }
   },
   'Língua Portuguesa': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA EM AÇÃO - Língua Portuguesa',                    codigo:'0002P260101218810' },
-      { nome:'MODERNA SuperAÇÃO! - Língua Portuguesa',                 codigo:'0003P260101218810' },
-      { nome:'MODERNA PLUS - Língua Portuguesa',                       codigo:'0004P260101218810' },
-      { nome:'360°_LÍNGUA PORTUGUESA',                                 codigo:'0024P260101218810' },
-      { nome:'LÍNGUA PORTUGUESA POR TODA PARTE',                       codigo:'0025P260101218810' },
-      { nome:'INTERAÇÃO LINGUAGENS E SUAS TECNOLOGIAS',                codigo:'0062P260101218810' },
-      { nome:'IDENTIDADE SARAIVA - Língua Portuguesa',                 codigo:'0081P260101218810' },
-      { nome:'SER PROTAGONISTA LINGUAGENS E SUAS TECNOLOGIAS',         codigo:'0092P260101218810' },
-      { nome:'DO SEU JEITO - Língua Portuguesa',                       codigo:'0109P260101218810' },
-      { nome:'ENTRE SABERES: LINGUAGENS E SUAS TECNOLOGIAS',           codigo:'0120P260101218810' },
-    ]
+    series: [...SERIES_EM, ...SERIES_EJA_FINAIS],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA EM AÇÃO - Língua Portuguesa',                    codigo:'0002P260101218810' },
+        { nome:'MODERNA SuperAÇÃO! - Língua Portuguesa',                 codigo:'0003P260101218810' },
+        { nome:'MODERNA PLUS - Língua Portuguesa',                       codigo:'0004P260101218810' },
+        { nome:'360°_LÍNGUA PORTUGUESA',                                 codigo:'0024P260101218810' },
+        { nome:'LÍNGUA PORTUGUESA POR TODA PARTE',                       codigo:'0025P260101218810' },
+        { nome:'INTERAÇÃO LINGUAGENS E SUAS TECNOLOGIAS',                codigo:'0062P260101218810' },
+        { nome:'IDENTIDADE SARAIVA - Língua Portuguesa',                 codigo:'0081P260101218810' },
+        { nome:'SER PROTAGONISTA LINGUAGENS E SUAS TECNOLOGIAS',         codigo:'0092P260101218810' },
+        { nome:'DO SEU JEITO - Língua Portuguesa',                       codigo:'0109P260101218810' },
+        { nome:'ENTRE SABERES: LINGUAGENS E SUAS TECNOLOGIAS',           codigo:'0120P260101218810' },
+      ],
+      'default_eja_finais': [
+        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0013P260102212000' },
+        { nome:'NOVA EJA MODERNA - Leitura e Escrita',                   codigo:'0004P260102212000' },
+        { nome:'SEGUE A TRILHA EJA: Práticas de Leitura e Escrita',      codigo:'0070P260102212000' },
+        { nome:'VEM PRA EJA! - Práticas de Leitura e Escrita',           codigo:'0023P260102212000' },
+      ],
+    }
   },
   'Arte': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA EM AÇÃO - Arte',                                 codigo:'0002P260101218810' },
-      { nome:'MODERNA SuperAÇÃO! - Arte',                              codigo:'0003P260101218810' },
-      { nome:'MODERNA PLUS - Arte',                                    codigo:'0004P260101218810' },
-      { nome:'360° ARTE',                                              codigo:'0024P260101218810' },
-      { nome:'ARTE POR TODA PARTE',                                    codigo:'0025P260101218810' },
-      { nome:'IDENTIDADE SARAIVA - Arte',                              codigo:'0081P260101218810' },
-      { nome:'SER PROTAGONISTA - Arte',                                codigo:'0092P260101218810' },
-      { nome:'DO SEU JEITO - Arte',                                    codigo:'0109P260101218810' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA EM AÇÃO - Arte',                                 codigo:'0002P260101218810' },
+        { nome:'MODERNA SuperAÇÃO! - Arte',                              codigo:'0003P260101218810' },
+        { nome:'MODERNA PLUS - Arte',                                    codigo:'0004P260101218810' },
+        { nome:'360° ARTE',                                              codigo:'0024P260101218810' },
+        { nome:'ARTE POR TODA PARTE',                                    codigo:'0025P260101218810' },
+        { nome:'IDENTIDADE SARAIVA - Arte',                              codigo:'0081P260101218810' },
+        { nome:'SER PROTAGONISTA - Arte',                                codigo:'0092P260101218810' },
+        { nome:'DO SEU JEITO - Arte',                                    codigo:'0109P260101218810' },
+      ],
+    }
   },
   'Redação': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA SuperAÇÃO! - Redação',                          codigo:'0003P260101218810' },
-      { nome:'MODERNA PLUS - Redação',                                 codigo:'0004P260101218810' },
-      { nome:'360° REDAÇÃO',                                           codigo:'0024P260101218810' },
-      { nome:'REDAÇÃO POR TODA PARTE',                                 codigo:'0025P260101218810' },
-      { nome:'IDENTIDADE SARAIVA - Redação',                           codigo:'0081P260101218810' },
-      { nome:'Redação Ormundo & Minolta',                              codigo:'0003P260101218810' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA SuperAÇÃO! - Redação',                          codigo:'0003P260101218810' },
+        { nome:'MODERNA PLUS - Redação',                                 codigo:'0004P260101218810' },
+        { nome:'360° REDAÇÃO',                                           codigo:'0024P260101218810' },
+        { nome:'REDAÇÃO POR TODA PARTE',                                 codigo:'0025P260101218810' },
+        { nome:'IDENTIDADE SARAIVA - Redação',                           codigo:'0081P260101218810' },
+        { nome:'Redação Ormundo & Minolta',                              codigo:'0003P260101218810' },
+      ],
+    }
   },
   'Espanhol': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA PLUS - Espanhol: Sentidos en lengua española',   codigo:'0008P260101221817' },
-      { nome:'MODERNA SuperAÇÃO! Espanhol',                            codigo:'0009P260101221817' },
-      { nome:'¡SÍ, SE PUEDE! ESPAÑOL',                                 codigo:'0032P260101221817' },
-      { nome:'SÍNTESIS',                                               codigo:'0083P260101221817' },
-      { nome:'PUENTES',                                                codigo:'0096P260101221817' },
-    ]
+    series: [...SERIES_EM, ...SERIES_EJA_FINAIS],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA PLUS - Espanhol: Sentidos en lengua española',   codigo:'0008P260101221817' },
+        { nome:'MODERNA SuperAÇÃO! Espanhol',                            codigo:'0009P260101221817' },
+        { nome:'¡SÍ, SE PUEDE! ESPAÑOL',                                 codigo:'0032P260101221817' },
+        { nome:'SÍNTESIS',                                               codigo:'0083P260101221817' },
+        { nome:'PUENTES',                                                codigo:'0096P260101221817' },
+      ],
+      'default_eja_finais': [
+        { nome:'NOVA EJA MODERNA - Espanhol',                            codigo:'0009P260102217000' },
+      ],
+    }
   },
   'Inglês': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA EM AÇÃO - Inglês',                               codigo:'0005P260101219811' },
-      { nome:'MODERNA PLUS - Inglês',                                  codigo:'0007P260101219811' },
-      { nome:'JOY!',                                                   codigo:'0030P260101219811' },
-      { nome:'WAYS - ENGLISH FOR LIFE',                                codigo:'0031P260101219811' },
-      { nome:'DOME',                                                   codigo:'0095P260101219811' },
-      { nome:'ENTRE SABERES: LINGUAGENS E SUAS TECNOLOGIAS (INGLÊS)',  codigo:'0121P260101219811' },
-      { nome:'No Borders: English for Brazilian students',             codigo:'0140P260101219811' },
-    ]
+    series: [...SERIES_EM, ...SERIES_EJA_FINAIS],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA EM AÇÃO - Inglês',                               codigo:'0005P260101219811' },
+        { nome:'MODERNA PLUS - Inglês',                                  codigo:'0007P260101219811' },
+        { nome:'JOY!',                                                   codigo:'0030P260101219811' },
+        { nome:'WAYS - ENGLISH FOR LIFE',                                codigo:'0031P260101219811' },
+        { nome:'DOME',                                                   codigo:'0095P260101219811' },
+        { nome:'ENTRE SABERES: LINGUAGENS E SUAS TECNOLOGIAS (INGLÊS)',  codigo:'0121P260101219811' },
+        { nome:'No Borders: English for Brazilian students',             codigo:'0140P260101219811' },
+      ],
+      'default_eja_finais': [
+        { nome:'NOVA EJA MODERNA - Inglês',                              codigo:'0008P260102216000' },
+        { nome:'Práticas em Língua Estrangeira – Inglês',                codigo:'0062P260102216000' },
+        { nome:'COLEÇÃO COMEBACK - Práticas em Línguas Estrangeiras - Inglês', codigo:'0065P260102216000' },
+        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0019P260102216000' },
+      ],
+    }
   },
   'Educação Física': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA SuperAÇÃO! Educação Física',                     codigo:'0011P260101220812' },
-      { nome:'360° EDUCAÇÃO FÍSICA',                                   codigo:'0034P260101220812' },
-      { nome:'EDUCAÇÃO FÍSICA POR TODA PARTE',                         codigo:'0035P260101220812' },
-      { nome:'IDENTIDADE SARAIVA - Educação Física',                   codigo:'0084P260101220812' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA SuperAÇÃO! Educação Física',                     codigo:'0011P260101220812' },
+        { nome:'360° EDUCAÇÃO FÍSICA',                                   codigo:'0034P260101220812' },
+        { nome:'EDUCAÇÃO FÍSICA POR TODA PARTE',                         codigo:'0035P260101220812' },
+        { nome:'IDENTIDADE SARAIVA - Educação Física',                   codigo:'0084P260101220812' },
+      ],
+    }
   },
   'Educação Digital': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA PLUS - Educação Digital',                        codigo:'0012P260101201813' },
-      { nome:'EDUCAÇÃO DIGITAL POR TODA PARTE',                        codigo:'0036P260101201813' },
-      { nome:'360° EDUCAÇÃO DIGITAL',                                  codigo:'0037P260101201813' },
-      { nome:'INTERAÇÃO EDUCAÇÃO DIGITAL',                             codigo:'0067P260101201813' },
-      { nome:'IDENTIDADE SARAIVA - Educação Digital',                  codigo:'0085P260101201813' },
-      { nome:'SER PROTAGONISTA EDUCAÇÃO DIGITAL',                      codigo:'0098P260101201813' },
-      { nome:'Saberes da Educação Digital',                            codigo:'0108P260101201813' },
-      { nome:'Educação Digital: Por Dentro da Matrix',                 codigo:'0116P260101201813' },
-      { nome:'MUNDO DIGITAL - MODO DE USAR',                           codigo:'0135P260101201813' },
-      { nome:'Consciência: uma jornada pela Educação Digital',         codigo:'0163P260101201813' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA PLUS - Educação Digital',                        codigo:'0012P260101201813' },
+        { nome:'EDUCAÇÃO DIGITAL POR TODA PARTE',                        codigo:'0036P260101201813' },
+        { nome:'360° EDUCAÇÃO DIGITAL',                                  codigo:'0037P260101201813' },
+        { nome:'INTERAÇÃO EDUCAÇÃO DIGITAL',                             codigo:'0067P260101201813' },
+        { nome:'IDENTIDADE SARAIVA - Educação Digital',                  codigo:'0085P260101201813' },
+        { nome:'SER PROTAGONISTA EDUCAÇÃO DIGITAL',                      codigo:'0098P260101201813' },
+        { nome:'Saberes da Educação Digital',                            codigo:'0108P260101201813' },
+        { nome:'Educação Digital: Por Dentro da Matrix',                 codigo:'0116P260101201813' },
+        { nome:'MUNDO DIGITAL - MODO DE USAR',                           codigo:'0135P260101201813' },
+        { nome:'Consciência: uma jornada pela Educação Digital',         codigo:'0163P260101201813' },
+      ],
+    }
   },
   'Biologia': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA PLUS - Biologia',                                codigo:'0016P260101203815' },
-      { nome:'MODERNA SuperAÇÃO! - Biologia',                          codigo:'0017P260101203815' },
-      { nome:'360° BIOLOGIA',                                          codigo:'0040P260101203815' },
-      { nome:'BIOLOGIA POR TODA PARTE',                                codigo:'0041P260101203815' },
-      { nome:'CIÊNCIA VIVA - Biologia',                                codigo:'0080P260101203815' },
-      { nome:'IDENTIDADE SARAIVA - Biologia',                          codigo:'0087P260101203815' },
-      { nome:'SER PROTAGONISTA - Biologia',                            codigo:'0100P260101203815' },
-      { nome:'DO SEU JEITO - Biologia',                                codigo:'0112P260101203815' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA PLUS - Biologia',                                codigo:'0016P260101203815' },
+        { nome:'MODERNA SuperAÇÃO! - Biologia',                          codigo:'0017P260101203815' },
+        { nome:'360° BIOLOGIA',                                          codigo:'0040P260101203815' },
+        { nome:'BIOLOGIA POR TODA PARTE',                                codigo:'0041P260101203815' },
+        { nome:'CIÊNCIA VIVA - Biologia',                                codigo:'0080P260101203815' },
+        { nome:'IDENTIDADE SARAIVA - Biologia',                          codigo:'0087P260101203815' },
+        { nome:'SER PROTAGONISTA - Biologia',                            codigo:'0100P260101203815' },
+        { nome:'DO SEU JEITO - Biologia',                                codigo:'0112P260101203815' },
+      ],
+    }
   },
   'Física': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA PLUS - Física',                                  codigo:'0016P260101203815' },
-      { nome:'MODERNA SuperAÇÃO! - Física',                            codigo:'0017P260101203815' },
-      { nome:'360° FÍSICA',                                            codigo:'0040P260101203815' },
-      { nome:'FÍSICA POR TODA PARTE',                                  codigo:'0041P260101203815' },
-      { nome:'CIÊNCIA VIVA - Física',                                  codigo:'0080P260101203815' },
-      { nome:'IDENTIDADE SARAIVA - Física',                            codigo:'0087P260101203815' },
-      { nome:'SER PROTAGONISTA - Física',                              codigo:'0100P260101203815' },
-      { nome:'DO SEU JEITO - Física',                                  codigo:'0112P260101203815' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA PLUS - Física',                                  codigo:'0016P260101203815' },
+        { nome:'MODERNA SuperAÇÃO! - Física',                            codigo:'0017P260101203815' },
+        { nome:'360° FÍSICA',                                            codigo:'0040P260101203815' },
+        { nome:'FÍSICA POR TODA PARTE',                                  codigo:'0041P260101203815' },
+        { nome:'CIÊNCIA VIVA - Física',                                  codigo:'0080P260101203815' },
+        { nome:'IDENTIDADE SARAIVA - Física',                            codigo:'0087P260101203815' },
+        { nome:'SER PROTAGONISTA - Física',                              codigo:'0100P260101203815' },
+        { nome:'DO SEU JEITO - Física',                                  codigo:'0112P260101203815' },
+      ],
+    }
   },
   'Química': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA PLUS - Química',                                 codigo:'0016P260101203815' },
-      { nome:'MODERNA SuperAÇÃO! - Química',                           codigo:'0017P260101203815' },
-      { nome:'360° QUÍMICA',                                           codigo:'0040P260101203815' },
-      { nome:'QUÍMICA POR TODA PARTE',                                 codigo:'0041P260101203815' },
-      { nome:'CIÊNCIA VIVA - Química',                                 codigo:'0080P260101203815' },
-      { nome:'IDENTIDADE SARAIVA - Química',                           codigo:'0087P260101203815' },
-      { nome:'SER PROTAGONISTA - Química',                             codigo:'0100P260101203815' },
-      { nome:'DO SEU JEITO - Química',                                 codigo:'0112P260101203815' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA PLUS - Química',                                 codigo:'0016P260101203815' },
+        { nome:'MODERNA SuperAÇÃO! - Química',                           codigo:'0017P260101203815' },
+        { nome:'360° QUÍMICA',                                           codigo:'0040P260101203815' },
+        { nome:'QUÍMICA POR TODA PARTE',                                 codigo:'0041P260101203815' },
+        { nome:'CIÊNCIA VIVA - Química',                                 codigo:'0080P260101203815' },
+        { nome:'IDENTIDADE SARAIVA - Química',                           codigo:'0087P260101203815' },
+        { nome:'SER PROTAGONISTA - Química',                             codigo:'0100P260101203815' },
+        { nome:'DO SEU JEITO - Química',                                 codigo:'0112P260101203815' },
+      ],
+    }
   },
   'Ciências da Natureza (Bio/Fís/Quím)': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA PLUS - Ciências da Natureza',                    codigo:'0016P260101203815' },
-      { nome:'MODERNA SuperAÇÃO! - Ciências da Natureza',              codigo:'0017P260101203815' },
-      { nome:'360°_QUÍMICA, FÍSICA, BIOLOGIA',                         codigo:'0040P260101203815' },
-      { nome:'QUÍMICA, FÍSICA, BIOLOGIA_POR TODA PARTE',               codigo:'0041P260101203815' },
-      { nome:'INTERAÇÃO CIÊNCIAS DA NATUREZA E SUAS TECNOLOGIAS',      codigo:'0069P260101203815' },
-      { nome:'CIÊNCIA VIVA',                                           codigo:'0080P260101203815' },
-      { nome:'IDENTIDADE SARAIVA - Ciências da Natureza',              codigo:'0087P260101203815' },
-      { nome:'SER PROTAGONISTA CIÊNCIAS DA NATUREZA E SUAS TECNOLOGIAS', codigo:'0100P260101203815' },
-      { nome:'DO SEU JEITO - Ciências da Natureza',                    codigo:'0112P260101203815' },
-    ]
+    series: [...SERIES_EM, ...SERIES_EJA_FINAIS],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA PLUS - Ciências da Natureza',                    codigo:'0016P260101203815' },
+        { nome:'MODERNA SuperAÇÃO! - Ciências da Natureza',              codigo:'0017P260101203815' },
+        { nome:'360°_QUÍMICA, FÍSICA, BIOLOGIA',                         codigo:'0040P260101203815' },
+        { nome:'QUÍMICA, FÍSICA, BIOLOGIA_POR TODA PARTE',               codigo:'0041P260101203815' },
+        { nome:'INTERAÇÃO CIÊNCIAS DA NATUREZA E SUAS TECNOLOGIAS',      codigo:'0069P260101203815' },
+        { nome:'CIÊNCIA VIVA',                                           codigo:'0080P260101203815' },
+        { nome:'IDENTIDADE SARAIVA - Ciências da Natureza',              codigo:'0087P260101203815' },
+        { nome:'SER PROTAGONISTA CIÊNCIAS DA NATUREZA E SUAS TECNOLOGIAS', codigo:'0100P260101203815' },
+        { nome:'DO SEU JEITO - Ciências da Natureza',                    codigo:'0112P260101203815' },
+      ],
+      'default_eja_finais': [
+        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0017P260102214000' },
+        { nome:'NOVA EJA MODERNA - Ciências da Natureza',                codigo:'0006P260102214000' },
+      ],
+    }
   },
   'História': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA PLUS - História',                                codigo:'0018P260101204816' },
-      { nome:'MODERNA SuperAÇÃO! - História',                          codigo:'0019P260101204816' },
-      { nome:'HISTÓRIA POR TODA PARTE',                                codigo:'0047P260101204816' },
-      { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - História',                  codigo:'0072P260101204816' },
-      { nome:'SER PROTAGONISTA - História',                            codigo:'0103P260101204816' },
-      { nome:'DO SEU JEITO - História',                                codigo:'0113P260101204816' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA PLUS - História',                                codigo:'0018P260101204816' },
+        { nome:'MODERNA SuperAÇÃO! - História',                          codigo:'0019P260101204816' },
+        { nome:'HISTÓRIA POR TODA PARTE',                                codigo:'0047P260101204816' },
+        { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - História',                  codigo:'0072P260101204816' },
+        { nome:'SER PROTAGONISTA - História',                            codigo:'0103P260101204816' },
+        { nome:'DO SEU JEITO - História',                                codigo:'0113P260101204816' },
+      ],
+    }
   },
   'Geografia': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA PLUS - Geografia',                               codigo:'0018P260101204816' },
-      { nome:'MODERNA SuperAÇÃO! - Geografia',                         codigo:'0019P260101204816' },
-      { nome:'GEOGRAFIA POR TODA PARTE',                               codigo:'0047P260101204816' },
-      { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - Geografia',                 codigo:'0072P260101204816' },
-      { nome:'SER PROTAGONISTA - Geografia',                           codigo:'0103P260101204816' },
-      { nome:'DO SEU JEITO - Geografia',                               codigo:'0113P260101204816' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA PLUS - Geografia',                               codigo:'0018P260101204816' },
+        { nome:'MODERNA SuperAÇÃO! - Geografia',                         codigo:'0019P260101204816' },
+        { nome:'GEOGRAFIA POR TODA PARTE',                               codigo:'0047P260101204816' },
+        { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - Geografia',                 codigo:'0072P260101204816' },
+        { nome:'SER PROTAGONISTA - Geografia',                           codigo:'0103P260101204816' },
+        { nome:'DO SEU JEITO - Geografia',                               codigo:'0113P260101204816' },
+      ],
+    }
   },
   'Filosofia': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA PLUS - Filosofia',                               codigo:'0018P260101204816' },
-      { nome:'MODERNA SuperAÇÃO! - Filosofia',                         codigo:'0019P260101204816' },
-      { nome:'FILOSOFIA POR TODA PARTE',                               codigo:'0047P260101204816' },
-      { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - Filosofia',                 codigo:'0072P260101204816' },
-      { nome:'SER PROTAGONISTA - Filosofia',                           codigo:'0103P260101204816' },
-      { nome:'DO SEU JEITO - Filosofia',                               codigo:'0113P260101204816' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA PLUS - Filosofia',                               codigo:'0018P260101204816' },
+        { nome:'MODERNA SuperAÇÃO! - Filosofia',                         codigo:'0019P260101204816' },
+        { nome:'FILOSOFIA POR TODA PARTE',                               codigo:'0047P260101204816' },
+        { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - Filosofia',                 codigo:'0072P260101204816' },
+        { nome:'SER PROTAGONISTA - Filosofia',                           codigo:'0103P260101204816' },
+        { nome:'DO SEU JEITO - Filosofia',                               codigo:'0113P260101204816' },
+      ],
+    }
   },
   'Sociologia': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA PLUS - Sociologia',                              codigo:'0018P260101204816' },
-      { nome:'MODERNA SuperAÇÃO! - Sociologia',                        codigo:'0019P260101204816' },
-      { nome:'SOCIOLOGIA POR TODA PARTE',                              codigo:'0047P260101204816' },
-      { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - Sociologia',                codigo:'0072P260101204816' },
-      { nome:'SER PROTAGONISTA - Sociologia',                          codigo:'0103P260101204816' },
-      { nome:'DO SEU JEITO - Sociologia',                              codigo:'0113P260101204816' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA PLUS - Sociologia',                              codigo:'0018P260101204816' },
+        { nome:'MODERNA SuperAÇÃO! - Sociologia',                        codigo:'0019P260101204816' },
+        { nome:'SOCIOLOGIA POR TODA PARTE',                              codigo:'0047P260101204816' },
+        { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - Sociologia',                codigo:'0072P260101204816' },
+        { nome:'SER PROTAGONISTA - Sociologia',                          codigo:'0103P260101204816' },
+        { nome:'DO SEU JEITO - Sociologia',                              codigo:'0113P260101204816' },
+      ],
+    }
   },
   'Ciências Humanas (Hist/Geo/Fil/Soc)': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA PLUS',                                           codigo:'0018P260101204816' },
-      { nome:'MODERNA SuperAÇÃO!',                                     codigo:'0019P260101204816' },
-      { nome:'FILOSOFIA, SOCIOLOGIA, HISTÓRIA, GEOGRAFIA_POR TODA PARTE', codigo:'0047P260101204816' },
-      { nome:'INTERAÇÃO CIÊNCIAS HUMANAS E SOCIAIS APLICADAS',         codigo:'0072P260101204816' },
-      { nome:'SER PROTAGONISTA CIÊNCIAS HUMANAS E SOCIAIS APLICADAS',  codigo:'0103P260101204816' },
-      { nome:'DO SEU JEITO',                                           codigo:'0113P260101204816' },
-      { nome:'ESTUDOS E DEBATES EM HISTÓRIA_GEOGRAFIA_FILOSOFIA_SOCIOLOGIA', codigo:'0165P260101204816' },
-    ]
+    series: [...SERIES_EM, ...SERIES_EJA_FINAIS],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA PLUS',                                           codigo:'0018P260101204816' },
+        { nome:'MODERNA SuperAÇÃO!',                                     codigo:'0019P260101204816' },
+        { nome:'FILOSOFIA, SOCIOLOGIA, HISTÓRIA, GEOGRAFIA POR TODA PARTE', codigo:'0047P260101204816' },
+        { nome:'INTERAÇÃO CIÊNCIAS HUMANAS E SOCIAIS APLICADAS',         codigo:'0072P260101204816' },
+        { nome:'SER PROTAGONISTA CIÊNCIAS HUMANAS E SOCIAIS APLICADAS',  codigo:'0103P260101204816' },
+        { nome:'DO SEU JEITO',                                           codigo:'0113P260101204816' },
+        { nome:'ESTUDOS E DEBATES EM HISTÓRIA, GEOGRAFIA, FILOSOFIA, SOCIOLOGIA', codigo:'0165P260101204816' },
+      ],
+      'default_eja_finais': [
+        { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte',             codigo:'0007P260102215000' },
+        { nome:'Práticas em Ciências Humanas e Arte',                    codigo:'0061P260102215000' },
+        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0018P260102215000' },
+        { nome:'VEM PRA EJA! - Práticas em Ciências Humanas e Arte',     codigo:'0025P260102215000' },
+      ],
+    }
+  },
+  'Linguagens e Cultura Digital': {
+    series: [...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS],
+    livrosPorSerie: {
+      'default_eja_iniciais': [
+        { nome:'NOVA EJA MODERNA - Linguagens e Cultura Digital',        codigo:'0002P260101210000' },
+        { nome:'COLEÇÃO APRENDER SEM BARREIRAS',                         codigo:'0043P260101210000' },
+        { nome:'UNIVERSO DA LITERATURA',                                  codigo:'0046P260101210000' },
+        { nome:'Práticas em Linguagens e Cultura Digital',               codigo:'0056P260101210000' },
+        { nome:'VOCÊ NA ERA DIGITAL',                                    codigo:'0067P260101210000' },
+        { nome:'VEM PRA EJA! - Práticas em Linguagens e Cultura Digital', codigo:'0021P260101210000' },
+      ],
+      'default_eja_finais': [
+        { nome:'NOVA EJA MODERNA - Linguagens e Cultura Digital',        codigo:'0002P260101210000' },
+        { nome:'COLEÇÃO APRENDER SEM BARREIRAS',                         codigo:'0043P260101210000' },
+        { nome:'UNIVERSO DA LITERATURA',                                  codigo:'0046P260101210000' },
+        { nome:'Práticas em Linguagens e Cultura Digital',               codigo:'0056P260101210000' },
+        { nome:'VOCÊ NA ERA DIGITAL',                                    codigo:'0067P260101210000' },
+      ],
+    }
+  },
+  'Práticas de Alfabetização e Matemática': {
+    series: [...SERIES_EJA_INICIAIS],
+    livrosPorSerie: {
+      'default_eja_iniciais': [
+        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0010P260101209000' },
+        { nome:'NOVA EJA MODERNA - Alfabetização e Matemática',          codigo:'0001P260101209000' },
+        { nome:'Práticas de Alfabetização e de Matemática',              codigo:'0028P260101209000' },
+        { nome:'COLEÇÃO CAMINHOS DO APRENDER',                           codigo:'0052P260101209000' },
+        { nome:'NOSSA HISTÓRIA COM AS LETRAS E OS NÚMEROS',              codigo:'0066P260101209000' },
+        { nome:'LER, REFLETIR E COMUNICAR',                              codigo:'0093P260101209000' },
+        { nome:'VEM PRA EJA! - Práticas de Alfabetização e de Matemática', codigo:'0020P260101209000' },
+      ],
+    }
+  },
+  'Mundo do Trabalho e Territórios': {
+    series: [...SERIES_EJA_INICIAIS],
+    livrosPorSerie: {
+      'default_eja_iniciais': [
+        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0012P260101211000' },
+        { nome:'NOVA EJA MODERNA - Mundo do Trabalho e Territórios',     codigo:'0003P260101211000' },
+        { nome:'ATIVA MUNDO DO TRABALHO',                                 codigo:'0047P260101211000' },
+        { nome:'CAMINHOS DO APRENDER – Mundo do Trabalho e Territórios', codigo:'0054P260101211000' },
+        { nome:'Práticas do Mundo do Trabalho e Territórios',            codigo:'0057P260101211000' },
+        { nome:'VEM PRA EJA! - Mundo do Trabalho e Territórios',         codigo:'0022P260101211000' },
+      ],
+    }
   },
   'Projetos Integradores - Linguagens': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'LINGUAGENS EM MOVIMENTO',                                codigo:'0054P260102201000' },
-      { nome:'HORIZONTES - LINGUAGENS',                                codigo:'0055P260102201000' },
-      { nome:'IDENTIDADE SARAIVA - Projetos Integradores',             codigo:'0089P260102201000' },
-      { nome:'Linguagens em projetos integradores',                    codigo:'0154P260102201000' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'LINGUAGENS EM MOVIMENTO',                                codigo:'0054P260102201000' },
+        { nome:'HORIZONTES - LINGUAGENS',                                codigo:'0055P260102201000' },
+        { nome:'IDENTIDADE SARAIVA - Projetos Integradores',             codigo:'0089P260102201000' },
+        { nome:'Linguagens em projetos integradores',                    codigo:'0154P260102201000' },
+      ],
+    }
   },
   'Projetos Integradores - Matemática': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA EM PROJETOS: Matemática',                        codigo:'0021P260102202000' },
-      { nome:'INTERAÇÃO PROJETOS INTEGRADORES - MATEMÁTICA',           codigo:'0077P260102202000' },
-      { nome:'IDENTIDADE SARAIVA - Projetos Integradores',             codigo:'0090P260102202000' },
-      { nome:'Projetos Integradores: Tempo Jovem',                     codigo:'0150P260102202000' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA EM PROJETOS: Matemática',                        codigo:'0021P260102202000' },
+        { nome:'INTERAÇÃO PROJETOS INTEGRADORES - MATEMÁTICA',           codigo:'0077P260102202000' },
+        { nome:'IDENTIDADE SARAIVA - Projetos Integradores',             codigo:'0090P260102202000' },
+        { nome:'Projetos Integradores: Tempo Jovem',                     codigo:'0150P260102202000' },
+      ],
+    }
   },
   'Projetos Integradores - Ciências da Natureza': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA EM PROJETOS: Ciências da Natureza',              codigo:'0022P260102203000' },
-      { nome:'CIÊNCIAS DA NATUREZA EM MOVIMENTO',                      codigo:'0059P260102203000' },
-      { nome:'INTERAÇÃO PROJETOS INTEGRADORES - CIÊNCIAS DA NATUREZA', codigo:'0078P260102203000' },
-      { nome:'Ciências da Natureza em projetos integradores',          codigo:'0156P260102203000' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA EM PROJETOS: Ciências da Natureza',              codigo:'0022P260102203000' },
+        { nome:'CIÊNCIAS DA NATUREZA EM MOVIMENTO',                      codigo:'0059P260102203000' },
+        { nome:'INTERAÇÃO PROJETOS INTEGRADORES - CIÊNCIAS DA NATUREZA', codigo:'0078P260102203000' },
+        { nome:'Ciências da Natureza em projetos integradores',          codigo:'0156P260102203000' },
+      ],
+    }
   },
   'Projetos Integradores - Ciências Humanas': {
-    series: ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'],
-    livros: [
-      { nome:'MODERNA EM PROJETOS: Ciências Humanas',                  codigo:'0023P260102204000' },
-      { nome:'HORIZONTES - CIÊNCIAS HUMANAS',                          codigo:'0060P260102204000' },
-      { nome:'CIÊNCIAS HUMANAS EM MOVIMENTO',                          codigo:'0061P260102204000' },
-      { nome:'INTERAÇÃO PROJETOS INTEGRADORES - CIÊNCIAS HUMANAS',     codigo:'0079P260102204000' },
-      { nome:'DO SEU JEITO',                                           codigo:'0114P260102204000' },
-    ]
+    series: [...SERIES_EM],
+    livrosPorSerie: {
+      'default_em': [
+        { nome:'MODERNA EM PROJETOS: Ciências Humanas',                  codigo:'0023P260102204000' },
+        { nome:'HORIZONTES - CIÊNCIAS HUMANAS',                          codigo:'0060P260102204000' },
+        { nome:'CIÊNCIAS HUMANAS EM MOVIMENTO',                          codigo:'0061P260102204000' },
+        { nome:'INTERAÇÃO PROJETOS INTEGRADORES - CIÊNCIAS HUMANAS',     codigo:'0079P260102204000' },
+        { nome:'DO SEU JEITO',                                           codigo:'0114P260102204000' },
+      ],
+    }
   },
 };
+
+// Helper: retorna livros da matéria filtrados pela série
+function getLivrosPorSerie(mat, serie) {
+  const m = PNLD2026[mat];
+  if (!m) return [];
+  if (!m.livrosPorSerie) return m.livros || [];
+  const isEjaIniciais = serie.includes('Anos Iniciais') || serie.includes('1º ao 5º');
+  const isEjaFinais   = serie.includes('EJA') && !isEjaIniciais;
+  if (isEjaIniciais && m.livrosPorSerie['default_eja_iniciais']) return m.livrosPorSerie['default_eja_iniciais'];
+  if (isEjaFinais   && m.livrosPorSerie['default_eja_finais'])   return m.livrosPorSerie['default_eja_finais'];
+  return m.livrosPorSerie['default_em'] || [];
+}
 
 // ─── PESQUISA DO MAPA ─────────────────────────────────────────────────────────
 // Popula matérias ao carregar
@@ -2520,10 +2656,11 @@ function mapCascataSeries() {
 
 function mapCascataLivros() {
   const mat = document.getElementById('map-sel-mat').value;
+  const ser = document.getElementById('map-sel-ser')?.value || '';
   const selLiv = document.getElementById('map-sel-liv');
   selLiv.innerHTML = '<option value="">Todos os livros...</option>';
   if (!mat || !PNLD2026[mat]) { selLiv.disabled = true; return; }
-  PNLD2026[mat].livros.forEach(l => selLiv.insertAdjacentHTML('beforeend', `<option value="${l.codigo}">${l.nome}</option>`));
+  getLivrosPorSerie(mat, ser).forEach(l => selLiv.insertAdjacentHTML('beforeend', `<option value="${l.codigo}">${l.nome}</option>`));
   selLiv.disabled = false;
 }
 
@@ -2688,10 +2825,11 @@ function rtAtualizarSeries(id) {
 
 function rtAtualizarLivros(id) {
   const mat = document.getElementById('rt-mat-' + id).value;
+  const ser = document.getElementById('rt-ser-' + id)?.value || '';
   const selLiv = document.getElementById('rt-liv-' + id);
   selLiv.innerHTML = '<option value="">Selecione...</option>';
   if (!mat) { selLiv.disabled = true; return; }
-  PNLD2026[mat].livros.forEach(l => {
+  getLivrosPorSerie(mat, ser).forEach(l => {
     selLiv.insertAdjacentHTML('beforeend', `<option value="${l.codigo}">${l.nome}</option>`);
   });
   selLiv.disabled = false;
@@ -2849,10 +2987,6 @@ function abrirComprovante(id) {
     <tr>
       <td style="padding:8px 12px;border:1px solid var(--gray-30);font-weight:600;color:var(--gray-80);width:40%;background:var(--gray-10);">Título</td>
       <td style="padding:8px 12px;border:1px solid var(--gray-30);color:var(--gray-90);">${item.titulo}</td>
-    </tr>
-    <tr>
-      <td style="padding:8px 12px;border:1px solid var(--gray-30);font-weight:600;color:var(--gray-80);background:var(--gray-10);">Código PNLD</td>
-      <td style="padding:8px 12px;border:1px solid var(--gray-30);font-family:monospace;color:var(--gray-90);">${item.codigo}</td>
     </tr>
     <tr>
       <td style="padding:8px 12px;border:1px solid var(--gray-30);font-weight:600;color:var(--gray-80);background:var(--gray-10);">Matéria / Série</td>
