@@ -2249,6 +2249,7 @@ async function admAvancarStatus(id) {
 const SERIES_EM  = ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'];
 const SERIES_EJA_FINAIS  = ['6º ano - EJA (E. Fundamental)','7º ano - EJA (E. Fundamental)','8º ano - EJA (E. Fundamental)','9º ano - EJA (E. Fundamental)'];
 const SERIES_EJA_INICIAIS = ['1º ao 5º ano - EJA (Anos Iniciais)'];
+const SERIES_EF = ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'];
 
 const PNLD2026 = {
   'Matemática': {
@@ -2618,6 +2619,139 @@ const PNLD2026 = {
       ],
     }
   },
+
+  // ─── ENSINO FUNDAMENTAL ANOS FINAIS (PNLD 2024) ──────────────────────────────
+  'Arte (E. Fundamental)': {
+    series: ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'],
+    livrosPorSerie: { 'default_ef': [
+      { nome:'RUMOS DA ARTE',                   codigo:'0004P240100200060' },
+      { nome:'ARARIBÁ CONECTA - ARTE',           codigo:'0011P240100200060' },
+      { nome:'SE LIGA NA ARTE',                  codigo:'0012P240100200060' },
+      { nome:'SUPERAÇÃO! ARTE',                  codigo:'0013P240100200060' },
+      { nome:'MOSAICO ARTE',                     codigo:'0032P240100200060' },
+      { nome:'JORNADAS: NOVOS CAMINHOS – ARTE',  codigo:'0041P240100200060' },
+      { nome:'TELÁRIS ESSENCIAL: ARTE',          codigo:'0052P240100200060' },
+      { nome:'AMPLITUDE ARTE',                   codigo:'0062P240100200060' },
+      { nome:'TRAJETÓRIAS ARTE',                 codigo:'0073P240100200060' },
+      { nome:'ARTE POR TODA PARTE',              codigo:'0074P240100200060' },
+      { nome:'JANELAS DA ARTE',                  codigo:'0087P240100200060' },
+      { nome:'SEGUE A TRILHA ARTE',              codigo:'0091P240100200060' },
+    ]}
+  },
+  'Ciências (E. Fundamental)': {
+    series: ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'],
+    livrosPorSerie: { 'default_ef': [
+      { nome:'ARARIBÁ CONECTA - CIÊNCIAS',                codigo:'0016P240100207030' },
+      { nome:'CIÊNCIAS NATURAIS - APRENDENDO COM O COTIDIANO', codigo:'0018P240100207030' },
+      { nome:'SUPERAÇÃO! CIÊNCIAS',                       codigo:'0019P240100207030' },
+      { nome:'#SOU + CIÊNCIAS',                           codigo:'0033P240100207030' },
+      { nome:'JORNADAS: NOVOS CAMINHOS – CIÊNCIAS',       codigo:'0042P240100207030' },
+      { nome:'TELÁRIS ESSENCIAL: CIÊNCIAS',               codigo:'0054P240100207030' },
+      { nome:'AMPLITUDE CIÊNCIAS',                        codigo:'0063P240100207030' },
+      { nome:'CONEXÕES & VIVÊNCIAS CIÊNCIAS',             codigo:'0064P240100207030' },
+      { nome:'A CONQUISTA CIÊNCIAS',                      codigo:'0077P240100207030' },
+      { nome:'CIÊNCIAS VIDA & UNIVERSO',                  codigo:'0078P240100207030' },
+      { nome:'CIÊNCIAS UMA NOVA VISÃO',                   codigo:'0097P240100207030' },
+      { nome:'GERAÇÃO ALPHA CIÊNCIAS',                    codigo:'0101P240100207030' },
+      { nome:'UNIVERSO DAS DESCOBERTAS CIÊNCIAS',         codigo:'0109P240100207030' },
+      { nome:'CIÊNCIAS, TECNOLOGIA, SOCIEDADE E AMBIENTE', codigo:'0111P240100207030' },
+    ]}
+  },
+  'Educação Física (E. Fundamental)': {
+    series: ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'],
+    livrosPorSerie: { 'default_ef': [
+      { nome:'SE LIGA NA EDUCAÇÃO FÍSICA', codigo:'0015P240100200160' },
+    ]}
+  },
+  'Geografia (E. Fundamental)': {
+    series: ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'],
+    livrosPorSerie: { 'default_ef': [
+      { nome:'ARARIBÁ CONECTA - GEOGRAFIA',          codigo:'0029P240100208050' },
+      { nome:'EXPEDIÇÕES GEOGRÁFICAS',               codigo:'0030P240100208050' },
+      { nome:'SUPERAÇÃO! GEOGRAFIA',                 codigo:'0031P240100208050' },
+      { nome:'JOVENS SAPIENS GEOGRAFIA',             codigo:'0035P240100208050' },
+      { nome:'JORNADAS: NOVOS CAMINHOS – GEOGRAFIA', codigo:'0047P240100208050' },
+      { nome:'TELÁRIS ESSENCIAL: GEOGRAFIA',         codigo:'0057P240100208050' },
+      { nome:'CONEXÕES & VIVÊNCIAS GEOGRAFIA',       codigo:'0069P240100208050' },
+      { nome:'AMPLITUDE GEOGRAFIA',                  codigo:'0070P240100208050' },
+      { nome:'A CONQUISTA GEOGRAFIA',                codigo:'0084P240100208050' },
+      { nome:'GEOGRAFIA ESPAÇO & INTERAÇÃO',         codigo:'0085P240100208050' },
+      { nome:'GEOGRAFIA: COMPREENSÃO DO ESPAÇO E LUGAR', codigo:'0088P240100208050' },
+      { nome:'SEGUE A TRILHA GEOGRAFIA',             codigo:'0094P240100208050' },
+      { nome:'GERAÇÃO ALPHA GEOGRAFIA',              codigo:'0104P240100208050' },
+      { nome:'GEOGRAFIA UMA NOVA VISÃO',             codigo:'0107P240100208050' },
+      { nome:'CALEIDOSCÓPIO',                        codigo:'0108P240100208050' },
+    ]}
+  },
+  'História (E. Fundamental)': {
+    series: ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'],
+    livrosPorSerie: { 'default_ef': [
+      { nome:'ARARIBÁ CONECTA - HISTÓRIA',           codigo:'0024P240100208040' },
+      { nome:'SE LIGA NA HISTÓRIA',                  codigo:'0025P240100208040' },
+      { nome:'EXPEDIÇÕES DA HISTÓRIA',               codigo:'0026P240100208040' },
+      { nome:'VIVER HISTÓRIA COM LEANDRO KARNAL',    codigo:'0027P240100208040' },
+      { nome:'SUPERAÇÃO! HISTÓRIA',                  codigo:'0028P240100208040' },
+      { nome:'JOVENS SAPIENS HISTÓRIA',              codigo:'0034P240100208040' },
+      { nome:'JORNADAS: NOVOS CAMINHOS – HISTÓRIA',  codigo:'0045P240100208040' },
+      { nome:'HISTÓRIA.DOC',                         codigo:'0046P240100208040' },
+      { nome:'AMPLITUDE HISTÓRIA',                   codigo:'0067P240100208040' },
+      { nome:'CONEXÕES & VIVÊNCIAS HISTÓRIA',        codigo:'0068P240100208040' },
+      { nome:'A CONQUISTA HISTÓRIA',                 codigo:'0081P240100208040' },
+      { nome:'HISTÓRIA SOCIEDADE & CIDADANIA',       codigo:'0083P240100208040' },
+      { nome:'SEGUE A TRILHA HISTÓRIA',              codigo:'0093P240100208040' },
+      { nome:'GERAÇÃO ALPHA HISTÓRIA',               codigo:'0103P240100208040' },
+    ]}
+  },
+  'Inglês (E. Fundamental)': {
+    series: ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'],
+    livrosPorSerie: { 'default_ef': [
+      { nome:'PEACEMAKERS',                                codigo:'0003P240100200090' },
+      { nome:'SE LIGA NA LÍNGUA INGLESA - NEW BEYOND WORDS', codigo:'0006P240100200090' },
+      { nome:'WAYS: ENGLISH FOR LIFE',                     codigo:'0036P240100200090' },
+      { nome:'JORNADAS: NOVOS CAMINHOS – LÍNGUA INGLESA',  codigo:'0037P240100200090' },
+      { nome:'ANYTIME!: ALWAYS READY FOR EDUCATION',       codigo:'0038P240100200090' },
+      { nome:'TELÁRIS ESSENCIAL: INGLÊS',                  codigo:'0050P240100200090' },
+      { nome:'CONEXÕES & VIVÊNCIAS LÍNGUA INGLESA',        codigo:'0059P240100200090' },
+      { nome:'JOY STARTER',                                codigo:'0071P240100200090' },
+      { nome:'BRIDGES',                                    codigo:'0072P240100200090' },
+      { nome:'ALIVE!',                                     codigo:'0098P240100200090' },
+      { nome:'IT FITS',                                    codigo:'0099P240100200090' },
+    ]}
+  },
+  'Língua Portuguesa (E. Fundamental)': {
+    series: ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'],
+    livrosPorSerie: { 'default_ef': [
+      { nome:'A CONQUISTA LÍNGUA PORTUGUESA',              codigo:'0001P240100200010' },
+      { nome:'TRAJETÓRIAS LÍNGUA PORTUGUESA',              codigo:'0002P240100200010' },
+      { nome:'ARARIBÁ CONECTA - PORTUGUÊS',                codigo:'0007P240100200010' },
+      { nome:'SE LIGA NA LÍNGUA',                          codigo:'0008P240100200010' },
+      { nome:'NOVO SINGULAR & PLURAL',                     codigo:'0009P240100200010' },
+      { nome:'SUPERAÇÃO! PORTUGUÊS',                       codigo:'0010P240100200010' },
+      { nome:'JORNADAS: NOVOS CAMINHOS – LÍNGUA PORTUGUESA', codigo:'0039P240100200010' },
+      { nome:'PORTUGUÊS LINGUAGENS',                       codigo:'0040P240100200010' },
+      { nome:'TELÁRIS ESSENCIAL: PORTUGUÊS',               codigo:'0051P240100200010' },
+      { nome:'GERAÇÃO ALPHA LÍNGUA PORTUGUESA',            codigo:'0100P240100200010' },
+      { nome:'COLEÇÃO METAVERSO LÍNGUA PORTUGUESA',        codigo:'0105P240100200010' },
+    ]}
+  },
+  'Matemática (E. Fundamental)': {
+    series: ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'],
+    livrosPorSerie: { 'default_ef': [
+      { nome:'ARARIBÁ CONECTA - MATEMÁTICA',               codigo:'0020P240100020020' },
+      { nome:'DESAFIOS DA MATEMÁTICA COM ÊNIO SILVEIRA',   codigo:'0021P240100020020' },
+      { nome:'MATEMÁTICA - BIANCHINI',                     codigo:'0022P240100020020' },
+      { nome:'SUPERAÇÃO! MATEMÁTICA',                      codigo:'0023P240100020020' },
+      { nome:'JORNADAS: NOVOS CAMINHOS – MATEMÁTICA',      codigo:'0043P240100020020' },
+      { nome:'MATEMÁTICA E REALIDADE',                     codigo:'0044P240100020020' },
+      { nome:'TELÁRIS ESSENCIAL: MATEMÁTICA',              codigo:'0055P240100020020' },
+      { nome:'CONEXÕES & VIVÊNCIAS MATEMÁTICA',            codigo:'0065P240100020020' },
+      { nome:'AMPLITUDE MATEMÁTICA',                       codigo:'0066P240100020020' },
+      { nome:'A CONQUISTA MATEMÁTICA',                     codigo:'0079P240100020020' },
+      { nome:'GERAÇÃO ALPHA MATEMÁTICA',                   codigo:'0102P240100020020' },
+      { nome:'MATEMÁTICA NOS DIAS DE HOJE',                codigo:'0106P240100020020' },
+      { nome:'COLEÇÃO MATEMÁTICA EM CENA',                 codigo:'0113P240100020020' },
+    ]}
+  },
 };
 
 // Helper: retorna livros da matéria filtrados pela série
@@ -2627,8 +2761,10 @@ function getLivrosPorSerie(mat, serie) {
   if (!m.livrosPorSerie) return m.livros || [];
   const isEjaIniciais = serie.includes('Anos Iniciais') || serie.includes('1º ao 5º');
   const isEjaFinais   = serie.includes('EJA') && !isEjaIniciais;
+  const isEF          = serie.includes('E. Fundamental') && !serie.includes('EJA');
   if (isEjaIniciais && m.livrosPorSerie['default_eja_iniciais']) return m.livrosPorSerie['default_eja_iniciais'];
   if (isEjaFinais   && m.livrosPorSerie['default_eja_finais'])   return m.livrosPorSerie['default_eja_finais'];
+  if (isEF          && m.livrosPorSerie['default_ef'])           return m.livrosPorSerie['default_ef'];
   return m.livrosPorSerie['default_em'] || [];
 }
 
