@@ -1795,22 +1795,24 @@ async function abrirEstatisticas() {
   document.getElementById('estat-lista').innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray-60);"><i class="ri-loader-4-line" style="animation:spin 1s linear infinite;font-size:24px;display:block;margin-bottom:8px;"></i>Carregando estatísticas...</div>';
 
   try {
-    const [escolas, stats] = await Promise.all([
-      sbGet('escolas', 'select=nome,inep,cidade,gre,livros_correios,qtd_livros_2026&order=nome'),
-      sbGet('estatisticas_escolas', 'select=*')
-    ]);
+    const escolas = await sbGet('escolas', 'select=nome,inep,cidade,gre,livros_correios,qtd_livros_2026&order=nome');
 
-    const statsMap = {};
-    (stats || []).forEach(s => { statsMap[String(s.inep).trim()] = s; });
-
-    let lista = escolas || [];
+    let lista = Array.isArray(escolas) ? escolas : [];
 
     if (usuarioLogado && usuarioLogado.isGre) {
       const greLogada = String(usuarioLogado.gre || '').trim();
       lista = lista.filter(e => String(e.gre || '').trim() === greLogada);
     }
 
-    document.getElementById('estat-count').textContent = lista.length + ' escolas';
+    const estatCountEl = document.getElementById('estat-count');
+    if (estatCountEl) {
+      estatCountEl.textContent = `${lista.length} escolas`;
+    }
+
+    if (lista.length === 0) {
+      document.getElementById('estat-lista').innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray-60);">Nenhuma escola encontrada.</div>';
+      return;
+    }
 
     document.getElementById('estat-lista').innerHTML = `
       <div style="overflow-x:auto;width:100%;border:1px solid var(--gray-30);border-radius:8px;">
@@ -1828,10 +1830,9 @@ async function abrirEstatisticas() {
           </thead>
           <tbody>
             ${lista.map((e, i) => {
-              const s = statsMap[String(e.inep).trim()] || {};
-              const qtdSimad = s.livros_correios ?? e.livros_correios ?? e.qtd_livros_2026 ?? 0;
-              const enviados = s.livros_enviados ?? 0;
-              const recebidos = s.livros_recebidos ?? 0;
+              const qtdSimad = e.livros_correios ?? e.qtd_livros_2026 ?? 0;
+              const enviados = e.livros_enviados ?? 0;
+              const recebidos = e.livros_recebidos ?? 0;
               const saldo = qtdSimad - enviados + recebidos;
 
               const badgeBg = saldo > 0 ? '#d1fae5' : '#f3f4f6';
@@ -1839,8 +1840,8 @@ async function abrirEstatisticas() {
 
               return `
                 <tr style="${i % 2 === 1 ? 'background:rgba(0,0,0,.015)' : ''};border-bottom:1px solid var(--gray-20);">
-                  <td style="padding:10px 14px;font-family:monospace;font-size:11px;color:var(--gray-80);">${e.inep}</td>
-                  <td style="padding:10px 14px;font-weight:600;color:var(--gray-90);max-width:280px;overflow:hidden;text-overflow:ellipsis;" title="${e.nome}">${e.nome}</td>
+                  <td style="padding:10px 14px;font-family:monospace;font-size:11px;color:var(--gray-80);">${e.inep || '—'}</td>
+                  <td style="padding:10px 14px;font-weight:600;color:var(--gray-90);max-width:280px;overflow:hidden;text-overflow:ellipsis;" title="${e.nome}">${e.nome || 'Escola sem nome'}</td>
                   <td style="padding:10px 14px;color:var(--gray-80);">${e.cidade || '—'}</td>
                   <td style="padding:10px 14px;text-align:center;font-family:monospace;font-weight:600;color:var(--blue);">${qtdSimad.toLocaleString('pt-BR')}</td>
                   <td style="padding:10px 14px;text-align:center;font-family:monospace;color:#be123c;">${enviados.toLocaleString('pt-BR')}</td>
