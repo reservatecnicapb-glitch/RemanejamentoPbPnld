@@ -1342,6 +1342,7 @@ async function fazerLogin() {
         inep: `GRE${String(greNum).padStart(2,'0')}`,
         municipio: 'Paraíba', estado: 'Paraíba'
       };
+      localStorage.setItem('remanejamento_usuario', JSON.stringify(usuarioLogado));
       document.getElementById('user-avatar').textContent = 'GR';
       document.getElementById('user-name-display').textContent = `${greNum}ª GRE`;
       document.getElementById('user-role-display').textContent = `GRE · SEECT-PB`;
@@ -1374,6 +1375,7 @@ async function fazerLogin() {
         inep: loginUp,
         municipio: 'Paraíba', estado: 'Paraíba'
       };
+      localStorage.setItem('remanejamento_usuario', JSON.stringify(usuarioLogado));
       document.getElementById('user-avatar').textContent = loginUp.slice(0,2);
       document.getElementById('user-name-display').textContent = loginUp;
       document.getElementById('user-role-display').textContent = `Comissão · SEECT-PB`;
@@ -1401,6 +1403,7 @@ async function fazerLogin() {
     if (user.is_admin) {
       // Admin
       usuarioLogado = { isAdmin: true, inep: 'admin', nome: 'Administrador do Sistema', municipio: 'João Pessoa - PB', gre: '—', estado: 'Paraíba' };
+      localStorage.setItem('remanejamento_usuario', JSON.stringify(usuarioLogado));
       document.getElementById('user-avatar').textContent = 'AD';
       document.getElementById('user-name-display').textContent = 'Administrador';
       document.getElementById('user-role-display').textContent = 'Admin · SEECT-PB';
@@ -1428,6 +1431,7 @@ async function fazerLogin() {
         lat:       parseFloat(e.lat),
         lng:       parseFloat(e.lng),
       };
+      localStorage.setItem('remanejamento_usuario', JSON.stringify(usuarioLogado));
       preencherDadosUsuario(usuarioLogado);
     }
 
@@ -1469,6 +1473,7 @@ function preencherDadosUsuario(escola) {
 // ─── LOGOUT ───────────────────────────────────────────────────────────────────
 document.getElementById('btn-logout').addEventListener('click', () => {
   usuarioLogado = null;
+  localStorage.removeItem('remanejamento_usuario');
   document.getElementById('user-dropdown').classList.remove('open');
   showLogin();
 });
@@ -3404,7 +3409,43 @@ document.getElementById('modal-estatisticas').addEventListener('click', function
 });
 
 // ─── INICIAR NA TELA DE LOGIN ─────────────────────────────────────────────────
-showLogin();
+// Tenta restaurar sessão salva
+const _sessaoSalva = localStorage.getItem('remanejamento_usuario');
+if (_sessaoSalva) {
+  try {
+    usuarioLogado = JSON.parse(_sessaoSalva);
+    const av = document.getElementById('user-avatar');
+    const nm = document.getElementById('user-name-display');
+    const rl = document.getElementById('user-role-display');
+    if (usuarioLogado.isAdmin) {
+      if (av) av.textContent = 'AD';
+      if (nm) nm.textContent = 'Administrador';
+      if (rl) rl.textContent = 'Admin · SEECT-PB';
+    } else if (usuarioLogado.isGre) {
+      if (av) av.textContent = 'GR';
+      if (nm) nm.textContent = `${usuarioLogado.gre}ª GRE`;
+      if (rl) rl.textContent = 'GRE · SEECT-PB';
+    } else if (usuarioLogado.isComissao) {
+      if (av) av.textContent = usuarioLogado.login?.slice(0,2) || 'CO';
+      if (nm) nm.textContent = usuarioLogado.login;
+      if (rl) rl.textContent = 'Comissão · SEECT-PB';
+    } else {
+      const initials = usuarioLogado.nome?.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() || '--';
+      if (av) av.textContent = initials;
+      if (nm) nm.textContent = usuarioLogado.nome;
+      if (rl) rl.textContent = `INEP ${usuarioLogado.inep}`;
+      preencherDadosUsuario(usuarioLogado);
+    }
+    remAtualizarStats();
+    remAjustarAbaHistorico();
+    showMain();
+  } catch(e) {
+    localStorage.removeItem('remanejamento_usuario');
+    showLogin();
+  }
+} else {
+  showLogin();
+}
 </script>
 </body>
 </html>
