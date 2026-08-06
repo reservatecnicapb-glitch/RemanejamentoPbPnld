@@ -1176,6 +1176,51 @@
       </div>
     </div>
 
+    <!-- MODAL TRANSPORTE GRE -->
+    <div id="modal-transporte" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:white;border-radius:12px;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--gray-30);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-weight:700;font-size:15px;color:var(--gray-90);"><i class="ri-truck-line"></i> Definir Transporte</span>
+          <button onclick="fecharModalTransporte()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--gray-60);"><i class="ri-close-line"></i></button>
+        </div>
+        <div style="padding:20px;">
+          <div id="transporte-pedido-info" style="background:var(--gray-10);border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--gray-80);"></div>
+          <p style="font-size:13px;color:var(--gray-80);margin-bottom:16px;">Como será realizado o transporte deste pedido?</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <button onclick="greDefinirTransporte('proprio')" style="display:flex;align-items:center;gap:14px;padding:16px;border:2px solid var(--gray-30);border-radius:8px;background:white;cursor:pointer;text-align:left;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--gray-30)'">
+              <i class="ri-car-line" style="font-size:28px;color:var(--green);"></i>
+              <div>
+                <div style="font-weight:700;font-size:13px;color:var(--gray-90);">Transporte Próprio</div>
+                <div style="font-size:12px;color:var(--gray-60);margin-top:2px;">A própria GRE realizará o transporte dos livros</div>
+              </div>
+            </button>
+            <button onclick="greDefinirTransporte('geadm')" style="display:flex;align-items:center;gap:14px;padding:16px;border:2px solid var(--gray-30);border-radius:8px;background:white;cursor:pointer;text-align:left;transition:all 0.15s;" onmouseover="this.style.borderColor='#1351b4'" onmouseout="this.style.borderColor='var(--gray-30)'">
+              <i class="ri-building-2-line" style="font-size:28px;color:#1351b4;"></i>
+              <div>
+                <div style="font-weight:700;font-size:13px;color:var(--gray-90);">Contatar GEADM</div>
+                <div style="font-size:12px;color:var(--gray-60);margin-top:2px;">Encaminhar para a GEADM realizar o transporte</div>
+              </div>
+            </button>
+          </div>
+          <div id="transporte-error" style="display:none;margin-top:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:10px;font-size:12px;color:#991b1b;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL TERMO DE DOAÇÃO -->
+    <div id="modal-termo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:white;border-radius:12px;max-width:820px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--gray-30);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:white;z-index:1;">
+          <span style="font-weight:700;font-size:14px;color:var(--gray-90);"><i class="ri-file-text-line"></i> Termo de Doação</span>
+          <div style="display:flex;gap:8px;">
+            <button onclick="imprimirTermo()" class="btn btn-primary" style="font-size:12px;"><i class="ri-printer-line"></i> Imprimir</button>
+            <button onclick="fecharTermo()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--gray-60);"><i class="ri-close-line"></i></button>
+          </div>
+        </div>
+        <div id="termo-conteudo" style="padding:40px;font-family:'Times New Roman',serif;font-size:12pt;color:#000;line-height:1.6;"></div>
+      </div>
+    </div>
+
     <div id="modal-comprovante" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:20px;">
       <div style="background:white;border-radius:12px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
         <div style="padding:16px 20px;border-bottom:1px solid var(--gray-30);display:flex;align-items:center;justify-content:space-between;">
@@ -1308,7 +1353,8 @@ document.getElementById('inep-input').addEventListener('keydown', e => {
 });
 
 async function fazerLogin() {
-  const inep  = document.getElementById('inep-input').value.trim().toUpperCase();
+  const inep  = document.getElementById('inep-input').value.trim();
+  const inepUpper = inep.toUpperCase();
   const senha = document.getElementById('senha-input').value.trim();
   const alertEl = document.getElementById('login-alert');
   const msg   = document.getElementById('login-alert-msg');
@@ -1324,7 +1370,7 @@ async function fazerLogin() {
 
   try {
     // Verifica se é login de GRE (formato GRE01 a GRE16)
-    const greMatch = inep.match(/^GRE(\d{1,2})$/);
+    const greMatch = inepUpper.match(/^GRE(\d{1,2})$/);
     if (greMatch) {
       const greNum = parseInt(greMatch[1]);
       const resGre = await fetch(
@@ -1354,7 +1400,7 @@ async function fazerLogin() {
     }
 
     // Verifica se é login de Comissão (GEECI, GEECT, GEEJA, GEADM)
-    const comissaoMatch = inep.match(/^(GEECI|GEECT|GEEJA|GEADM)$/i);
+    const comissaoMatch = inepUpper.match(/^(GEECI|GEECT|GEEJA|GEADM)$/);
     if (comissaoMatch) {
       const loginUp = inep.toUpperCase();
       const resComissao = await fetch(
@@ -1380,6 +1426,7 @@ async function fazerLogin() {
       document.getElementById('user-avatar').textContent = loginUp.slice(0,2);
       document.getElementById('user-name-display').textContent = loginUp;
       document.getElementById('user-role-display').textContent = `Comissão · SEECT-PB`;
+      await carregarInepsComissao();
       remAtualizarStats();
       remAjustarAbaHistorico();
       showMain();
@@ -1654,7 +1701,7 @@ function showInfoPanel(school) {
     booksEl.innerHTML = '<p style="color:var(--gray-60);font-size:12px;">Esta é a sua escola.</p>';
     btn.style.display = 'none';
   } else {
-    const sob = remLivrosSobrando.filter(x => String(x.inep).trim() === String(school.inep).trim());
+    const sob = remLivrosTodos.filter(x => String(x.inep).trim() === String(school.inep).trim());
     if (sob.length === 0) {
       booksEl.innerHTML = '<p style="color:var(--gray-60);font-size:12px;">Nenhum livro sobrando cadastrado.</p>';
       btn.style.display = 'none';
@@ -1675,7 +1722,7 @@ function showInfoPanel(school) {
 function remMapaSolicitar() {
   if (!mapEscolaSelecionada) return;
   const school = mapEscolaSelecionada;
-  const sob = remLivrosSobrando.filter(x => String(x.inep).trim() === String(school.inep).trim());
+  const sob = remLivrosTodos.filter(x => String(x.inep).trim() === String(school.inep).trim());
   if (sob.length === 0) return;
 
   // Fecha painel do mapa
@@ -1716,8 +1763,9 @@ function remMapaSolicitar() {
       <button class="btn btn-primary" onclick="remConfirmarPedidoMapa()"><i class="ri-send-plane-line"></i> Enviar Pedido</button>
     </div>`;
 
-  const pedLista = document.getElementById('ped-lista');
+  const pedLista = document.getElementById('ped-enviados-lista');
   pedLista.parentNode.insertBefore(formDiv, pedLista);
+  formDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function remConfirmarPedidoMapa() {
@@ -1729,7 +1777,7 @@ async function remConfirmarPedidoMapa() {
   if (!idSob) { errEl.style.display=''; errEl.textContent='Selecione um livro.'; return; }
   if (!qtd || qtd < 1) { errEl.style.display=''; errEl.textContent='Informe a quantidade.'; return; }
 
-  const item = remLivrosSobrando.find(x => x.id === idSob);
+  const item = remLivrosTodos.find(x => x.id === idSob);
   if (!item) return;
   if (qtd > item.qtd) { errEl.style.display=''; errEl.textContent=`Quantidade máxima disponível: ${item.qtd}.`; return; }
 
@@ -1754,11 +1802,25 @@ document.getElementById('map-info-close').addEventListener('click', () => {
 });
 
 // ─── REMANEJAMENTO — ESTADO ───────────────────────────────────────────────────
-let remLivrosSobrando = [];
+let remLivrosSobrando = []; // livros filtrados (meus / da GRE)
+let remLivrosTodos    = []; // todos os livros sobrando (para busca no mapa)
+let comissaoIneps     = null; // INEPs visíveis para login de comissão
 let remPedidos = [];
 const remItemCount = { sob:0 };
 
 // ─── HELPERS SUPABASE ─────────────────────────────────────────────────────────
+
+async function carregarInepsComissao() {
+  const divisao = usuarioLogado?.divisao;
+  if (!divisao) { comissaoIneps = null; return; }
+  let filtro = '';
+  if      (divisao === 'GEEJA') filtro = 'eja=eq.true&select=inep';
+  else if (divisao === 'GEECT') filtro = 'profissional=eq.true&select=inep';
+  else if (divisao === 'GEECI') filtro = 'tempo_integral=eq.true&profissional=eq.false&select=inep';
+  else { comissaoIneps = null; return; } // GEADM não filtra por escola
+  const data = await sbGet('escolas', filtro);
+  comissaoIneps = new Set((data || []).map(e => String(e.inep).trim()));
+}
 const sbHeaders = () => ({
   'apikey': SUPABASE_KEY,
   'Authorization': 'Bearer ' + SUPABASE_KEY,
@@ -1901,9 +1963,9 @@ async function remCarregarSobrando() {
   const myInep  = usuarioLogado?.inep;
   const greNum  = usuarioLogado?.gre;
 
-  // Esconde formulário de cadastro para GRE
+  // Esconde formulário de cadastro para GRE e Comissão
   const formCard = document.getElementById('sob-form-card');
-  if (formCard) formCard.style.display = isGre ? 'none' : '';
+  if (formCard) formCard.style.display = (isGre || usuarioLogado?.isComissao) ? 'none' : '';
 
   let filtro;
   if (isAdmin) {
@@ -1915,19 +1977,33 @@ async function remCarregarSobrando() {
     filtro = `ativo=eq.true&inep=eq.${myInep}&order=id.desc&select=*,escolas(nome,cidade,lat,lng,gre)`;
   }
 
-  const data = await sbGet('livros_sobrando', filtro);
-  let mapped = (data || []).map(x => ({
+  const dataTodos = await sbGet('livros_sobrando', 'ativo=eq.true&order=id.desc&select=*,escolas(nome,cidade,lat,lng,gre)');
+  const mapear = (x) => ({
     id: x.id, inep: x.inep, escola: x.escolas?.nome || '', cidade: x.escolas?.cidade || '',
     lat: parseFloat(x.escolas?.lat) || -7.155, lng: parseFloat(x.escolas?.lng) || -34.865,
     greEscola: x.escolas?.gre,
     mat: x.mat, serie: x.serie, titulo: x.titulo, codigo: x.codigo, qtd: x.qtd,
     data: new Date(x.data).toLocaleDateString('pt-BR')
-  }));
+  });
 
-  // GRE filtra só as escolas da sua região
-  if (isGre) mapped = mapped.filter(x => x.greEscola === greNum);
+  remLivrosTodos = (dataTodos || []).map(mapear);
 
-  remLivrosSobrando = mapped;
+  // Filtra pra lista conforme perfil
+  let filtrados = remLivrosTodos;
+  if (!isAdmin && !isGre && !usuarioLogado?.isComissao) {
+    filtrados = remLivrosTodos.filter(x => String(x.inep).trim() === myInep);
+  } else if (isGre) {
+    filtrados = remLivrosTodos.filter(x => x.greEscola === greNum);
+  } else if (usuarioLogado?.isComissao) {
+    const divisao = usuarioLogado.divisao;
+    if (divisao === 'GEADM') {
+      filtrados = remLivrosTodos; // GEADM vê tudo
+    } else if (comissaoIneps) {
+      filtrados = remLivrosTodos.filter(x => comissaoIneps.has(String(x.inep).trim()));
+    }
+  }
+
+  remLivrosSobrando = filtrados;
   remRenderLista();
   remAtualizarStats();
 }
@@ -1963,11 +2039,17 @@ function remRenderLista() {
   document.getElementById('sob-count').textContent = lista.length + ' registros';
   // Atualiza título conforme perfil
   const tituloEl = document.getElementById('sob-titulo');
-  if (tituloEl) tituloEl.textContent = isAdmin ? 'Livros Sobrando — Todas as Escolas' : isGre ? `Livros Sobrando — ${greNum}ª GRE` : 'Meus Livros Sobrando';
+  const isComissao = usuarioLogado?.isComissao;
+  if (tituloEl) {
+    if (isAdmin) tituloEl.textContent = 'Livros Sobrando — Todas as Escolas';
+    else if (isGre) tituloEl.textContent = `Livros Sobrando — ${greNum}ª GRE`;
+    else if (isComissao) tituloEl.textContent = `Livros Sobrando — ${usuarioLogado.divisao}`;
+    else tituloEl.textContent = 'Meus Livros Sobrando';
+  }
   const mySchool = schools.find(s => s.inep === usuarioLogado?.inep);
   if (mySchool && isAdmin) lista.sort((a,b) => { const aOwn=a.inep===usuarioLogado?.inep, bOwn=b.inep===usuarioLogado?.inep; if(aOwn&&!bOwn)return -1; if(!aOwn&&bOwn)return 1; return calcDist(mySchool.lat,mySchool.lng,a.lat,a.lng)-calcDist(mySchool.lat,mySchool.lng,b.lat,b.lng); });
   if (lista.length === 0) { document.getElementById('sob-lista').innerHTML = `<div style="padding:40px 20px;text-align:center;color:var(--gray-60);"><i class="ri-inbox-line" style="font-size:36px;opacity:0.3;display:block;margin-bottom:10px;"></i><p>Nenhum livro cadastrado ainda.</p></div>`; return; }
-  document.getElementById('sob-lista').innerHTML = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Escola</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Matéria / Série</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Qtde.</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Distância</th><th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ação</th></tr></thead><tbody>${lista.map((item,i) => { const isOwn=item.inep===usuarioLogado?.inep; const dist=mySchool&&!isOwn?calcDist(mySchool.lat,mySchool.lng,item.lat,item.lng):null; const distStr=dist!==null?(dist<1?'< 1 km':dist.toFixed(1)+' km'):'—'; return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}"><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;font-size:12px;">${item.escola}${isOwn?` <span style="font-size:10px;background:#d1fae5;color:#065f46;padding:1px 6px;border-radius:3px;font-weight:700;">você</span>`:''}</div><div style="font-size:11px;color:var(--gray-60);">INEP ${item.inep}</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${item.titulo}</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);color:var(--gray-80);">${item.mat}<br><span style="font-size:11px;color:var(--gray-60);">${item.serie}</span></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;font-family:monospace;font-weight:700;font-size:15px;color:var(--green);">${item.qtd}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;color:var(--gray-80);font-size:12px;">${distStr}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:right;"><div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;">${isAdmin?`<button onclick="remRemoverRegistro(${item.id})" class="btn-sm-action" style="color:#cc2222;"><i class="ri-delete-bin-line"></i></button>`:''} ${!isOwn?`<button onclick="remFazerPedido(${item.id})" class="btn-request" ${isGre?'style="display:none;"':''}><i class="ri-shake-hands-line"></i> Solicitar</button>`:`<div style="display:flex;align-items:center;gap:4px;"><span style="font-size:11px;color:var(--gray-60);">Seu cadastro</span><button onclick="remRemoverRegistro(${item.id})" class="btn-sm-action" style="color:#cc2222;" title="Remover"><i class="ri-delete-bin-line"></i></button></div>`}</div></td></tr>`; }).join('')}</tbody></table></div>`;
+  document.getElementById('sob-lista').innerHTML = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Escola</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Matéria / Série</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Qtde.</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Distância</th><th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ação</th></tr></thead><tbody>${lista.map((item,i) => { const isOwn=item.inep===usuarioLogado?.inep; const dist=mySchool&&!isOwn?calcDist(mySchool.lat,mySchool.lng,item.lat,item.lng):null; const distStr=dist!==null?(dist<1?'< 1 km':dist.toFixed(1)+' km'):'—'; return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}"><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;font-size:12px;">${item.escola}${isOwn?` <span style="font-size:10px;background:#d1fae5;color:#065f46;padding:1px 6px;border-radius:3px;font-weight:700;">você</span>`:''}</div><div style="font-size:11px;color:var(--gray-60);">INEP ${item.inep}</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${item.titulo}</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);color:var(--gray-80);">${item.mat}<br><span style="font-size:11px;color:var(--gray-60);">${item.serie}</span></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;font-family:monospace;font-weight:700;font-size:15px;color:var(--green);">${item.qtd}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;color:var(--gray-80);font-size:12px;">${distStr}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:right;"><div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;">${isAdmin?`<button onclick="remRemoverRegistro(${item.id})" class="btn-sm-action" style="color:#cc2222;"><i class="ri-delete-bin-line"></i></button>`:''} ${!isOwn?`<button onclick="remFazerPedido(${item.id})" class="btn-request" ${(isGre||isComissao)?'style="display:none;"':''}><i class="ri-shake-hands-line"></i> Solicitar</button>`:`<div style="display:flex;align-items:center;gap:4px;"><span style="font-size:11px;color:var(--gray-60);">Seu cadastro</span><button onclick="remRemoverRegistro(${item.id})" class="btn-sm-action" style="color:#cc2222;" title="Remover"><i class="ri-delete-bin-line"></i></button></div>`}</div></td></tr>`; }).join('')}</tbody></table></div>`;
 }
 
 async function remRemoverRegistro(id) {
@@ -1990,36 +2072,64 @@ async function remCarregarPedidos() {
   ['ped-enviados-lista','ped-recebidos-lista'].forEach(id => {
     document.getElementById(id).innerHTML = '<div style="padding:30px;text-align:center;color:var(--gray-60);">Carregando...</div>';
   });
+  try {
   const data = await sbGet('pedidos_remanejamento',
-    'order=id.desc&select=*,livros_sobrando(titulo,codigo,mat,serie),solicitante:escolas!pedidos_remanejamento_inep_solicitante_fkey(nome,lat,lng,gre),ofertante:escolas!pedidos_remanejamento_inep_ofertante_fkey(nome,gre)'
+    'order=id.desc&select=*,livros_sobrando(titulo,codigo,mat,serie),solicitante:escolas!pedidos_remanejamento_inep_solicitante_fkey(nome,lat,lng,gre,eja),ofertante:escolas!pedidos_remanejamento_inep_ofertante_fkey(nome,gre)'
   );
   remPedidos = (data||[]).map(p => ({
     id:p.id, protocolo:p.protocolo,
     inepSolicitante:p.inep_solicitante, escolaSolicitante:p.solicitante?.nome||p.inep_solicitante,
     latSol:parseFloat(p.solicitante?.lat)||0, lngSol:parseFloat(p.solicitante?.lng)||0,
     greSolicitante: p.solicitante?.gre,
+    ejaSolicitante: p.solicitante?.eja,
     inepOfertante:p.inep_ofertante, escolaOfertante:p.ofertante?.nome||p.inep_ofertante,
     greOfertante: p.ofertante?.gre,
     titulo:p.livros_sobrando?.titulo||'', codigo:p.livros_sobrando?.codigo||'',
     mat:p.livros_sobrando?.mat||'', serie:p.livros_sobrando?.serie||'',
-    qtd:p.qtd, data:new Date(p.data).toLocaleDateString('pt-BR'), status:p.status
+    qtd:p.qtd, data:new Date(p.data).toLocaleDateString('pt-BR'), status:p.status,
+    transporte:p.transporte, greResponsavel:p.gre_responsavel
   }));
   remRenderPedidos();
   remAtualizarStats();
+  } catch(e) {
+    console.error('Erro ao carregar pedidos:', e);
+    ['ped-enviados-lista','ped-recebidos-lista'].forEach(id => {
+      document.getElementById(id).innerHTML = '<div style="padding:30px;text-align:center;color:#cc2222;">Erro ao carregar pedidos. Tente novamente.</div>';
+    });
+  }
 }
 
 function remRenderPedidos() {
   const isAdmin=usuarioLogado?.isAdmin, myInep=usuarioLogado?.inep, isGre=usuarioLogado?.isGre, greNum=usuarioLogado?.gre;
-  const STATUS={pendente:{label:'Aguardando aceite',bg:'#dbeafe',color:'#1351b4'},aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'}};
+  const STATUS={pendente:{label:'Aguardando aceite',bg:'#dbeafe',color:'#1351b4'},aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'},confirmado:{label:'Confirmado',bg:'#f0fdf4',color:'#14532d'}};
 
   let enviados, recebidos;
   if (isAdmin) {
     enviados = remPedidos; recebidos = [];
   } else if (isGre) {
-    // GRE vê só pedidos aprovados das escolas da sua região
+    const greN = Number(greNum);
     const aprovados = remPedidos.filter(p => p.status === 'aprovado');
-    enviados  = aprovados.filter(p => p.greSolicitante === greNum);
-    recebidos = aprovados.filter(p => p.greOfertante === greNum && p.greSolicitante !== greNum);
+    enviados  = aprovados.filter(p => Number(p.greSolicitante) === greN);
+    recebidos = aprovados.filter(p => Number(p.greOfertante) === greN && Number(p.greSolicitante) !== greN);
+  } else if (usuarioLogado?.isComissao) {
+    const divisao = usuarioLogado.divisao;
+    if (divisao === 'GEADM') {
+      enviados  = remPedidos.filter(p => p.transporte === 'geadm');
+      recebidos = [];
+    } else if (comissaoIneps) {
+      const base = remPedidos.filter(p => {
+        if (p.status !== 'aprovado' || p.transporte !== 'proprio') return false;
+        const serieEJA = p.serie?.toUpperCase().includes('EJA');
+        if (usuarioLogado.divisao === 'GEEJA') return serieEJA;
+        if (usuarioLogado.divisao === 'GEECI') return !serieEJA && comissaoIneps.has(String(p.inepSolicitante).trim());
+        if (usuarioLogado.divisao === 'GEECT') return !serieEJA && comissaoIneps.has(String(p.inepSolicitante).trim());
+        return true;
+      });
+      enviados  = base;
+      recebidos = [];
+    } else {
+      enviados = []; recebidos = [];
+    }
   } else {
     enviados  = remPedidos.filter(p => p.inepSolicitante === myInep);
     recebidos = remPedidos.filter(p => p.inepOfertante   === myInep);
@@ -2042,24 +2152,175 @@ function remRenderPedidos() {
     </tr></thead><tbody>${lista.map((p,i) => {
       const s = STATUS[p.status]||STATUS.pendente;
       const podeAgir = (isAdmin || tipo === 'recebidos') && p.status === 'pendente';
+      const podeConfirmar = usuarioLogado?.isComissao && p.status === 'aprovado' && p.transporte === 'proprio';
       const contraparte = tipo === 'enviados' ? p.escolaOfertante : p.escolaSolicitante;
-      return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}">
+      const greClick = isGre && Number(p.greSolicitante) === Number(greNum) ? `onclick="abrirModalTransporte(${p.id})" style="cursor:pointer;"` : '';
+      const TRANSP = { proprio: {label:'Transporte Próprio', bg:'#d1fae5', color:'#065f46'}, geadm: {label:'→ GEADM', bg:'#dbeafe', color:'#1351b4'} };
+      const transpBadge = p.transporte ? `<span style="padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;background:${TRANSP[p.transporte]?.bg};color:${TRANSP[p.transporte]?.color};">${TRANSP[p.transporte]?.label}</span>` : (isGre ? '<span style="font-size:11px;color:#f59e0b;font-weight:600;">⚠ Definir</span>' : '');
+      return `<tr ${greClick} style="${i%2===1?'background:rgba(0,0,0,.015)':''}${isGre?' transition:background 0.1s;':''}">
         <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-family:monospace;font-weight:700;">${p.protocolo}</td>
         <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${p.titulo}</div><div style="font-size:11px;color:var(--gray-60);">${p.mat} · ${p.serie}</div></td>
         <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;">${contraparte}</td>
         <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;font-family:monospace;font-weight:700;">${p.qtd}</td>
         <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;"><span style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;background:${s.bg};color:${s.color};">${s.label}</span></td>
         <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:right;">
-          ${podeAgir ? `<div style="display:flex;gap:4px;justify-content:flex-end;">
+          ${podeConfirmar ? `<button onclick="comissaoConfirmarPedido(${p.id})" style="padding:5px 12px;font-size:11px;background:#14532d;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;"><i class="ri-check-double-line"></i> Confirmar</button>`
+          : p.status === 'confirmado' && usuarioLogado?.isComissao ? `<button onclick="abrirTermo(${p.id})" style="padding:5px 10px;font-size:11px;background:#1351b4;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;"><i class="ri-file-text-line"></i> Termo</button>`
+          : isGre && Number(p.greSolicitante) === Number(greNum) ? transpBadge
+          : !isGre && !usuarioLogado?.isComissao && podeAgir ? `<div style="display:flex;gap:4px;justify-content:flex-end;">
             <button onclick="remAtualizarPedido(${p.id},'aprovado')" style="padding:5px 10px;font-size:11px;background:#d1fae5;color:#065f46;border:none;border-radius:5px;cursor:pointer;font-weight:600;">✓ Aceitar</button>
             <button onclick="remAtualizarPedido(${p.id},'recusado')" style="padding:5px 10px;font-size:11px;background:#ffe4e6;color:#be123c;border:none;border-radius:5px;cursor:pointer;font-weight:600;">✗ Recusar</button>
-          </div>` : '<span style="font-size:11px;color:var(--gray-60);">—</span>'}
+            ${isAdmin ? `<button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button>` : ''}
+          </div>`
+          : isAdmin ? `<button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button>`
+          : '<span style="font-size:11px;color:var(--gray-60);">—</span>'}
         </td>
       </tr>`;
     }).join('')}</tbody></table></div>`;
   }
   renderTabela(enviados,  'ped-enviados-lista',  'enviados');
   renderTabela(recebidos, 'ped-recebidos-lista', 'recebidos');
+}
+
+// ─── MODAL TRANSPORTE GRE ─────────────────────────────────────────────────────
+let _transportePedidoId = null;
+
+function abrirModalTransporte(id) {
+  _transportePedidoId = id;
+  const p = remPedidos.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('transporte-pedido-info').innerHTML = `
+    <div style="font-weight:700;font-size:13px;">${p.protocolo}</div>
+    <div style="margin-top:4px;">${p.titulo} · ${p.mat} · ${p.serie}</div>
+    <div style="margin-top:4px;color:var(--gray-60);">${p.escolaSolicitante} → ${p.escolaOfertante} · ${p.qtd} un.</div>
+    ${p.transporte ? `<div style="margin-top:6px;font-size:11px;color:#065f46;font-weight:600;">✓ Transporte já definido: ${p.transporte === 'proprio' ? 'Próprio' : 'GEADM'}</div>` : ''}
+  `;
+  document.getElementById('transporte-error').style.display = 'none';
+  document.getElementById('modal-transporte').style.display = 'flex';
+}
+
+function fecharModalTransporte() {
+  document.getElementById('modal-transporte').style.display = 'none';
+  _transportePedidoId = null;
+}
+
+async function greDefinirTransporte(tipo) {
+  if (!_transportePedidoId) return;
+  const errEl = document.getElementById('transporte-error');
+  try {
+    await sbPatch('pedidos_remanejamento', `id=eq.${_transportePedidoId}`, {
+      transporte: tipo,
+      gre_responsavel: usuarioLogado.gre
+    });
+    fecharModalTransporte();
+    await remCarregarPedidos();
+  } catch(e) {
+    errEl.style.display = '';
+    errEl.textContent = 'Erro ao salvar. Tente novamente.';
+  }
+}
+
+document.getElementById('modal-transporte').addEventListener('click', function(e) {
+  if (e.target === this) fecharModalTransporte();
+});
+
+// ─── TERMO DE DOAÇÃO ──────────────────────────────────────────────────────────
+function abrirTermo(id) {
+  const p = remPedidos.find(x => x.id === id);
+  if (!p) return;
+
+  const greNum = p.greSolicitante || '___';
+  const dataHoje = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+
+  const linhasTabela = Array.from({length: Math.max(p.qtd, 5)}, (_, i) => `
+    <tr>
+      <td style="border:1px solid #000;padding:4px 8px;text-align:center;">${i+1}</td>
+      <td style="border:1px solid #000;padding:4px 8px;">${i === 0 ? p.titulo : ''}</td>
+      <td style="border:1px solid #000;padding:4px 8px;text-align:center;">${i === 0 ? p.qtd : ''}</td>
+    </tr>`).join('');
+
+  document.getElementById('termo-conteudo').innerHTML = `
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-weight:bold;font-size:13pt;line-height:1.8;">
+        GOVERNO DO ESTADO DA PARAÍBA<br>
+        SECRETARIA DE ESTADO DA EDUCAÇÃO<br>
+        ${greNum}ª GERÊNCIA REGIONAL DE EDUCAÇÃO<br>
+        ESCOLA ESTADUAL: ${p.escolaOfertante}
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-weight:bold;font-size:13pt;">TERMO DE DOAÇÃO DE LIVROS</div>
+      <div style="font-weight:bold;">Nº ${p.protocolo}/2026</div>
+    </div>
+
+    <p><strong>DOADOR:</strong> ${p.escolaOfertante}</p>
+    <p><strong>DONATÁRIO:</strong> Escola Estadual ${p.escolaSolicitante}</p>
+
+    <p style="margin-top:16px;">Pelo presente instrumento, o DOADOR transfere gratuitamente à unidade escolar os livros descritos abaixo, que passam a integrar o acervo da escola.</p>
+
+    <table style="width:100%;border-collapse:collapse;margin:20px 0;font-size:11pt;">
+      <thead>
+        <tr style="background:#f0f0f0;">
+          <th style="border:1px solid #000;padding:6px 8px;text-align:center;width:50px;">Item</th>
+          <th style="border:1px solid #000;padding:6px 8px;text-align:left;">Título</th>
+          <th style="border:1px solid #000;padding:6px 8px;text-align:center;width:80px;">Qtd.</th>
+        </tr>
+      </thead>
+      <tbody>${linhasTabela}</tbody>
+    </table>
+
+    <div style="margin-top:24px;">
+      <p><strong>DECLARAÇÕES</strong></p>
+      <p>O doador declara a propriedade dos bens. A unidade escolar declara o recebimento e compromete-se a registrar os exemplares no acervo, quando aplicável.</p>
+    </div>
+
+    <p style="margin-top:20px;">Local e data: João Pessoa, ${dataHoje}</p>
+
+    <div style="display:flex;justify-content:space-between;margin-top:60px;gap:40px;">
+      <div style="flex:1;text-align:center;">
+        <div style="border-top:1px solid #000;padding-top:6px;">${p.escolaOfertante}<br><span style="font-size:10pt;">DOADOR</span></div>
+      </div>
+      <div style="flex:1;text-align:center;">
+        <div style="border-top:1px solid #000;padding-top:6px;">${p.escolaSolicitante}<br><span style="font-size:10pt;">DONATÁRIO</span></div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('modal-termo').style.display = 'flex';
+}
+
+function fecharTermo() {
+  document.getElementById('modal-termo').style.display = 'none';
+}
+
+function imprimirTermo() {
+  const conteudo = document.getElementById('termo-conteudo').innerHTML;
+  const janela = window.open('', '_blank');
+  janela.document.write(`<!DOCTYPE html><html><head><title>Termo de Doação</title>
+    <style>body{font-family:'Times New Roman',serif;font-size:12pt;color:#000;padding:40px;line-height:1.6;}
+    table{width:100%;border-collapse:collapse;}th,td{border:1px solid #000;padding:4px 8px;}
+    @media print{button{display:none;}}</style></head>
+    <body>${conteudo}</body></html>`);
+  janela.document.close();
+  janela.print();
+}
+
+document.getElementById('modal-termo').addEventListener('click', function(e) {
+  if (e.target === this) fecharTermo();
+});
+
+async function comissaoConfirmarPedido(id) {
+  if (!confirm('Confirmar realização do transporte deste pedido?')) return;
+  await sbPatch('pedidos_remanejamento', `id=eq.${id}`, { status: 'confirmado' });
+  await remCarregarPedidos();
+}
+
+async function remApagarPedido(id) {
+  if (!confirm('Apagar este pedido permanentemente?')) return;
+  await sbDelete('pedidos_remanejamento', `id=eq.${id}`);
+  await remCarregarPedidos();
+  await remRenderHistorico();
 }
 
 async function remAtualizarPedido(id, status) {
@@ -2071,12 +2332,12 @@ async function remRenderHistorico() {
   document.getElementById('hist-lista').innerHTML = '<div style="padding:30px;text-align:center;color:var(--gray-60);">Carregando...</div>';
   const data = await sbGet('pedidos_remanejamento', 'status=neq.pendente&order=id.desc&select=*,livros_sobrando(titulo,mat,serie),solicitante:escolas!pedidos_remanejamento_inep_solicitante_fkey(nome),ofertante:escolas!pedidos_remanejamento_inep_ofertante_fkey(nome)');
   const myInep=usuarioLogado?.inep, isAdmin=usuarioLogado?.isAdmin;
-  const todos=(data||[]).map(p=>({protocolo:p.protocolo,titulo:p.livros_sobrando?.titulo||'',mat:p.livros_sobrando?.mat||'',serie:p.livros_sobrando?.serie||'',qtd:p.qtd,status:p.status,escolaSolicitante:p.solicitante?.nome||p.inep_solicitante,escolaOfertante:p.ofertante?.nome||p.inep_ofertante,inepSolicitante:p.inep_solicitante}));
+  const todos=(data||[]).map(p=>({id:p.id, protocolo:p.protocolo,titulo:p.livros_sobrando?.titulo||'',mat:p.livros_sobrando?.mat||'',serie:p.livros_sobrando?.serie||'',qtd:p.qtd,status:p.status,escolaSolicitante:p.solicitante?.nome||p.inep_solicitante,escolaOfertante:p.ofertante?.nome||p.inep_ofertante,inepSolicitante:p.inep_solicitante}));
   const lista=isAdmin?todos:todos.filter(p=>p.inepSolicitante===myInep);
   document.getElementById('hist-count').textContent=lista.length+' registros';
-  const STATUS={aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'}};
+  const STATUS={aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'},confirmado:{label:'Confirmado',bg:'#f0fdf4',color:'#14532d'}};
   if(lista.length===0){document.getElementById('hist-lista').innerHTML=`<div style="padding:40px 20px;text-align:center;color:var(--gray-60);"><i class="ri-history-line" style="font-size:36px;opacity:0.3;display:block;margin-bottom:10px;"></i><p>Nenhum histórico ainda.</p></div>`;return;}
-  document.getElementById('hist-lista').innerHTML=`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Protocolo</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Solicitante</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ofertante</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Resultado</th></tr></thead><tbody>${lista.map((p,i)=>{const s=STATUS[p.status]||{label:p.status,bg:'#f3f4f6',color:'#374151'};return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}"><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-family:monospace;font-weight:700;">${p.protocolo}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${p.titulo}</div><div style="font-size:11px;color:var(--gray-60);">${p.mat} · ${p.serie} · ${p.qtd} un.</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;">${p.escolaSolicitante}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;color:var(--gray-80);">${p.escolaOfertante}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;"><span style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;background:${s.bg};color:${s.color};">${s.label}</span></td></tr>`;}).join('')}</tbody></table></div>`;
+  document.getElementById('hist-lista').innerHTML=`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Protocolo</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Solicitante</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ofertante</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Resultado</th>${isAdmin?'<th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ação</th>':''}</tr></thead><tbody>${lista.map((p,i)=>{const s=STATUS[p.status]||{label:p.status,bg:'#f3f4f6',color:'#374151'};return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}"><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-family:monospace;font-weight:700;">${p.protocolo}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${p.titulo}</div><div style="font-size:11px;color:var(--gray-60);">${p.mat} · ${p.serie} · ${p.qtd} un.</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;">${p.escolaSolicitante}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;color:var(--gray-80);">${p.escolaOfertante}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;"><span style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;background:${s.bg};color:${s.color};">${s.label}</span></td>${isAdmin?`<td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;"><button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button></td>`:''}</tr>`;}).join('')}</tbody></table></div>`;
 }
 
 // Mostrar/ocultar aba Histórico conforme perfil
@@ -2267,12 +2528,20 @@ function admRenderLista(filtro) {
               <button class="btn-sm-action" title="Rastrear" onclick="abrirRastreamento(${p.id})"><i class="ri-map-pin-time-line"></i></button>
               <button class="btn-sm-action" title="Comprovante" onclick="abrirComprovante(${p.id})"><i class="ri-file-text-line"></i></button>
               ${podeAvancar ? `<button class="btn btn-primary" style="padding:5px 10px;font-size:11px;" onclick="admAvancarStatus(${p.id})"><i class="ri-arrow-right-circle-line"></i> Dar baixa</button>` : `<span style="font-size:11px;color:var(--gray-60);padding:5px 10px;">✓ Concluído</span>`}
+              <button class="btn-sm-action" title="Apagar" onclick="rtApagarPedido(${p.id})" style="color:#cc2222;"><i class="ri-delete-bin-line"></i></button>
             </div>
           </td>
         </tr>`;
       }).join('')}
     </tbody>
   </table></div>`;
+}
+
+async function rtApagarPedido(id) {
+  if (!confirm('Apagar este pedido de reserva técnica permanentemente?')) return;
+  await sbDelete('pedidos_reserva', `id=eq.${id}`);
+  await rtCarregarPedidos();
+  admRenderLista(admFiltro);
 }
 
 async function admAvancarStatus(id) {
@@ -2832,7 +3101,7 @@ function remMapaBuscar() {
 
   if (!mat) { remMapaRestaurar(); resultsEl.style.display = 'none'; return; }
 
-  const matches = remLivrosSobrando.filter(x => {
+  const matches = remLivrosTodos.filter(x => {
     const matOk = x.mat === mat;
     const serOk = !ser    || x.serie  === ser;
     const livOk = !livCod || x.codigo === livCod;
@@ -3414,6 +3683,7 @@ document.getElementById('modal-estatisticas').addEventListener('click', function
 // Tenta restaurar sessão salva
 const _sessaoSalva = localStorage.getItem('remanejamento_usuario');
 if (_sessaoSalva) {
+  (async () => {
   try {
     usuarioLogado = JSON.parse(_sessaoSalva);
     const av = document.getElementById('user-avatar');
@@ -3431,6 +3701,7 @@ if (_sessaoSalva) {
       if (av) av.textContent = usuarioLogado.login?.slice(0,2) || 'CO';
       if (nm) nm.textContent = usuarioLogado.login;
       if (rl) rl.textContent = 'Comissão · SEECT-PB';
+      await carregarInepsComissao();
     } else {
       const initials = usuarioLogado.nome?.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() || '--';
       if (av) av.textContent = initials;
@@ -3445,6 +3716,7 @@ if (_sessaoSalva) {
     localStorage.removeItem('remanejamento_usuario');
     showLogin();
   }
+  })();
 } else {
   showLogin();
 }
