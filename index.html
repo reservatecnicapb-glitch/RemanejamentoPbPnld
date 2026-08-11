@@ -2564,8 +2564,8 @@ async function admAvancarStatus(id) {
 
 // ─── CATÁLOGO PNLD 2026 ───────────────────────────────────────────────────────
 const SERIES_EM  = ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'];
-const SERIES_EJA_FINAIS  = ['6º ano - EJA (E. Fundamental)','7º ano - EJA (E. Fundamental)','8º ano - EJA (E. Fundamental)','9º ano - EJA (E. Fundamental)'];
-const SERIES_EJA_INICIAIS = ['1º ao 5º ano - EJA (Anos Iniciais)'];
+const SERIES_EJA_FINAIS  = ['Etapa 3 - EJA (Anos Finais E. Fundamental)','Etapa 4 - EJA (Anos Finais E. Fundamental)'];
+const SERIES_EJA_INICIAIS = ['Etapa 1 - EJA (Anos Iniciais E. Fundamental)','Etapa 2 - EJA (Anos Iniciais E. Fundamental)'];
 const SERIES_EF = ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'];
 
 const PNLD2026 = {
@@ -3314,7 +3314,7 @@ async function rtEnviarPedido() {
   // Salva cada item no Supabase
   for (const item of itens) {
     await sbPost('pedidos_reserva', {
-      protocolo: protocolo + '-' + item.codigo.slice(0,4),
+      protocolo: protocolo,
       inep: e.inep, titulo: item.titulo, mat: item.mat,
       serie: item.serie, qtd: item.qtd, tipo: item.tipo,
       justificativa: just, status: 'solicitado'
