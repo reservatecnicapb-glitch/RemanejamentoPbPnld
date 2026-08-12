@@ -2564,13 +2564,15 @@ async function admAvancarStatus(id) {
 
 // ─── CATÁLOGO PNLD 2026 ───────────────────────────────────────────────────────
 const SERIES_EM  = ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'];
-const SERIES_EJA_FINAIS  = ['Etapa 3 - EJA (Anos Finais E. Fundamental)','Etapa 4 - EJA (Anos Finais E. Fundamental)'];
-const SERIES_EJA_INICIAIS = ['Etapa 1 - EJA (Anos Iniciais E. Fundamental)','Etapa 2 - EJA (Anos Iniciais E. Fundamental)'];
+const SERIES_EJA_INICIAIS = ['Etapas 1 e 2 - EJA (Anos Iniciais E. Fundamental)'];
+const SERIES_EJA_FINAIS   = ['Etapas 3 e 4 - EJA (Anos Finais E. Fundamental)'];
+const SERIES_EJA_EF56     = ['Etapas 5 e 6 - EJA (E. Fundamental)'];
+const SERIES_EJA_EM78     = ['Etapas 7 e 8 - EJA (E. Médio)'];
 const SERIES_EF = ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'];
 
 const PNLD2026 = {
   'Matemática': {
-    series: [...SERIES_EM, ...SERIES_EF, ...SERIES_EJA_FINAIS],
+    series: [...SERIES_EM, ...SERIES_EF, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA PLUS - Matemática Paiva',                       codigo:'0013P260101202814' },
@@ -2605,6 +2607,12 @@ const PNLD2026 = {
         { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0015P260102213000' },
         { nome:'NOVA EJA MODERNA - Matemática',                          codigo:'0015P260102213000' },
         { nome:'Práticas em Matemática',                                 codigo:'0015P260102213000' },
+      ],
+      'default_eja_medio_v1': [
+        { nome:'NOVA EJA MODERNA - Matemática (Vol. I - E. Fundamental)', codigo:'0015P260102213000' },
+      ],
+      'default_eja_medio_v2': [
+        { nome:'NOVA EJA MODERNA - Matemática (Vol. II - E. Médio)', codigo:'0015P260102213000' },
       ],
     }
   },
@@ -2702,7 +2710,7 @@ const PNLD2026 = {
     }
   },
   'Inglês': {
-    series: [...SERIES_EM, ...SERIES_EF, ...SERIES_EJA_FINAIS],
+    series: [...SERIES_EM, ...SERIES_EF, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA EM AÇÃO - Inglês',                               codigo:'0005P260101219811' },
@@ -2731,6 +2739,12 @@ const PNLD2026 = {
         { nome:'Práticas em Língua Estrangeira – Inglês',                codigo:'0062P260102216000' },
         { nome:'COLEÇÃO COMEBACK - Práticas em Línguas Estrangeiras - Inglês', codigo:'0065P260102216000' },
         { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0019P260102216000' },
+      ],
+      'default_eja_medio_v1': [
+        { nome:'NOVA EJA MODERNA - Inglês (Vol. I - E. Fundamental)',     codigo:'0008P260102216000' },
+      ],
+      'default_eja_medio_v2': [
+        { nome:'NOVA EJA MODERNA - Inglês (Vol. II - E. Médio)',    codigo:'0008P260102216000' },
       ],
     }
   },
@@ -3057,11 +3071,17 @@ function getLivrosPorSerie(mat, serie) {
   const m = PNLD2026[mat];
   if (!m) return [];
   if (!m.livrosPorSerie) return m.livros || [];
-  const isEjaIniciais = serie.includes('Anos Iniciais') || serie.includes('1º ao 5º');
-  const isEjaFinais   = serie.includes('EJA') && !isEjaIniciais;
+  const isEjaIniciais = serie.includes('Etapas 1 e 2');
+  const isEjaFinais   = serie.includes('Etapas 3 e 4');
+  const isEjaMedioV1  = serie.includes('Etapas 5 e 6');
+  const isEjaMedioV2  = serie.includes('Etapas 7 e 8');
   const isEF          = serie.includes('E. Fundamental') && !serie.includes('EJA');
   if (isEjaIniciais && m.livrosPorSerie['default_eja_iniciais']) return m.livrosPorSerie['default_eja_iniciais'];
   if (isEjaFinais   && m.livrosPorSerie['default_eja_finais'])   return m.livrosPorSerie['default_eja_finais'];
+  if (isEjaMedioV1  && m.livrosPorSerie['default_eja_medio_v1']) return m.livrosPorSerie['default_eja_medio_v1'];
+  if (isEjaMedioV2  && m.livrosPorSerie['default_eja_medio_v2']) return m.livrosPorSerie['default_eja_medio_v2'];
+  if (isEjaMedioV1  && m.livrosPorSerie['default_eja_medio'])    return m.livrosPorSerie['default_eja_medio'];
+  if (isEjaMedioV2  && m.livrosPorSerie['default_eja_medio'])    return m.livrosPorSerie['default_eja_medio'];
   if (isEF          && m.livrosPorSerie['default_ef'])           return m.livrosPorSerie['default_ef'];
   return m.livrosPorSerie['default_em'] || [];
 }
