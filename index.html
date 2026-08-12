@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -2618,7 +2617,7 @@ const PNLD2026 = {
     }
   },
   'Língua Portuguesa': {
-    series: [...SERIES_EM, ...SERIES_EF, ...SERIES_EJA_FINAIS],
+    series: [...SERIES_EM, ...SERIES_EF, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA EM AÇÃO - Língua Portuguesa',                    codigo:'0002P260101218810' },
@@ -2826,7 +2825,7 @@ const PNLD2026 = {
     }
   },
   'Ciências da Natureza (Bio/Fís/Quím)': {
-    series: [...SERIES_EM, ...SERIES_EJA_FINAIS],
+    series: [...SERIES_EM, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA PLUS - Ciências da Natureza',                    codigo:'0016P260101203815' },
@@ -2839,9 +2838,11 @@ const PNLD2026 = {
         { nome:'SER PROTAGONISTA CIÊNCIAS DA NATUREZA E SUAS TECNOLOGIAS', codigo:'0100P260101203815' },
         { nome:'DO SEU JEITO - Ciências da Natureza',                    codigo:'0112P260101203815' },
       ],
-      'default_eja_finais': [
-        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0017P260102214000' },
-        { nome:'NOVA EJA MODERNA - Ciências da Natureza',                codigo:'0006P260102214000' },
+      'default_eja_medio_v1': [
+        { nome:'NOVA EJA MODERNA - Ciências da Natureza (Vol. I - E. Fundamental)', codigo:'0006P260102214000' },
+      ],
+      'default_eja_medio_v2': [
+        { nome:'NOVA EJA MODERNA - Ciências da Natureza (Vol. II - E. Médio)', codigo:'0006P260102214000' },
       ],
     }
   },
@@ -2997,6 +2998,17 @@ const PNLD2026 = {
       ],
     }
   },
+  'Ciências Humanas e Arte (EJA)': {
+    series: [...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    livrosPorSerie: {
+      'default_eja_medio_v1': [
+        { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte (Vol. I - E. Fundamental)', codigo:'0007P260102215000' },
+      ],
+      'default_eja_medio_v2': [
+        { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte (Vol. II - E. Médio)', codigo:'0007P260102215000' },
+      ],
+    }
+  },
   'Projetos Integradores - Linguagens': {
     series: [...SERIES_EM],
     livrosPorSerie: {
@@ -3061,6 +3073,42 @@ const PNLD2026 = {
         { nome:'GERAÇÃO ALPHA CIÊNCIAS',                    codigo:'0101P240100207030' },
         { nome:'UNIVERSO DAS DESCOBERTAS CIÊNCIAS',         codigo:'0109P240100207030' },
         { nome:'CIÊNCIAS, TECNOLOGIA, SOCIEDADE E AMBIENTE', codigo:'0111P240100207030' },
+      ],
+    }
+  },
+
+  'Leitura e Escrita': {
+    series: [...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    livrosPorSerie: {
+      'default_eja_medio_v1': [
+        { nome:'NOVA EJA MODERNA - Leitura e Escrita (Vol. I - E. Fundamental)', codigo:'0004P260102212000' },
+      ],
+      'default_eja_medio_v2': [
+        { nome:'NOVA EJA MODERNA - Leitura e Escrita (Vol. II - E. Médio)',      codigo:'0004P260102212000' },
+      ],
+    }
+  },
+
+  'Ciências da Natureza - EJA': {
+    series: [...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    livrosPorSerie: {
+      'default_eja_medio_v1': [
+        { nome:'NOVA EJA MODERNA - Ciências da Natureza (Vol. I - E. Fundamental)', codigo:'0006P260102214000' },
+      ],
+      'default_eja_medio_v2': [
+        { nome:'NOVA EJA MODERNA - Ciências da Natureza (Vol. II - E. Médio)',      codigo:'0006P260102214000' },
+      ],
+    }
+  },
+
+  'Ciências Humanas e Arte - EJA': {
+    series: [...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    livrosPorSerie: {
+      'default_eja_medio_v1': [
+        { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte (Vol. I - E. Fundamental)', codigo:'0007P260102215000' },
+      ],
+      'default_eja_medio_v2': [
+        { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte (Vol. II - E. Médio)',      codigo:'0007P260102215000' },
       ],
     }
   },
