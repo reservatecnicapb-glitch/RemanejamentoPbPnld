@@ -2564,6 +2564,7 @@ async function admAvancarStatus(id) {
 
 // ─── CATÁLOGO PNLD 2026 ───────────────────────────────────────────────────────
 const SERIES_EM  = ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'];
+const SERIES_EM_VU = ['Volume Único - E. Médio'];
 const SERIES_EJA_INICIAIS = [];
 const SERIES_EJA_FINAIS   = [];
 const SERIES_EJA_EF56     = ['Etapas 5 e 6 - EJA (E. Fundamental)'];
@@ -2572,7 +2573,7 @@ const SERIES_EF = ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º an
 
 const PNLD2026 = {
   'Matemática': {
-    series: [...SERIES_EM, ...SERIES_EF, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA PLUS - Matemática Paiva',                       codigo:'0013P260101202814' },
@@ -2614,10 +2615,14 @@ const PNLD2026 = {
       'default_eja_medio_v2': [
         { nome:'NOVA EJA MODERNA - Matemática (Vol. II - E. Médio)', codigo:'0015P260102213000' },
       ],
+
+      'default_vu': [
+        { nome:'IDENTIDADE SARAIVA - Matemática (Volume Único)', codigo:'0086P260101202814' },
+      ],
     }
   },
   'Língua Portuguesa': {
-    series: [...SERIES_EM, ...SERIES_EF, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA EM AÇÃO - Língua Portuguesa',                    codigo:'0002P260101218810' },
@@ -2650,10 +2655,14 @@ const PNLD2026 = {
         { nome:'SEGUE A TRILHA EJA: Práticas de Leitura e Escrita',      codigo:'0070P260102212000' },
         { nome:'VEM PRA EJA! - Práticas de Leitura e Escrita',           codigo:'0023P260102212000' },
       ],
+
+      'default_vu': [
+        { nome:'IDENTIDADE SARAIVA - Língua Portuguesa (Volume Único)', codigo:'0081P260101218810' },
+      ],
     }
   },
   'Arte': {
-    series: [...SERIES_EM, ...SERIES_EF],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA EM AÇÃO - Arte',                                 codigo:'0002P260101218810' },
@@ -2678,6 +2687,10 @@ const PNLD2026 = {
         { nome:'ARTE POR TODA PARTE (EF)',         codigo:'0074P240100200060' },
         { nome:'JANELAS DA ARTE',                  codigo:'0087P240100200060' },
         { nome:'SEGUE A TRILHA ARTE',              codigo:'0091P240100200060' },
+      ],
+
+      'default_vu': [
+        { nome:'IDENTIDADE SARAIVA - Arte (Volume Único)', codigo:'0081P260101218810' },
       ],
     }
   },
@@ -2710,7 +2723,7 @@ const PNLD2026 = {
     }
   },
   'Inglês': {
-    series: [...SERIES_EM, ...SERIES_EF, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA EM AÇÃO - Inglês',                               codigo:'0005P260101219811' },
@@ -2746,10 +2759,14 @@ const PNLD2026 = {
       'default_eja_medio_v2': [
         { nome:'NOVA EJA MODERNA - Inglês (Vol. II - E. Médio)',    codigo:'0008P260102216000' },
       ],
+
+      'default_vu': [
+        { nome:'MODERNA PLUS - Inglês (Volume Único)', codigo:'0007P260101219811' },
+      ],
     }
   },
   'Educação Física': {
-    series: [...SERIES_EM, ...SERIES_EF],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA SuperAÇÃO! Educação Física',                     codigo:'0011P260101220812' },
@@ -2759,6 +2776,10 @@ const PNLD2026 = {
       ],
       'default_ef': [
         { nome:'SE LIGA NA EDUCAÇÃO FÍSICA',                             codigo:'0015P240100200160' },
+      ],
+
+      'default_vu': [
+        { nome:'IDENTIDADE SARAIVA - Educação Física (Volume Único)', codigo:'0084P260101220812' },
       ],
     }
   },
@@ -2777,6 +2798,10 @@ const PNLD2026 = {
         { nome:'MUNDO DIGITAL - MODO DE USAR',                           codigo:'0135P260101201813' },
         { nome:'Consciência: uma jornada pela Educação Digital',         codigo:'0163P260101201813' },
       ],
+
+      'default_vu': [
+        { nome:'IDENTIDADE SARAIVA - Educação Digital (Volume Único)', codigo:'0085P260101201813' },
+      ],
     }
   },
   'Biologia': {
@@ -2791,6 +2816,10 @@ const PNLD2026 = {
         { nome:'IDENTIDADE SARAIVA - Biologia',                          codigo:'0087P260101203815' },
         { nome:'SER PROTAGONISTA - Biologia',                            codigo:'0100P260101203815' },
         { nome:'DO SEU JEITO - Biologia',                                codigo:'0112P260101203815' },
+      ],
+
+      'default_vu': [
+        { nome:'IDENTIDADE SARAIVA - Biologia (Volume Único)', codigo:'0087P260101203815' },
       ],
     }
   },
@@ -2807,6 +2836,10 @@ const PNLD2026 = {
         { nome:'SER PROTAGONISTA - Física',                              codigo:'0100P260101203815' },
         { nome:'DO SEU JEITO - Física',                                  codigo:'0112P260101203815' },
       ],
+
+      'default_vu': [
+        { nome:'IDENTIDADE SARAIVA - Física (Volume Único)', codigo:'0087P260101203815' },
+      ],
     }
   },
   'Química': {
@@ -2821,6 +2854,10 @@ const PNLD2026 = {
         { nome:'IDENTIDADE SARAIVA - Química',                           codigo:'0087P260101203815' },
         { nome:'SER PROTAGONISTA - Química',                             codigo:'0100P260101203815' },
         { nome:'DO SEU JEITO - Química',                                 codigo:'0112P260101203815' },
+      ],
+
+      'default_vu': [
+        { nome:'IDENTIDADE SARAIVA - Química (Volume Único)', codigo:'0087P260101203815' },
       ],
     }
   },
@@ -2847,7 +2884,7 @@ const PNLD2026 = {
     }
   },
   'História': {
-    series: [...SERIES_EM, ...SERIES_EF],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA PLUS - História',                                codigo:'0018P260101204816' },
@@ -2873,10 +2910,14 @@ const PNLD2026 = {
         { nome:'SEGUE A TRILHA HISTÓRIA',              codigo:'0093P240100208040' },
         { nome:'GERAÇÃO ALPHA HISTÓRIA',               codigo:'0103P240100208040' },
       ],
+
+      'default_vu': [
+        { nome:'IDENTIDADE SARAIVA - História (Volume Único)', codigo:'0018P260101204816' },
+      ],
     }
   },
   'Geografia': {
-    series: [...SERIES_EM, ...SERIES_EF],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA PLUS - Geografia',                               codigo:'0018P260101204816' },
@@ -2903,6 +2944,10 @@ const PNLD2026 = {
         { nome:'GEOGRAFIA UMA NOVA VISÃO',             codigo:'0107P240100208050' },
         { nome:'CALEIDOSCÓPIO',                        codigo:'0108P240100208050' },
       ],
+
+      'default_vu': [
+        { nome:'IDENTIDADE SARAIVA - Geografia (Volume Único)', codigo:'0018P260101204816' },
+      ],
     }
   },
   'Filosofia': {
@@ -2916,6 +2961,10 @@ const PNLD2026 = {
         { nome:'SER PROTAGONISTA - Filosofia',                           codigo:'0103P260101204816' },
         { nome:'DO SEU JEITO - Filosofia',                               codigo:'0113P260101204816' },
       ],
+
+      'default_vu': [
+        { nome:'IDENTIDADE SARAIVA - Filosofia (Volume Único)', codigo:'0018P260101204816' },
+      ],
     }
   },
   'Sociologia': {
@@ -2928,6 +2977,10 @@ const PNLD2026 = {
         { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - Sociologia',                codigo:'0072P260101204816' },
         { nome:'SER PROTAGONISTA - Sociologia',                          codigo:'0103P260101204816' },
         { nome:'DO SEU JEITO - Sociologia',                              codigo:'0113P260101204816' },
+      ],
+
+      'default_vu': [
+        { nome:'IDENTIDADE SARAIVA - Sociologia (Volume Único)', codigo:'0018P260101204816' },
       ],
     }
   },
@@ -3124,6 +3177,7 @@ function getLivrosPorSerie(mat, serie) {
   const isEjaFinais   = serie.includes('Etapas 3 e 4');
   const isEjaMedioV1  = serie.includes('Etapas 5 e 6');
   const isEjaMedioV2  = serie.includes('Etapas 7 e 8');
+  const isVolumeUnico = serie.includes('Volume Único');
   const isEF          = serie.includes('E. Fundamental') && !serie.includes('EJA');
   if (isEjaIniciais && m.livrosPorSerie['default_eja_iniciais']) return m.livrosPorSerie['default_eja_iniciais'];
   if (isEjaFinais   && m.livrosPorSerie['default_eja_finais'])   return m.livrosPorSerie['default_eja_finais'];
@@ -3131,6 +3185,7 @@ function getLivrosPorSerie(mat, serie) {
   if (isEjaMedioV2  && m.livrosPorSerie['default_eja_medio_v2']) return m.livrosPorSerie['default_eja_medio_v2'];
   if (isEjaMedioV1  && m.livrosPorSerie['default_eja_medio'])    return m.livrosPorSerie['default_eja_medio'];
   if (isEjaMedioV2  && m.livrosPorSerie['default_eja_medio'])    return m.livrosPorSerie['default_eja_medio'];
+  if (isVolumeUnico && m.livrosPorSerie['default_vu'])           return m.livrosPorSerie['default_vu'];
   if (isEF          && m.livrosPorSerie['default_ef'])           return m.livrosPorSerie['default_ef'];
   return m.livrosPorSerie['default_em'] || [];
 }
