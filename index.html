@@ -14,7 +14,7 @@
   const EMAILJS_TEMPLATE_ID = 'template_4fsb0j1';
 
   // Destinatários fixos
-  const EMAIL_DESTINATARIOS = 'reservatecnicapb@gmail.com', 'nucleodematerialdidatico@see.pb.gov.br';
+  const EMAIL_DESTINATARIOS = 'reservatecnicapb@gmail.com';
 
   (function() { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); })();
 </script>
@@ -524,7 +524,8 @@
     position: absolute; top: 16px; right: 16px; z-index: 1000;
     background: white; border-radius: 8px; padding: 14px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.18); font-size: 12px;
-    border: 1px solid var(--gray-30); width: 240px; display: none;
+    border: 1px solid var(--gray-30); width: 260px; display: none;
+    max-height: calc(100% - 32px); overflow-y: auto;
   }
   .map-info-panel.visible { display: block; }
   .map-info-school { font-weight: 700; color: var(--gray-90); font-size: 13px; margin-bottom: 4px; }
@@ -2091,7 +2092,8 @@ async function remCarregarPedidos() {
     transporte:p.transporte, greResponsavel:p.gre_responsavel,
     assinaturaOfertante: p.assinatura_ofertante,
     assinaturaSolicitante: p.assinatura_solicitante,
-    termoAssinado: p.termo_assinado
+    termoAssinado: p.termo_assinado,
+    statusEntrega: p.status_entrega
   }));
   remRenderPedidos();
   remAtualizarStats();
@@ -2103,68 +2105,63 @@ async function remCarregarPedidos() {
   }
 }
 
+// Status de entrega do remanejamento
+const STATUS_ENTREGA_REM = {
+  null:          { label: 'Aguardando coleta',  bg: '#fef3c7', color: '#92400e', icon: 'ri-time-line' },
+  saiu_coleta:   { label: 'Saiu para coleta',   bg: '#dbeafe', color: '#1351b4', icon: 'ri-map-pin-line' },
+  saiu_entrega:  { label: 'Saiu para entrega',  bg: '#d1fae5', color: '#065f46', icon: 'ri-truck-line' },
+  entregue:      { label: 'Entregue',            bg: '#f0fdf4', color: '#14532d', icon: 'ri-checkbox-circle-line' },
+};
+
+const PROX_STATUS_ENTREGA = {
+  null:        'saiu_coleta',
+  saiu_coleta: 'saiu_entrega',
+  saiu_entrega:'entregue',
+};
+
 function renderTermoBotoes(p) {
   const isOfertante   = usuarioLogado?.inep === p.inepOfertante;
   const isSolicitante = usuarioLogado?.inep === p.inepSolicitante;
   const podeAssinar   = (isOfertante && !p.assinaturaOfertante) || (isSolicitante && !p.assinaturaSolicitante);
   const assinadas     = (p.assinaturaOfertante ? 1 : 0) + (p.assinaturaSolicitante ? 1 : 0);
-  const podePrint     = p.termoAssinado || usuarioLogado?.isAdmin || usuarioLogado?.isGre || usuarioLogado?.isComissao;
+  const podePrint = p.termoAssinado || usuarioLogado?.isAdmin || usuarioLogado?.isGre || usuarioLogado?.isComissao;
+
+  // Botão de progresso de entrega — só pra GRE/GEADM após termo assinado
+  const isGre    = usuarioLogado?.isGre;
+  const isGeadm  = usuarioLogado?.isComissao && usuarioLogado?.divisao === 'GEADM';
+  const podeProgedir = (isGre || isGeadm || usuarioLogado?.isAdmin) && p.termoAssinado && p.statusEntrega !== 'entregue';
+  const proxStatus = PROX_STATUS_ENTREGA[p.statusEntrega ?? null];
+  const stEnt = STATUS_ENTREGA_REM[p.statusEntrega ?? null] || STATUS_ENTREGA_REM[null];
+
   return `<div style="display:flex;gap:4px;align-items:center;justify-content:flex-end;flex-wrap:wrap;">
-    <span style="font-size:10px;color:var(--gray-60);">${assinadas}/2 assinaturas</span>
+    ${p.termoAssinado ? `<span style="padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;background:${stEnt.bg};color:${stEnt.color};"><i class="${stEnt.icon}"></i> ${stEnt.label}</span>` : `<span style="font-size:10px;color:var(--gray-60);">${assinadas}/2 assinaturas</span>`}
     ${podeAssinar ? `<button onclick="assinarTermo(${p.id})" style="padding:5px 10px;font-size:11px;background:#1351b4;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;"><i class="ri-pen-nib-line"></i> Assinar</button>` : ''}
-    ${podePrint ? `<button onclick="abrirTermo(${p.id})" style="padding:5px 10px;font-size:11px;background:#065f46;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;"><i class="ri-file-text-line"></i> Termo</button>` : ''}
+    ${podeProgedir && proxStatus ? `<button onclick="remAvancarEntrega(${p.id},'${proxStatus}')" style="padding:5px 10px;font-size:11px;background:#065f46;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;"><i class="ri-arrow-right-circle-line"></i> ${STATUS_ENTREGA_REM[proxStatus]?.label}</button>` : ''}
+    ${podePrint ? `<button onclick="abrirTermo(${p.id})" style="padding:5px 10px;font-size:11px;background:#374151;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;"><i class="ri-file-text-line"></i> Termo</button>` : ''}
   </div>`;
+}
+
+async function remAvancarEntrega(id, novoStatus) {
+  await sbPatch('pedidos_remanejamento', `id=eq.${id}`, { status_entrega: novoStatus });
+  await remCarregarPedidos();
 }
 
 function remRenderPedidos() {
   const isAdmin=usuarioLogado?.isAdmin, myInep=usuarioLogado?.inep, isGre=usuarioLogado?.isGre, greNum=usuarioLogado?.gre;
-  const STATUS={
-    pendente:{label:'Aguardando aceite',bg:'#dbeafe',color:'#1351b4'},
-    aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},
-    recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'},
-    confirmado:{label:'Confirmado',bg:'#f0fdf4',color:'#14532d'},
-    saiu_coleta:{label:'Saiu para coleta',bg:'#fef3c7',color:'#92400e'},
-    saiu_entrega:{label:'Saiu para entrega',bg:'#e0e7ff',color:'#3730a3'},
-    entregue:{label:'Entregue',bg:'#d1fae5',color:'#065f46'}
-  };
-  const STATUS_TRANSPORTE_ORDEM = ['saiu_coleta', 'saiu_entrega', 'entregue'];
-  function proximoStatusTransporte(status) {
-    if (status === 'confirmado') return 'saiu_coleta';
-    const idx = STATUS_TRANSPORTE_ORDEM.indexOf(status);
-    if (idx >= 0 && idx < STATUS_TRANSPORTE_ORDEM.length - 1) return STATUS_TRANSPORTE_ORDEM[idx + 1];
-    return null;
-  }
-  function podeProgredirTransporte(p) {
-    if (!p.termoAssinado) return false;
-    const next = proximoStatusTransporte(p.status);
-    if (!next) return false;
-    // GRE com transporte próprio
-    if (usuarioLogado?.isGre && p.transporte === 'proprio') {
-      return Number(p.greSolicitante) === Number(usuarioLogado.gre) || Number(p.greResponsavel) === Number(usuarioLogado.gre);
-    }
-    // GEADM com transporte geadm
-    if (usuarioLogado?.isComissao && usuarioLogado.divisao === 'GEADM' && p.transporte === 'geadm') {
-      return true;
-    }
-    // Admin sempre pode
-    if (usuarioLogado?.isAdmin) return true;
-    return false;
-  }
+  const STATUS={pendente:{label:'Aguardando aceite',bg:'#dbeafe',color:'#1351b4'},aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'},confirmado:{label:'Confirmado',bg:'#f0fdf4',color:'#14532d'}};
 
   let enviados, recebidos;
   if (isAdmin) {
     enviados = remPedidos; recebidos = [];
   } else if (isGre) {
     const greN = Number(greNum);
-    const statusGre = ['aprovado','confirmado','saiu_coleta','saiu_entrega','entregue'];
-    const baseGre = remPedidos.filter(p => statusGre.includes(p.status));
-    enviados  = baseGre.filter(p => Number(p.greSolicitante) === greN);
-    recebidos = baseGre.filter(p => Number(p.greOfertante) === greN && Number(p.greSolicitante) !== greN);
+    const aprovados = remPedidos.filter(p => p.status === 'aprovado');
+    enviados  = aprovados.filter(p => Number(p.greSolicitante) === greN);
+    recebidos = aprovados.filter(p => Number(p.greOfertante) === greN && Number(p.greSolicitante) !== greN);
   } else if (usuarioLogado?.isComissao) {
     const divisao = usuarioLogado.divisao;
     if (divisao === 'GEADM') {
-      const statusGeadm = ['aprovado','confirmado','saiu_coleta','saiu_entrega','entregue'];
-      enviados  = remPedidos.filter(p => p.transporte === 'geadm' && statusGeadm.includes(p.status));
+      enviados  = remPedidos.filter(p => p.transporte === 'geadm' && (p.status === 'aprovado' || p.status === 'confirmado'));
       recebidos = [];
     } else if (comissaoIneps) {
       const base = remPedidos.filter(p => {
@@ -2213,36 +2210,21 @@ function remRenderPedidos() {
         <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${p.titulo}</div><div style="font-size:11px;color:var(--gray-60);">${p.mat} · ${p.serie}</div></td>
         <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;">${contraparte}</td>
         <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;font-family:monospace;font-weight:700;">${p.qtd}</td>
-        <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;"><span style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;background:${s.bg};color:${s.color};">${s.label}</span></td>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;">
+          <span style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;background:${s.bg};color:${s.color};">${s.label}</span>
+          ${p.statusEntrega ? `<br><span style="padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;margin-top:3px;display:inline-block;background:${(STATUS_ENTREGA_REM[p.statusEntrega]||{}).bg};color:${(STATUS_ENTREGA_REM[p.statusEntrega]||{}).color};">${(STATUS_ENTREGA_REM[p.statusEntrega]||{}).label}</span>` : ''}
+        </td>
         <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:right;">
-          ${(() => {
-            const nextSt = proximoStatusTransporte(p.status);
-            const podeProg = podeProgredirTransporte(p);
-            const nextLabel = nextSt ? (STATUS[nextSt]?.label || nextSt) : '';
-            if (podeConfirmar) {
-              return `<button onclick="comissaoConfirmarPedido(${p.id})" style="padding:5px 12px;font-size:11px;background:#14532d;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;"><i class="ri-check-double-line"></i> Confirmar</button>`;
-            }
-            // Termo + progressão de status (GRE / GEADM / Admin)
-            if (p.status === 'confirmado' || p.status === 'saiu_coleta' || p.status === 'saiu_entrega' || p.status === 'entregue') {
-              let html = '';
-              if (p.status === 'confirmado' || p.termoAssinado) html += renderTermoBotoes(p);
-              if (podeProg && nextSt) {
-                html += `<button onclick="event.stopPropagation();progredirStatusPedido(${p.id})" style="margin-left:4px;padding:5px 10px;font-size:11px;background:#1351b4;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;" title="Avançar status do pedido"><i class="ri-arrow-right-circle-line"></i> ${nextLabel}</button>`;
-              }
-              if (isAdmin) html += `<button onclick="event.stopPropagation();remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button>`;
-              return html || '<span style="font-size:11px;color:var(--gray-60);">—</span>';
-            }
-            if (isGre && Number(p.greSolicitante) === Number(greNum)) return transpBadge;
-            if (!isGre && !usuarioLogado?.isComissao && podeAgir) {
-              return `<div style="display:flex;gap:4px;justify-content:flex-end;">
+          ${podeConfirmar ? `<button onclick="comissaoConfirmarPedido(${p.id})" style="padding:5px 12px;font-size:11px;background:#14532d;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;"><i class="ri-check-double-line"></i> Confirmar</button>`
+          : p.status === 'confirmado' ? renderTermoBotoes(p)
+          : isGre && Number(p.greSolicitante) === Number(greNum) && p.status === 'aprovado' ? transpBadge
+          : !isGre && !usuarioLogado?.isComissao && podeAgir ? `<div style="display:flex;gap:4px;justify-content:flex-end;">
             <button onclick="remAtualizarPedido(${p.id},'aprovado')" style="padding:5px 10px;font-size:11px;background:#d1fae5;color:#065f46;border:none;border-radius:5px;cursor:pointer;font-weight:600;">✓ Aceitar</button>
             <button onclick="remAtualizarPedido(${p.id},'recusado')" style="padding:5px 10px;font-size:11px;background:#ffe4e6;color:#be123c;border:none;border-radius:5px;cursor:pointer;font-weight:600;">✗ Recusar</button>
             ${isAdmin ? `<button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button>` : ''}
-          </div>`;
-            }
-            if (isAdmin) return `<button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button>`;
-            return '<span style="font-size:11px;color:var(--gray-60);">—</span>';
-          })()}
+          </div>`
+          : isAdmin ? `<button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button>`
+          : '<span style="font-size:11px;color:var(--gray-60);">—</span>'}
         </td>
       </tr>`;
     }).join('')}</tbody></table></div>`;
@@ -2330,17 +2312,13 @@ function abrirTermo(id) {
       </span>`;
   }
 
-  const podeVisualizar =
+  const podeVisualizar = true; // todos podem ver o termo após confirmado
+  const podePrintTermo =
     duasAssinaram ||
     p.termoAssinado ||
     usuarioLogado?.isAdmin ||
     usuarioLogado?.isGre ||
     usuarioLogado?.isComissao;
-
-  if (!podeVisualizar) {
-    alert('O Termo de Doação só pode ser aberto após as duas escolas assinarem.');
-    return;
-  }
 
   const linhasTabela = Array.from({length: 5}, (_, i) => `
     <tr>
@@ -2413,37 +2391,31 @@ function abrirTermo(id) {
 
         <table style="width:100%;border-collapse:collapse;">
           <tr>
-            <td style="width:48%;padding:8px 12px;text-align:center;vertical-align:top;">
-              <div style="height:45px;"></div>
+            <td style="width:48%;padding:8px 12px;text-align:center;vertical-align:bottom;">
+              ${assOf ? `
+              <div style="font-size:10pt;color:#065f46;margin-bottom:4px;">✓ Assinado eletronicamente</div>
+              <div style="font-size:9.5pt;color:#555;margin-bottom:6px;">${assOf}</div>
+              ` : `<div style="height:45px;"></div>`}
               <div style="border-top:1px solid #333;padding-top:6px;font-weight:700;">
                 ${p.escolaOfertante || 'Escola Ofertante'}
               </div>
               <div style="font-size:10.5pt;margin-top:3px;">
                 INEP: ${p.inepOfertante || '—'}
               </div>
-              <div style="font-size:10pt;margin-top:7px;color:#065f46;">
-                ✓ Assinado eletronicamente
-              </div>
-              <div style="font-size:9.5pt;color:#555;margin-top:2px;">
-                ${assOf || '—'}
-              </div>
             </td>
 
             <td style="width:4%;"></td>
 
-            <td style="width:48%;padding:8px 12px;text-align:center;vertical-align:top;">
-              <div style="height:45px;"></div>
+            <td style="width:48%;padding:8px 12px;text-align:center;vertical-align:bottom;">
+              ${assSol ? `
+              <div style="font-size:10pt;color:#065f46;margin-bottom:4px;">✓ Assinado eletronicamente</div>
+              <div style="font-size:9.5pt;color:#555;margin-bottom:6px;">${assSol}</div>
+              ` : `<div style="height:45px;"></div>`}
               <div style="border-top:1px solid #333;padding-top:6px;font-weight:700;">
                 ${p.escolaSolicitante || 'Escola Solicitante'}
               </div>
               <div style="font-size:10.5pt;margin-top:3px;">
                 INEP: ${p.inepSolicitante || '—'}
-              </div>
-              <div style="font-size:10pt;margin-top:7px;color:#065f46;">
-                ✓ Assinado eletronicamente
-              </div>
-              <div style="font-size:9.5pt;color:#555;margin-top:2px;">
-                ${assSol || '—'}
               </div>
             </td>
           </tr>
@@ -2470,7 +2442,7 @@ function abrirTermo(id) {
   conteudoEl.innerHTML = conteudo;
 
   const btn = document.getElementById('btn-imprimir-termo');
-  if (btn) btn.style.display = '';
+  if (btn) btn.style.display = podePrintTermo ? '' : 'none';
 
   document.getElementById('modal-termo').style.display = 'flex';
 }
@@ -2520,39 +2492,6 @@ async function comissaoConfirmarPedido(id) {
   await remCarregarPedidos();
 }
 
-async function progredirStatusPedido(id) {
-  const p = remPedidos.find(x => x.id === id);
-  if (!p) return;
-  if (!p.termoAssinado) {
-    alert('O Termo de Doação precisa estar assinado pelas duas escolas antes de avançar o status.');
-    return;
-  }
-  const STATUS_LABELS = {
-    saiu_coleta: 'Saiu para coleta',
-    saiu_entrega: 'Saiu para entrega',
-    entregue: 'Entregue'
-  };
-  let next = null;
-  if (p.status === 'confirmado') next = 'saiu_coleta';
-  else if (p.status === 'saiu_coleta') next = 'saiu_entrega';
-  else if (p.status === 'saiu_entrega') next = 'entregue';
-  if (!next) {
-    alert('Este pedido já está no status final (Entregue).');
-    return;
-  }
-  // Autorização
-  const isGreOk = usuarioLogado?.isGre && p.transporte === 'proprio' &&
-    (Number(p.greSolicitante) === Number(usuarioLogado.gre) || Number(p.greResponsavel) === Number(usuarioLogado.gre));
-  const isGeadmOk = usuarioLogado?.isComissao && usuarioLogado.divisao === 'GEADM' && p.transporte === 'geadm';
-  if (!isGreOk && !isGeadmOk && !usuarioLogado?.isAdmin) {
-    alert('Você não tem permissão para avançar o status deste pedido.');
-    return;
-  }
-  if (!confirm(`Confirma alterar o status para "${STATUS_LABELS[next]}"?`)) return;
-  await sbPatch('pedidos_remanejamento', `id=eq.${id}`, { status: next });
-  await remCarregarPedidos();
-}
-
 async function remApagarPedido(id) {
   if (!confirm('Apagar este pedido permanentemente?')) return;
   await sbDelete('pedidos_remanejamento', `id=eq.${id}`);
@@ -2562,6 +2501,41 @@ async function remApagarPedido(id) {
 
 async function remAtualizarPedido(id, status) {
   await sbPatch('pedidos_remanejamento', `id=eq.${id}`, { status });
+
+  if (status === 'aprovado') {
+    // Busca dados do pedido
+    const pedidos = await sbGet('pedidos_remanejamento', `id=eq.${id}&select=*`);
+    const p = pedidos?.[0];
+    if (p) {
+      const livroId = p.livro_id;
+      const qtd     = p.qtd;
+      const inepOf  = p.inep_ofertante;
+      const inepSol = p.inep_solicitante;
+
+      // 1. Busca qtd atual do livro sobrando
+      const livros = await sbGet('livros_sobrando', `id=eq.${livroId}&select=qtd`);
+      const qtdAtual = livros?.[0]?.qtd || 0;
+      const novaQtd  = qtdAtual - qtd;
+
+      if (novaQtd <= 0) {
+        // Se zerou, marca como inativo
+        await sbPatch('livros_sobrando', `id=eq.${livroId}`, { qtd: 0, ativo: false });
+      } else {
+        await sbPatch('livros_sobrando', `id=eq.${livroId}`, { qtd: novaQtd });
+      }
+
+      // 2. Atualiza estatísticas — livros_enviados da ofertante
+      const estOf = await sbGet('estatisticas_escolas', `inep=eq.${inepOf}&select=livros_enviados`);
+      const enviados = (estOf?.[0]?.livros_enviados || 0) + qtd;
+      await sbPatch('estatisticas_escolas', `inep=eq.${inepOf}`, { livros_enviados: enviados });
+
+      // 3. Atualiza estatísticas — livros_recebidos da solicitante
+      const estSol = await sbGet('estatisticas_escolas', `inep=eq.${inepSol}&select=livros_recebidos`);
+      const recebidos = (estSol?.[0]?.livros_recebidos || 0) + qtd;
+      await sbPatch('estatisticas_escolas', `inep=eq.${inepSol}`, { livros_recebidos: recebidos });
+    }
+  }
+
   await remCarregarPedidos();
 }
 
@@ -2572,7 +2546,7 @@ async function remRenderHistorico() {
   const todos=(data||[]).map(p=>({id:p.id, protocolo:p.protocolo,titulo:p.livros_sobrando?.titulo||'',mat:p.livros_sobrando?.mat||'',serie:p.livros_sobrando?.serie||'',qtd:p.qtd,status:p.status,escolaSolicitante:p.solicitante?.nome||p.inep_solicitante,escolaOfertante:p.ofertante?.nome||p.inep_ofertante,inepSolicitante:p.inep_solicitante}));
   const lista=isAdmin?todos:todos.filter(p=>p.inepSolicitante===myInep);
   document.getElementById('hist-count').textContent=lista.length+' registros';
-  const STATUS={aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'},confirmado:{label:'Confirmado',bg:'#f0fdf4',color:'#14532d'},saiu_coleta:{label:'Saiu para coleta',bg:'#fef3c7',color:'#92400e'},saiu_entrega:{label:'Saiu para entrega',bg:'#e0e7ff',color:'#3730a3'},entregue:{label:'Entregue',bg:'#d1fae5',color:'#065f46'}};
+  const STATUS={aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'},confirmado:{label:'Confirmado',bg:'#f0fdf4',color:'#14532d'}};
   if(lista.length===0){document.getElementById('hist-lista').innerHTML=`<div style="padding:40px 20px;text-align:center;color:var(--gray-60);"><i class="ri-history-line" style="font-size:36px;opacity:0.3;display:block;margin-bottom:10px;"></i><p>Nenhum histórico ainda.</p></div>`;return;}
   document.getElementById('hist-lista').innerHTML=`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Protocolo</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Solicitante</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ofertante</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Resultado</th>${isAdmin?'<th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ação</th>':''}</tr></thead><tbody>${lista.map((p,i)=>{const s=STATUS[p.status]||{label:p.status,bg:'#f3f4f6',color:'#374151'};return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}"><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-family:monospace;font-weight:700;">${p.protocolo}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${p.titulo}</div><div style="font-size:11px;color:var(--gray-60);">${p.mat} · ${p.serie} · ${p.qtd} un.</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;">${p.escolaSolicitante}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;color:var(--gray-80);">${p.escolaOfertante}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;"><span style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;background:${s.bg};color:${s.color};">${s.label}</span></td>${isAdmin?`<td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;"><button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button></td>`:''}</tr>`;}).join('')}</tbody></table></div>`;
 }
