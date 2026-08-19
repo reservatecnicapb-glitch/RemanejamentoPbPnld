@@ -1885,7 +1885,17 @@ function remShowTab(tab) {
 function remAdicionarItem(prefix) {
   const id = ++remItemCount[prefix];
   const cor = prefix === 'sob' ? 'var(--green)' : '#92400e';
-  const materias = Object.keys(PNLD2026);
+  // Coleta todas as séries únicas de todas as matérias, em ordem
+  const seriesSet = new Set();
+  const ordemSeries = [
+    ...SERIES_EM, ...SERIES_EM_VU,
+    ...SERIES_EF,
+    ...SERIES_EJA_EF56, ...SERIES_EJA_EM78,
+    ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS,
+  ];
+  ordemSeries.forEach(s => seriesSet.add(s));
+  Object.values(PNLD2026).forEach(m => (m.series||[]).forEach(s => seriesSet.add(s)));
+  const todasSeries = [...seriesSet];
   const container = document.getElementById(prefix+'-itens-container');
   const div = document.createElement('div');
   div.id = prefix+'-item-'+id;
@@ -1897,19 +1907,19 @@ function remAdicionarItem(prefix) {
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 120px;gap:12px;align-items:end;">
       <div>
-        <label class="form-label">Matéria *</label>
+        <label class="form-label">Série *</label>
         <div class="select-wrap">
-          <select id="${prefix}-mat-${id}" onchange="remCascataSeries('${prefix}',${id})">
+          <select id="${prefix}-ser-${id}" onchange="remCascataMaterias('${prefix}',${id})">
             <option value="">Selecione...</option>
-            ${materias.map(m=>`<option value="${m}">${m}</option>`).join('')}
+            ${todasSeries.map(s=>`<option value="${s}">${s}</option>`).join('')}
           </select>
         </div>
       </div>
       <div>
-        <label class="form-label">Série *</label>
+        <label class="form-label">Matéria *</label>
         <div class="select-wrap">
-          <select id="${prefix}-ser-${id}" onchange="remCascataLivros('${prefix}',${id})" disabled>
-            <option value="">Selecione a matéria...</option>
+          <select id="${prefix}-mat-${id}" onchange="remCascataLivros('${prefix}',${id})" disabled>
+            <option value="">Selecione a série...</option>
           </select>
         </div>
       </div>
@@ -1917,7 +1927,7 @@ function remAdicionarItem(prefix) {
         <label class="form-label">Livro *</label>
         <div class="select-wrap">
           <select id="${prefix}-liv-${id}" disabled>
-            <option value="">Selecione a série...</option>
+            <option value="">Selecione a matéria...</option>
           </select>
         </div>
       </div>
@@ -1934,16 +1944,21 @@ function remRemoverItem(prefix, id) {
   if (el) el.remove();
 }
 
-function remCascataSeries(prefix, id) {
-  const mat = document.getElementById(`${prefix}-mat-${id}`).value;
-  const selSer = document.getElementById(`${prefix}-ser-${id}`);
+function remCascataMaterias(prefix, id) {
+  const ser = document.getElementById(`${prefix}-ser-${id}`).value;
+  const selMat = document.getElementById(`${prefix}-mat-${id}`);
   const selLiv = document.getElementById(`${prefix}-liv-${id}`);
-  selSer.innerHTML = '<option value="">Selecione...</option>';
-  selLiv.innerHTML = '<option value="">Selecione a série...</option>';
+  selMat.innerHTML = '<option value="">Selecione...</option>';
+  selLiv.innerHTML = '<option value="">Selecione a matéria...</option>';
   selLiv.disabled = true;
-  if (!mat || !PNLD2026[mat]) { selSer.disabled = true; return; }
-  PNLD2026[mat].series.forEach(s => selSer.insertAdjacentHTML('beforeend', `<option>${s}</option>`));
-  selSer.disabled = false;
+  if (!ser) { selMat.disabled = true; return; }
+  // Filtra matérias que têm a série selecionada
+  Object.entries(PNLD2026).forEach(([mat, dados]) => {
+    if ((dados.series || []).includes(ser)) {
+      selMat.insertAdjacentHTML('beforeend', `<option value="${mat}">${mat}</option>`);
+    }
+  });
+  selMat.disabled = false;
 }
 
 function remCascataLivros(prefix, id) {
@@ -2984,9 +2999,9 @@ const PNLD2026 = {
       ],
 
       'default_vu': [
-        { nome:'MODERNA PLUS - Inglês (Volume Único)', codigo:'0007P260101219811' },
-        { nome:'MODERNA PLUS - Inglês (Volume Único)', codigo:'0007P260101219811' },
-        { nome:'IDENTIDADE SARAIVA - Redação (Volume Único)', codigo:'0081P260101218810' },
+        { nome:'MODERNA PLUS - Inglês (Volume Único)',        codigo:'0007P260101219811' },
+        { nome:'IDENTIDADE SARAIVA - Inglês (Volume Único)',  codigo:'0007P260101219811' },
+        { nome:'WAYS - English for Life (Volume Único)',      codigo:'0031P260101219811' },
       ],
     }
   },
