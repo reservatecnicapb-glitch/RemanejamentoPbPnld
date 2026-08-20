@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1582,13 +1581,13 @@ async function salvarGestor() {
   const cpf  = document.getElementById('gest-cpf')?.value.trim();
   if (!nome || !cpf) { alert('Preencha nome e CPF do gestor.'); return; }
   const inep = usuarioLogado?.inep;
-  await sbPatch('escolas', `inep=eq.${inep}`, { nome_gestor: nome, cpf_gestor: cpf });
+  const ok = await sbPatch('escolas', `inep=eq.${inep}`, { nome_gestor: nome, cpf_gestor: cpf });
+  if (!ok) { alert('Erro ao salvar. Verifique sua conexão e tente novamente.'); return; }
   usuarioLogado.nomeGestor = nome;
-  usuarioLogado.cpfGestor = cpf;
+  usuarioLogado.cpfGestor  = cpf;
   localStorage.setItem('remanejamento_usuario', JSON.stringify(usuarioLogado));
-  // Remove destaque amarelo
-  document.getElementById('gest-nome').style.borderColor = 'var(--gray-40)';
-  document.getElementById('gest-cpf').style.borderColor = 'var(--gray-40)';
+  // Redesenha a seção de dados pra tirar o aviso
+  preencherDadosUsuario(usuarioLogado);
   const okEl = document.getElementById('gestor-ok');
   if (okEl) { okEl.style.display = ''; setTimeout(() => okEl.style.display = 'none', 3000); }
 }
