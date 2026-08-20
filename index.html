@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -2289,6 +2290,7 @@ function renderTermoBotoes(p) {
     ${podeAssinarEscola ? `<button onclick="assinarTermo(${p.id})" style="padding:5px 10px;font-size:11px;background:#1351b4;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;"><i class="ri-pen-nib-line"></i> Assinar</button>` : ''}
     ${podeProgedir && proxStatus ? `<button onclick="remAvancarEntrega(${p.id},'${proxStatus}')" style="padding:5px 10px;font-size:11px;background:#065f46;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;"><i class="ri-arrow-right-circle-line"></i> ${STATUS_ENTREGA_REM[proxStatus]?.label}</button>` : ''}
     ${podePrint ? `<button onclick="abrirTermo(${p.id})" style="padding:5px 10px;font-size:11px;background:#374151;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:600;"><i class="ri-file-text-line"></i> Termo</button>` : ''}
+    ${usuarioLogado?.isAdmin ? `<button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button>` : ''}
   </div>`;
 }
 
