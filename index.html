@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -888,18 +889,18 @@
         <!-- Pesquisa em cascata -->
         <div style="padding:16px 20px;border-bottom:1px solid var(--gray-30);background:var(--gray-10);display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;">
           <div style="flex:1;min-width:160px;">
-            <label class="form-label">Matéria</label>
+            <label class="form-label">Série</label>
             <div class="select-wrap">
-              <select id="map-sel-mat" onchange="mapCascataSeries()">
+              <select id="map-sel-ser" onchange="mapCascataMaterias()">
                 <option value="">Todas...</option>
               </select>
             </div>
           </div>
           <div style="flex:1;min-width:160px;">
-            <label class="form-label">Série</label>
+            <label class="form-label">Matéria</label>
             <div class="select-wrap">
-              <select id="map-sel-ser" onchange="mapCascataLivros()" disabled>
-                <option value="">Selecione a matéria...</option>
+              <select id="map-sel-mat" onchange="mapCascataLivros()" disabled>
+                <option value="">Selecione a série...</option>
               </select>
             </div>
           </div>
@@ -907,7 +908,7 @@
             <label class="form-label">Livro</label>
             <div class="select-wrap">
               <select id="map-sel-liv" disabled>
-                <option value="">Selecione a série...</option>
+                <option value="">Selecione a matéria...</option>
               </select>
             </div>
           </div>
@@ -1514,6 +1515,8 @@ async function fazerLogin() {
         estado:    'Paraíba',
         lat:       parseFloat(e.lat),
         lng:       parseFloat(e.lng),
+        nomeGestor: e.nome_gestor || '',
+        cpfGestor:  e.cpf_gestor  || '',
       };
       localStorage.setItem('remanejamento_usuario', JSON.stringify(usuarioLogado));
       preencherDadosUsuario(usuarioLogado);
@@ -1535,7 +1538,6 @@ async function fazerLogin() {
 
 // ─── PREENCHER DADOS DA ENTIDADE COM O USUÁRIO LOGADO ────────────────────────
 function preencherDadosUsuario(escola) {
-  // Avatar: iniciais do nome
   const palavras = escola.nome.split(' ');
   const iniciais = (palavras[0][0] + (palavras[1]?.[0] || '')).toUpperCase();
   document.getElementById('user-avatar').textContent = iniciais;
@@ -1544,14 +1546,51 @@ function preencherDadosUsuario(escola) {
     : escola.nome;
   document.getElementById('user-role-display').textContent = 'INEP ' + escola.inep;
 
-  // Dados da entidade
   const grid = document.getElementById('entity-grid');
   grid.innerHTML = `
     <div class="entity-field"><div class="field-label">Código INEP</div><div class="field-value">${escola.inep}</div></div>
     <div class="entity-field"><div class="field-label">Nome da Escola</div><div class="field-value bold">${escola.nome}</div></div>
-    <div class="entity-field"><div class="field-label">Endereço</div><div class="field-value">${escola.endereco || "—"}</div></div>
+    <div class="entity-field"><div class="field-label">Endereço</div><div class="field-value">${escola.endereco || '—'}</div></div>
     <div class="entity-field"><div class="field-label">Município / UF</div><div class="field-value">${escola.municipio}</div></div>
+    <div class="entity-field" style="grid-column:1/-1;border-top:1px solid var(--gray-20);padding-top:12px;margin-top:4px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <i class="ri-user-line" style="color:var(--green);"></i>
+        <span style="font-size:13px;font-weight:700;color:var(--gray-90);">Dados do Gestor</span>
+        ${!escola.nomeGestor ? '<span style="font-size:11px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-weight:600;">⚠ Preencha antes de usar o sistema</span>' : ''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;">
+        <div>
+          <label class="form-label">Nome do Gestor *</label>
+          <input type="text" id="gest-nome" value="${escola.nomeGestor || ''}" placeholder="Nome completo do gestor"
+            style="width:100%;padding:8px 10px;font-size:13px;border:1px solid ${!escola.nomeGestor ? '#f59e0b' : 'var(--gray-40)'};border-radius:6px;outline:none;font-family:'Inter',sans-serif;">
+        </div>
+        <div>
+          <label class="form-label">CPF do Gestor *</label>
+          <input type="text" id="gest-cpf" value="${escola.cpfGestor || ''}" placeholder="000.000.000-00"
+            maxlength="14" oninput="this.value=this.value.replace(/\D/g,'').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2')"
+            style="width:100%;padding:8px 10px;font-size:13px;border:1px solid ${!escola.cpfGestor ? '#f59e0b' : 'var(--gray-40)'};border-radius:6px;outline:none;font-family:'Inter',sans-serif;">
+        </div>
+        <button onclick="salvarGestor()" class="btn btn-primary" style="white-space:nowrap;"><i class="ri-save-line"></i> Salvar</button>
+      </div>
+      <div id="gestor-ok" style="display:none;margin-top:8px;font-size:12px;color:#065f46;">✓ Dados do gestor salvos!</div>
+    </div>
   `;
+}
+
+async function salvarGestor() {
+  const nome = document.getElementById('gest-nome')?.value.trim();
+  const cpf  = document.getElementById('gest-cpf')?.value.trim();
+  if (!nome || !cpf) { alert('Preencha nome e CPF do gestor.'); return; }
+  const inep = usuarioLogado?.inep;
+  await sbPatch('escolas', `inep=eq.${inep}`, { nome_gestor: nome, cpf_gestor: cpf });
+  usuarioLogado.nomeGestor = nome;
+  usuarioLogado.cpfGestor = cpf;
+  localStorage.setItem('remanejamento_usuario', JSON.stringify(usuarioLogado));
+  // Remove destaque amarelo
+  document.getElementById('gest-nome').style.borderColor = 'var(--gray-40)';
+  document.getElementById('gest-cpf').style.borderColor = 'var(--gray-40)';
+  const okEl = document.getElementById('gestor-ok');
+  if (okEl) { okEl.style.display = ''; setTimeout(() => okEl.style.display = 'none', 3000); }
 }
 
 // ─── LOGOUT ───────────────────────────────────────────────────────────────────
@@ -1924,6 +1963,14 @@ function calcDist(lat1, lng1, lat2, lng2) {
 }
 
 function remShowTab(tab) {
+  // Escola precisa preencher gestor antes de usar o sistema
+  const isEscola = !usuarioLogado?.isAdmin && !usuarioLogado?.isGre && !usuarioLogado?.isComissao;
+  if (isEscola && (!usuarioLogado?.nomeGestor || !usuarioLogado?.cpfGestor)) {
+    alert('⚠ Preencha o nome e CPF do gestor antes de usar o sistema.');
+    // Scroll para o campo de gestor
+    document.getElementById('gest-nome')?.focus();
+    return;
+  }
   ['mapa','sobrando','pedidos','historico'].forEach(t => {
     const el = document.getElementById('rem-'+t);
     if (el) el.style.display = t === tab ? '' : 'none';
@@ -3567,23 +3614,33 @@ function getLivrosPorSerie(mat, serie) {
 // ─── PESQUISA DO MAPA ─────────────────────────────────────────────────────────
 // Popula matérias ao carregar
 (function() {
-  const sel = document.getElementById('map-sel-mat');
-  if (!sel) return;
-  Object.keys(PNLD2026).forEach(m => sel.insertAdjacentHTML('beforeend', `<option value="${m}">${m}</option>`));
+  // Popula séries no mapa
+  const selSerMap = document.getElementById('map-sel-ser');
+  if (selSerMap) {
+    const seriesSet = new Set();
+    const ordemSeries = [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS];
+    ordemSeries.forEach(s => seriesSet.add(s));
+    Object.values(PNLD2026).forEach(m => (m.series||[]).forEach(s => seriesSet.add(s)));
+    [...seriesSet].forEach(s => selSerMap.insertAdjacentHTML('beforeend', `<option value="${s}">${s}</option>`));
+  }
 })();
 
 let mapMarkers = [];
 
-function mapCascataSeries() {
-  const mat = document.getElementById('map-sel-mat').value;
-  const selSer = document.getElementById('map-sel-ser');
+function mapCascataMaterias() {
+  const ser = document.getElementById('map-sel-ser').value;
+  const selMat = document.getElementById('map-sel-mat');
   const selLiv = document.getElementById('map-sel-liv');
-  selSer.innerHTML = '<option value="">Todas as séries...</option>';
+  selMat.innerHTML = '<option value="">Todas as matérias...</option>';
   selLiv.innerHTML = '<option value="">Todos os livros...</option>';
   selLiv.disabled = true;
-  if (!mat || !PNLD2026[mat]) { selSer.disabled = true; remMapaLimpar(); return; }
-  PNLD2026[mat].series.forEach(s => selSer.insertAdjacentHTML('beforeend', `<option>${s}</option>`));
-  selSer.disabled = false;
+  if (!ser) { selMat.disabled = true; remMapaLimpar(); return; }
+  Object.entries(PNLD2026).forEach(([mat, dados]) => {
+    if ((dados.series||[]).includes(ser)) {
+      selMat.insertAdjacentHTML('beforeend', `<option value="${mat}">${mat}</option>`);
+    }
+  });
+  selMat.disabled = false;
 }
 
 function mapCascataLivros() {
@@ -3597,13 +3654,13 @@ function mapCascataLivros() {
 }
 
 function remMapaBuscar() {
-  const mat    = document.getElementById('map-sel-mat')?.value || '';
   const ser    = document.getElementById('map-sel-ser')?.value || '';
+  const mat    = document.getElementById('map-sel-mat')?.value || '';
   const livEl  = document.getElementById('map-sel-liv');
   const livCod = livEl?.value || '';
   const resultsEl = document.getElementById('map-search-results');
 
-  if (!mat) { remMapaRestaurar(); resultsEl.style.display = 'none'; return; }
+  if (!ser && !mat) { remMapaRestaurar(); resultsEl.style.display = 'none'; return; }
 
   const matches = remLivrosTodos.filter(x => {
     const matOk = x.mat === mat;
