@@ -2992,6 +2992,8 @@ const PNLD2026 = {
         { nome:'INTERAÇÃO MATEMÁTICA - Editora do Brasil Vol. 1', codigo:'0068P260101202814' },
         { nome:'INTERAÇÃO MATEMÁTICA - Editora do Brasil Vol. 2', codigo:'0068P260101202814' },
         { nome:'INTERAÇÃO MATEMÁTICA - Editora do Brasil Vol. 3', codigo:'0068P260101202814' },
+        { nome:'APRENDENDO RESOLVENDO PROBLEMAS - Matemática', codigo:'0039P260101202814' },
+        { nome:'INTERAÇÕES - Matemática', codigo:'0068P260101202814' },
       ],
       'default_ef': [
         { nome:'ARARIBÁ CONECTA - MATEMÁTICA',               codigo:'0020P240100020020' },
@@ -3025,6 +3027,8 @@ const PNLD2026 = {
         { nome:'MODERNA PLUS - Matemática Paiva (Volume Único)', codigo:'0013P260101202814' },
         { nome:'360° MATEMÁTICA (Volume Único)', codigo:'0038P260101202814' },
         { nome:'MATEMÁTICA POR TODA PARTE (Volume Único)', codigo:'0039P260101202814' },
+        { nome:'APRENDENDO RESOLVENDO PROBLEMAS - Matemática (Volume Único)', codigo:'0039P260101202814' },
+        { nome:'INTERAÇÕES - Matemática (Volume Único)', codigo:'0068P260101202814' },
       ],
     }
   },
@@ -3174,6 +3178,7 @@ const PNLD2026 = {
         { nome:'BRIDGES',                                    codigo:'0072P240100200090' },
         { nome:'ALIVE!',                                     codigo:'0098P240100200090' },
         { nome:'IT FITS',                                    codigo:'0099P240100200090' },
+        { nome:'PRÁTICAS EM LÍNGUA ESTRANGEIRA - Inglês (E. Fundamental)', codigo:'0062P260102216000' },
       ],
       'default_eja_finais': [
         { nome:'NOVA EJA MODERNA - Inglês',                              codigo:'0008P260102216000' },
@@ -3539,7 +3544,7 @@ const PNLD2026 = {
     }
   },
   'Projetos Integradores - Linguagens': {
-    series: [...SERIES_EM],
+    series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
         { nome:'LINGUAGENS EM MOVIMENTO',                                codigo:'0054P260102201000' },
@@ -3547,10 +3552,14 @@ const PNLD2026 = {
         { nome:'IDENTIDADE SARAIVA - Projetos Integradores',             codigo:'0089P260102201000' },
         { nome:'Linguagens em projetos integradores',                    codigo:'0154P260102201000' },
       ],
+
+      'default_vu': [
+        { nome:'LINGUAGENS EM MOVIMENTO (Volume Único)', codigo:'0054P260102201000' },
+      ],
     }
   },
   'Projetos Integradores - Matemática': {
-    series: [...SERIES_EM],
+    series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA EM PROJETOS: Matemática',                        codigo:'0021P260102202000' },
@@ -3558,10 +3567,14 @@ const PNLD2026 = {
         { nome:'IDENTIDADE SARAIVA - Projetos Integradores',             codigo:'0090P260102202000' },
         { nome:'Projetos Integradores: Tempo Jovem',                     codigo:'0150P260102202000' },
       ],
+
+      'default_vu': [
+        { nome:'INTERAÇÃO PROJETOS INTEGRADORES - MATEMÁTICA (Volume Único)', codigo:'0077P260102202000' },
+      ],
     }
   },
   'Projetos Integradores - Ciências da Natureza': {
-    series: [...SERIES_EM],
+    series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA EM PROJETOS: Ciências da Natureza',              codigo:'0022P260102203000' },
@@ -3569,10 +3582,14 @@ const PNLD2026 = {
         { nome:'INTERAÇÃO PROJETOS INTEGRADORES - CIÊNCIAS DA NATUREZA', codigo:'0078P260102203000' },
         { nome:'Ciências da Natureza em projetos integradores',          codigo:'0156P260102203000' },
       ],
+
+      'default_vu': [
+        { nome:'MODERNA EM PROJETOS: Ciências da Natureza (Volume Único)', codigo:'0022P260102203000' },
+      ],
     }
   },
   'Projetos Integradores - Ciências Humanas': {
-    series: [...SERIES_EM],
+    series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA EM PROJETOS: Ciências Humanas',                  codigo:'0023P260102204000' },
@@ -3580,6 +3597,10 @@ const PNLD2026 = {
         { nome:'CIÊNCIAS HUMANAS EM MOVIMENTO',                          codigo:'0061P260102204000' },
         { nome:'INTERAÇÃO PROJETOS INTEGRADORES - CIÊNCIAS HUMANAS',     codigo:'0079P260102204000' },
         { nome:'DO SEU JEITO',                                           codigo:'0114P260102204000' },
+      ],
+
+      'default_vu': [
+        { nome:'MODERNA EM PROJETOS: Ciências Humanas (Volume Único)', codigo:'0023P260102204000' },
       ],
     }
   },
