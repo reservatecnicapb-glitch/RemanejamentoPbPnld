@@ -2477,15 +2477,29 @@ function abrirTermo(id) {
     usuarioLogado?.isGre ||
     usuarioLogado?.isComissao;
 
-  const itens = p.itens && p.itens.length > 0 ? p.itens : [{ titulo: p.titulo, qtd: p.qtd }];
+  const itens = p.itens && p.itens.length > 0 ? p.itens : [{ titulo: p.titulo, qtd: p.qtd, serie: p.serie, mat: p.mat }];
   const minLinhas = Math.max(itens.length, 5);
+
+  // Busca código do livro no PNLD2026
+  function buscarCodigo(item) {
+    if (!item) return '';
+    const mat = PNLD2026[item.mat];
+    if (!mat) return item.codigo || '';
+    const livros = mat.livrosPorSerie ? getLivrosPorSerie(item.mat, item.serie || '') : (mat.livros || []);
+    const encontrado = livros.find(l => l.nome === item.titulo || item.titulo?.startsWith(l.nome));
+    return encontrado?.codigo || item.codigo || '';
+  }
+
   const linhasTabela = Array.from({length: minLinhas}, (_, i) => {
     const item = itens[i];
+    const cod = item ? buscarCodigo(item) : '';
     return `
     <tr>
-      <td style="border:1px solid #ccc;padding:5px 8px;text-align:center;width:45px;">${i+1}</td>
+      <td style="border:1px solid #ccc;padding:5px 8px;text-align:center;width:35px;">${i+1}</td>
       <td style="border:1px solid #ccc;padding:5px 8px;height:25px;">${item ? (item.titulo || '') : ''}</td>
-      <td style="border:1px solid #ccc;padding:5px 8px;text-align:center;width:70px;">${item ? (item.qtd || '') : ''}</td>
+      <td style="border:1px solid #ccc;padding:5px 8px;font-size:10pt;">${item ? (item.serie || '') : ''}</td>
+      <td style="border:1px solid #ccc;padding:5px 8px;font-family:monospace;font-size:9.5pt;">${cod}</td>
+      <td style="border:1px solid #ccc;padding:5px 8px;text-align:center;width:55px;">${item ? (item.qtd || '') : ''}</td>
     </tr>`;
   }).join('');
 
@@ -2522,9 +2536,11 @@ function abrirTermo(id) {
       <table style="width:100%;border-collapse:collapse;margin:16px 0;">
         <thead>
           <tr>
-            <th style="border:1px solid #ccc;padding:6px 8px;text-align:center;width:45px;">ITEM</th>
+            <th style="border:1px solid #ccc;padding:6px 8px;text-align:center;width:35px;">ITEM</th>
             <th style="border:1px solid #ccc;padding:6px 8px;text-align:left;">LIVRO</th>
-            <th style="border:1px solid #ccc;padding:6px 8px;text-align:center;width:70px;">QTDE</th>
+            <th style="border:1px solid #ccc;padding:6px 8px;text-align:left;">SÉRIE</th>
+            <th style="border:1px solid #ccc;padding:6px 8px;text-align:left;">CÓDIGO</th>
+            <th style="border:1px solid #ccc;padding:6px 8px;text-align:center;width:55px;">QTDE</th>
           </tr>
         </thead>
         <tbody>${linhasTabela}</tbody>
