@@ -1934,6 +1934,13 @@ async function sbPost(tabela, body) {
   return Array.isArray(data) ? data[0] : data;
 }
 
+async function sbPostSilent(tabela, body) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}`, {
+    method: 'POST', headers: sbHeaders(), body: JSON.stringify(body)
+  });
+  return r.ok;
+}
+
 async function sbPatch(tabela, filtro, body) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}?${filtro}`, {
     method: 'PATCH', headers: {...sbHeaders(), 'Prefer': 'return=minimal'}, body: JSON.stringify(body)
@@ -3947,7 +3954,7 @@ async function rtEnviarPedido() {
 
   // Salva cada item no Supabase
   for (const item of itens) {
-    await sbPost('pedidos_reserva', {
+    await sbPostSilent('pedidos_reserva', {
       protocolo: protocolo,
       inep: e.inep, titulo: item.titulo, mat: item.mat,
       serie: item.serie, qtd: item.qtd, tipo: item.tipo,
@@ -4122,7 +4129,7 @@ async function suporteEnviar() {
   }
   errEl.style.display = 'none';
 
-  await sbPost('chamados_suporte', {
+  await sbPostSilent('chamados_suporte', {
     inep: usuarioLogado.inep,
     assunto, mensagem, status: 'aberto'
   });
