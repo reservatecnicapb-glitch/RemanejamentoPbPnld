@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -980,6 +981,8 @@
             <span class="card-title">Pedidos Enviados</span>
             <span class="results-count" id="ped-enviados-count" style="background:#dbeafe;color:#1351b4;">0 pedidos</span>
           </div>
+          <button id="btn-exportar-excel" onclick="exportarPedidosExcel()" class="btn btn-outline" style="font-size:12px;padding:5px 12px;display:none;"><i class="ri-file-excel-line"></i> Planilha Controle ADM</button>
+          <button id="btn-exportar-transporte" onclick="exportarPedidosTransporte()" class="btn btn-outline" style="font-size:12px;padding:5px 12px;display:none;"><i class="ri-truck-line"></i> Planilha de Transporte</button>
         </div>
         <div id="ped-enviados-lista"></div>
       </div>
@@ -1864,24 +1867,27 @@ async function remConfirmarPedidoMapa() {
   const e = usuarioLogado;
   const proto = gerarProtocolo('REM');
 
+  const escolaOf = schools.find(s => String(s.inep).trim() === String(school.inep).trim());
   const pedRes = await sbPost('pedidos_remanejamento', {
     protocolo: proto,
     inep_solicitante: e.inep,
     inep_ofertante: school.inep,
+    nome_solicitante: e.nome,
+    nome_ofertante: school.name || escolaOf?.name || '',
+    gre_solicitante: e.gre || null,
+    gre_ofertante: escolaOf?.gre || null,
     status: 'pendente'
   });
 
   if (pedRes?.id) {
-    for (const item of itensSel) {
-      await sbPost('pedidos_remanejamento_itens', {
-        pedido_id: pedRes.id,
-        livro_id: item.id,
-        titulo: item.titulo,
-        mat: item.mat,
-        serie: item.serie,
-        qtd: item.qtdSolicitada
-      });
-    }
+    await Promise.all(itensSel.map(item => sbPostSilent('pedidos_remanejamento_itens', {
+      pedido_id: pedRes.id,
+      livro_id: item.id,
+      titulo: item.titulo,
+      mat: item.mat,
+      serie: item.serie,
+      qtd: item.qtdSolicitada
+    })));
   }
 
   document.getElementById('ped-form-mapa').remove();
@@ -1985,7 +1991,7 @@ function remShowTab(tab) {
   if (tab === 'mapa')      { initMap(); setTimeout(() => map && map.invalidateSize(), 100); }
   if (tab === 'sobrando')  remCarregarSobrando();
   if (tab === 'pedidos')   remCarregarPedidos();
-  if (tab === 'historico') remCarregarHistorico();
+  if (tab === 'historico') remRenderHistorico();
 }
 
 // ─── MULTI-ITEM FORM ──────────────────────────────────────────────────────────
@@ -2138,6 +2144,7 @@ async function remCadastrar(tipo) {
   const itensEls = document.querySelectorAll(`[id^="${prefix}-item-"]`);
   if (itensEls.length === 0) { errEl.style.display=''; errEl.textContent='Adicione pelo menos um livro.'; return; }
   const e = usuarioLogado;
+  const posts = [];
   for (const el of itensEls) {
     const num = el.id.replace(prefix+'-item-','');
     const mat  = document.getElementById(`${prefix}-mat-${num}`)?.value;
@@ -2147,8 +2154,9 @@ async function remCadastrar(tipo) {
     const nome = livEl?.options[livEl.selectedIndex]?.text?.split(' — ')[0] || '';
     const qtd  = parseInt(document.getElementById(`${prefix}-qtd-${num}`)?.value);
     if (!mat || !ser || !cod || !qtd || qtd < 1) { errEl.style.display=''; errEl.textContent=`Preencha todos os campos do Livro ${num}.`; return; }
-    await sbPost('livros_sobrando', { inep: e.inep, codigo: cod, titulo: nome, mat, serie: ser, qtd });
+    posts.push(sbPostSilent('livros_sobrando', { inep: e.inep, codigo: cod, titulo: nome, mat, serie: ser, qtd }));
   }
+  await Promise.all(posts);
   errEl.style.display = 'none';
   document.getElementById(prefix+'-itens-container').innerHTML = '';
   remItemCount[prefix] = 0;
@@ -2185,24 +2193,34 @@ async function remRemoverRegistro(id) {
 async function remFazerPedido(idSob) {
   const item = remLivrosTodos.find(x => x.id === idSob);
   if (!item) return;
+
+  const qtdStr = prompt(`Quantos exemplares de "${item.titulo}" você deseja solicitar?\n(Disponível: ${item.qtd} un.)`);
+  if (qtdStr === null) return; // cancelou
+  const qtd = parseInt(qtdStr);
+  if (!qtd || qtd < 1) { alert('Quantidade inválida.'); return; }
+  if (qtd > item.qtd) { alert(`Quantidade máxima disponível: ${item.qtd}.`); return; }
+
   const e = usuarioLogado;
   const proto = gerarProtocolo('REM');
-  // Cria o pedido principal
+  const escolaOf = schools.find(s => String(s.inep).trim() === String(item.inep).trim());
   const pedRes = await sbPost('pedidos_remanejamento', {
     protocolo: proto,
     inep_solicitante: e.inep,
     inep_ofertante: item.inep,
+    nome_solicitante: e.nome,
+    nome_ofertante: item.escola || escolaOf?.name || '',
+    gre_solicitante: e.gre || null,
+    gre_ofertante: item.greEscola || escolaOf?.gre || null,
     status: 'pendente'
   });
   if (pedRes?.id) {
-    // Cria o item do pedido
     await sbPost('pedidos_remanejamento_itens', {
       pedido_id: pedRes.id,
       livro_id: item.id,
       titulo: item.titulo,
       mat: item.mat,
       serie: item.serie,
-      qtd: item.qtd
+      qtd
     });
   }
   alert(`✅ Pedido ${proto} enviado! Aguardando análise do administrador.`);
@@ -2216,7 +2234,7 @@ async function remCarregarPedidos() {
   try {
     const [data, itensData] = await Promise.all([
       sbGet('pedidos_remanejamento',
-        'order=id.desc&select=*,solicitante:escolas!pedidos_remanejamento_inep_solicitante_fkey(nome,lat,lng,gre,eja),ofertante:escolas!pedidos_remanejamento_inep_ofertante_fkey(nome,gre)'
+        'order=id.asc&select=*,solicitante:escolas!pedidos_remanejamento_inep_solicitante_fkey(nome,lat,lng,gre,eja),ofertante:escolas!pedidos_remanejamento_inep_ofertante_fkey(nome,gre)'
       ),
       sbGet('pedidos_remanejamento_itens', 'select=*')
     ]);
@@ -2307,6 +2325,10 @@ async function remAvancarEntrega(id, novoStatus) {
 
 function remRenderPedidos() {
   const isAdmin=usuarioLogado?.isAdmin, myInep=usuarioLogado?.inep, isGre=usuarioLogado?.isGre, greNum=usuarioLogado?.gre;
+  const btnExcel = document.getElementById('btn-exportar-excel');
+  const btnTransp = document.getElementById('btn-exportar-transporte');
+  if (btnExcel) btnExcel.style.display = isAdmin ? '' : 'none';
+  if (btnTransp) btnTransp.style.display = isAdmin ? '' : 'none';
   const STATUS={pendente:{label:'Aguardando aceite',bg:'#dbeafe',color:'#1351b4'},aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'},confirmado:{label:'Confirmado',bg:'#f0fdf4',color:'#14532d'}};
 
   let enviados, recebidos;
@@ -2351,7 +2373,7 @@ function remRenderPedidos() {
     document.getElementById(elId).innerHTML = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr>
       <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Protocolo</th>
       <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th>
-      <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Escolas</th>
+      <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ofertante → Solicitante</th>
       <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Qtde.</th>
       <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Status</th>
       <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ação</th>
@@ -2386,7 +2408,10 @@ function remRenderPedidos() {
             <button onclick="remAtualizarPedidoDireto(${p.id},'recusado')" style="padding:5px 10px;font-size:11px;background:#ffe4e6;color:#be123c;border:none;border-radius:5px;cursor:pointer;font-weight:600;">✗ Recusar</button>
             <button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button>
           </div>`
-          : isAdmin ? `<button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button>`
+          : isAdmin ? `<div style="display:flex;gap:4px;justify-content:flex-end;">
+            ${p.status === 'recusado' ? `<button onclick="remReativarPedido(${p.id})" class="btn-sm-action" style="color:#065f46;" title="Reativar"><i class="ri-refresh-line"></i></button>` : ''}
+            <button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button>
+          </div>`
           : '<span style="font-size:11px;color:var(--gray-60);">—</span>'}
         </td>
       </tr>`;
@@ -2672,6 +2697,95 @@ async function comissaoConfirmarPedido(id) {
   await remCarregarPedidos();
 }
 
+async function exportarPedidosTransporte() {
+  const todos = [...remPedidos].filter(p => p.status === 'aprovado' || p.status === 'confirmado').sort((a,b) => a.id - b.id);
+  if (todos.length === 0) { alert('Nenhum pedido aprovado para exportar.'); return; }
+
+  if (!window.XLSX) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  const linhas = todos.map(p => ({
+    'GRE Solicitante':    p.greSolicitante || '—',
+    'Escola Solicitante': p.escolaSolicitante,
+    'INEP Solicitante':   p.inepSolicitante,
+    'GRE Ofertante':      p.greOfertante || '—',
+    'Escola Ofertante':   p.escolaOfertante,
+    'INEP Ofertante':     p.inepOfertante,
+    'Livros':             p.itens.map(i => `${i.titulo} (${i.qtd})`).join(' | '),
+    'Qtd Total':          p.itens.reduce((s,i) => s+(i.qtd||0), 0),
+    'Status Entrega':     p.statusEntrega || 'Aguardando coleta',
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(linhas);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Transporte');
+
+  ws['!cols'] = [
+    {wch:8},{wch:45},{wch:12},
+    {wch:8},{wch:45},{wch:12},
+    {wch:60},{wch:8},{wch:16}
+  ];
+
+  XLSX.writeFile(wb, `transporte_remanejamento_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+async function exportarPedidosExcel() {
+  const todos = [...remPedidos].sort((a,b) => a.id - b.id);
+  if (todos.length === 0) { alert('Nenhum pedido para exportar.'); return; }
+
+  // Carrega SheetJS dinamicamente se necessário
+  if (!window.XLSX) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  const linhas = todos.map(p => ({
+    'Aceito':           (p.status === 'aprovado' || p.status === 'confirmado') ? '✓' : '',
+    'Protocolo':        p.protocolo,
+    'Status':           p.status,
+    'GRE Solicitante':  p.greSolicitante || '—',
+    'Escola Solicitante': p.escolaSolicitante,
+    'INEP Solicitante': p.inepSolicitante,
+    'GRE Ofertante':    p.greOfertante || '—',
+    'Escola Ofertante': p.escolaOfertante,
+    'INEP Ofertante':   p.inepOfertante,
+    'Livros':           p.itens.map(i => `${i.titulo} (${i.qtd})`).join(' | '),
+    'Qtd Total':        p.itens.reduce((s,i) => s+(i.qtd||0), 0),
+    'Transporte':       p.transporte || '—',
+    'Status Entrega':   p.statusEntrega || '—',
+    'Data':             p.data
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(linhas);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Pedidos');
+
+  ws['!cols'] = [
+    {wch:6},{wch:20},{wch:12},{wch:8},{wch:45},{wch:12},
+    {wch:8},{wch:45},{wch:12},{wch:60},{wch:8},
+    {wch:12},{wch:14},{wch:12}
+  ];
+
+  XLSX.writeFile(wb, `pedidos_remanejamento_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+async function remReativarPedido(id) {
+  if (!confirm('Reativar este pedido? Ele voltará para status Pendente.')) return;
+  await sbPatch('pedidos_remanejamento', `id=eq.${id}`, { status: 'pendente' });
+  await remCarregarPedidos();
+  await remRenderHistorico();
+}
+
 async function remApagarPedido(id) {
   if (!confirm('Apagar este pedido permanentemente?')) return;
   await sbDelete('pedidos_remanejamento', `id=eq.${id}`);
@@ -2710,27 +2824,72 @@ async function adminAceitarPedido(transporte) {
   if (!_aceitePedidoId) return;
   const p = remPedidos.find(x => x.id === _aceitePedidoId);
   if (!p) return;
+
+  const errEl = document.getElementById('aceite-error');
+
+  // Busca todos os livros de uma vez
+  const livroIds = p.itens.filter(i => i.livro_id).map(i => i.livro_id);
+  let livrosMap = {};
+  if (livroIds.length > 0) {
+    const livros = await sbGet('livros_sobrando', `id=in.(${livroIds.join(',')})&select=id,qtd,ativo`);
+    (livros||[]).forEach(l => { livrosMap[l.id] = l; });
+
+    // Valida estoque
+    for (const item of p.itens) {
+      if (!item.livro_id) continue;
+      const l = livrosMap[item.livro_id];
+      if (l && l.ativo === false) {
+        errEl.style.display = '';
+        errEl.textContent = `❌ "${item.titulo}" já foi totalmente distribuído.`;
+        return;
+      }
+      if (l && l.qtd !== null && l.qtd < item.qtd) {
+        errEl.style.display = '';
+        errEl.textContent = `❌ Estoque insuficiente para "${item.titulo}": disponível ${l.qtd}, solicitado ${item.qtd}.`;
+        return;
+      }
+    }
+  }
+  errEl.style.display = 'none';
+
   // Aceita e define transporte
   await sbPatch('pedidos_remanejamento', `id=eq.${_aceitePedidoId}`, {
-    status: 'aprovado',
-    transporte,
-    gre_responsavel: p.greSolicitante || null
+    status: 'aprovado', transporte, gre_responsavel: p.greSolicitante || null
   });
-  // Subtrai livros sobrando e atualiza estatísticas
+
+  // Atualiza livros e estatísticas em paralelo
+  const patches = [];
+  let qtdOfertante = 0, qtdSolicitante = 0;
+
   for (const item of p.itens) {
+    qtdOfertante += item.qtd;
+    qtdSolicitante += item.qtd;
     if (item.livro_id) {
-      const livros = await sbGet('livros_sobrando', `id=eq.${item.livro_id}&select=qtd`);
-      const qtdAtual = livros?.[0]?.qtd || 0;
-      const novaQtd  = qtdAtual - item.qtd;
-      await sbPatch('livros_sobrando', `id=eq.${item.livro_id}`, novaQtd <= 0 ? { qtd: 0, ativo: false } : { qtd: novaQtd });
+      const l = livrosMap[item.livro_id];
+      const qtdAtual = l?.qtd || 0;
+      const novaQtd = qtdAtual - item.qtd;
+      patches.push(sbPatch('livros_sobrando', `id=eq.${item.livro_id}`,
+        novaQtd <= 0 ? { qtd: 0, ativo: false } : { qtd: novaQtd }));
     }
-    const estOf  = await sbGet('estatisticas_escolas', `inep=eq.${p.inepOfertante}&select=livros_enviados`);
-    const estSol = await sbGet('estatisticas_escolas', `inep=eq.${p.inepSolicitante}&select=livros_recebidos`);
-    await sbPatch('estatisticas_escolas', `inep=eq.${p.inepOfertante}`,  { livros_enviados:  (estOf?.[0]?.livros_enviados  || 0) + item.qtd });
-    await sbPatch('estatisticas_escolas', `inep=eq.${p.inepSolicitante}`, { livros_recebidos: (estSol?.[0]?.livros_recebidos || 0) + item.qtd });
   }
+
+  // Busca estatísticas das duas escolas de uma vez
+  const [estOfArr, estSolArr] = await Promise.all([
+    sbGet('estatisticas_escolas', `inep=eq.${p.inepOfertante}&select=livros_enviados`),
+    sbGet('estatisticas_escolas', `inep=eq.${p.inepSolicitante}&select=livros_recebidos`)
+  ]);
+
+  patches.push(sbPatch('estatisticas_escolas', `inep=eq.${p.inepOfertante}`,
+    { livros_enviados: (estOfArr?.[0]?.livros_enviados || 0) + qtdOfertante }));
+  patches.push(sbPatch('estatisticas_escolas', `inep=eq.${p.inepSolicitante}`,
+    { livros_recebidos: (estSolArr?.[0]?.livros_recebidos || 0) + qtdSolicitante }));
+
+  await Promise.all(patches);
+
   fecharModalAceiteAdmin();
+  const scrollY = window.scrollY;
   await remCarregarPedidos();
+  window.scrollTo(0, scrollY);
 }
 
 async function remAtualizarPedido(id, status) {
@@ -2744,14 +2903,14 @@ async function remAtualizarPedido(id, status) {
 
 async function remRenderHistorico() {
   document.getElementById('hist-lista').innerHTML = '<div style="padding:30px;text-align:center;color:var(--gray-60);">Carregando...</div>';
-  const data = await sbGet('pedidos_remanejamento', 'status=neq.pendente&order=id.desc&select=*,livros_sobrando(titulo,mat,serie),solicitante:escolas!pedidos_remanejamento_inep_solicitante_fkey(nome),ofertante:escolas!pedidos_remanejamento_inep_ofertante_fkey(nome)');
+  const data = await sbGet('pedidos_remanejamento', 'status=neq.pendente&order=id.asc&select=*,livros_sobrando(titulo,mat,serie),solicitante:escolas!pedidos_remanejamento_inep_solicitante_fkey(nome),ofertante:escolas!pedidos_remanejamento_inep_ofertante_fkey(nome)');
   const myInep=usuarioLogado?.inep, isAdmin=usuarioLogado?.isAdmin;
   const todos=(data||[]).map(p=>({id:p.id, protocolo:p.protocolo,titulo:p.livros_sobrando?.titulo||'',mat:p.livros_sobrando?.mat||'',serie:p.livros_sobrando?.serie||'',qtd:p.qtd,status:p.status,escolaSolicitante:p.solicitante?.nome||p.inep_solicitante,escolaOfertante:p.ofertante?.nome||p.inep_ofertante,inepSolicitante:p.inep_solicitante}));
   const lista=isAdmin?todos:todos.filter(p=>p.inepSolicitante===myInep);
   document.getElementById('hist-count').textContent=lista.length+' registros';
   const STATUS={aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'},confirmado:{label:'Confirmado',bg:'#f0fdf4',color:'#14532d'}};
   if(lista.length===0){document.getElementById('hist-lista').innerHTML=`<div style="padding:40px 20px;text-align:center;color:var(--gray-60);"><i class="ri-history-line" style="font-size:36px;opacity:0.3;display:block;margin-bottom:10px;"></i><p>Nenhum histórico ainda.</p></div>`;return;}
-  document.getElementById('hist-lista').innerHTML=`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Protocolo</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Solicitante</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ofertante</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Resultado</th>${isAdmin?'<th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ação</th>':''}</tr></thead><tbody>${lista.map((p,i)=>{const s=STATUS[p.status]||{label:p.status,bg:'#f3f4f6',color:'#374151'};return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}"><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-family:monospace;font-weight:700;">${p.protocolo}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${p.titulo}</div><div style="font-size:11px;color:var(--gray-60);">${p.mat} · ${p.serie} · ${p.qtd} un.</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;">${p.escolaSolicitante}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;color:var(--gray-80);">${p.escolaOfertante}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;"><span style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;background:${s.bg};color:${s.color};">${s.label}</span></td>${isAdmin?`<td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;"><button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button></td>`:''}</tr>`;}).join('')}</tbody></table></div>`;
+  document.getElementById('hist-lista').innerHTML=`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead style="background:var(--gray-10);"><tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Protocolo</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Livro</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Solicitante</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ofertante</th><th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Resultado</th>${isAdmin?'<th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ação</th>':''}</tr></thead><tbody>${lista.map((p,i)=>{const s=STATUS[p.status]||{label:p.status,bg:'#f3f4f6',color:'#374151'};return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}"><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-family:monospace;font-weight:700;">${p.protocolo}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);"><div style="font-weight:600;">${p.titulo}</div><div style="font-size:11px;color:var(--gray-60);">${p.mat} · ${p.serie} · ${p.qtd} un.</div></td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;">${p.escolaSolicitante}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-size:12px;color:var(--gray-80);">${p.escolaOfertante}</td><td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;"><span style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;background:${s.bg};color:${s.color};">${s.label}</span></td>${isAdmin?`<td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;"><div style="display:flex;gap:4px;justify-content:center;">${p.status==='recusado'?`<button onclick="remReativarPedido(${p.id})" class="btn-sm-action" style="color:#065f46;" title="Reativar pedido"><i class="ri-refresh-line"></i></button>`:''}<button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button></div></td>`:''}</tr>`;}).join('')}</tbody></table></div>`;
 }
 
 // Mostrar/ocultar aba Histórico conforme perfil
@@ -2984,11 +3143,8 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA PLUS - Matemática Paiva',                       codigo:'0013P260101202814' },
         { nome:'MODERNA SuperAÇÃO! Matemática',                          codigo:'0014P260101202814' },
         { nome:'MODERNA EM AÇÃO - Matemática',                           codigo:'0015P260101202814' },
-        { nome:'360° MATEMÁTICA',                                        codigo:'0038P260101202814' },
-        { nome:'MATEMÁTICA POR TODA PARTE',                              codigo:'0039P260101202814' },
         { nome:'INTERAÇÃO MATEMÁTICA E SUAS TECNOLOGIAS',                codigo:'0068P260101202814' },
         { nome:'IDENTIDADE SARAIVA',                                     codigo:'0086P260101202814' },
         { nome:'SER PROTAGONISTA MATEMÁTICA E SUAS TECNOLOGIAS',         codigo:'0099P260101202814' },
@@ -2999,8 +3155,6 @@ const PNLD2026 = {
         { nome:'INTERAÇÃO MATEMÁTICA - Editora do Brasil Vol. 1', codigo:'0068P260101202814' },
         { nome:'INTERAÇÃO MATEMÁTICA - Editora do Brasil Vol. 2', codigo:'0068P260101202814' },
         { nome:'INTERAÇÃO MATEMÁTICA - Editora do Brasil Vol. 3', codigo:'0068P260101202814' },
-        { nome:'APRENDENDO RESOLVENDO PROBLEMAS - Matemática', codigo:'0039P260101202814' },
-        { nome:'INTERAÇÕES - Matemática', codigo:'0068P260101202814' },
       ],
       'default_ef': [
         { nome:'ARARIBÁ CONECTA - MATEMÁTICA',               codigo:'0020P240100020020' },
@@ -3045,11 +3199,8 @@ const PNLD2026 = {
       'default_em': [
         { nome:'MODERNA EM AÇÃO - Língua Portuguesa',                    codigo:'0002P260101218810' },
         { nome:'MODERNA SuperAÇÃO! - Língua Portuguesa',                 codigo:'0003P260101218810' },
-        { nome:'MODERNA PLUS - Língua Portuguesa',                       codigo:'0004P260101218810' },
         { nome:'360°_LÍNGUA PORTUGUESA',                                 codigo:'0024P260101218810' },
-        { nome:'LÍNGUA PORTUGUESA POR TODA PARTE',                       codigo:'0025P260101218810' },
         { nome:'INTERAÇÃO LINGUAGENS E SUAS TECNOLOGIAS',                codigo:'0062P260101218810' },
-        { nome:'IDENTIDADE SARAIVA - Língua Portuguesa',                 codigo:'0081P260101218810' },
         { nome:'SER PROTAGONISTA LINGUAGENS E SUAS TECNOLOGIAS',         codigo:'0092P260101218810' },
         { nome:'DO SEU JEITO - Língua Portuguesa',                       codigo:'0109P260101218810' },
         { nome:'ENTRE SABERES: LINGUAGENS E SUAS TECNOLOGIAS',           codigo:'0120P260101218810' },
@@ -3091,10 +3242,6 @@ const PNLD2026 = {
       'default_em': [
         { nome:'MODERNA EM AÇÃO - Arte',                                 codigo:'0002P260101218810' },
         { nome:'MODERNA SuperAÇÃO! - Arte',                              codigo:'0003P260101218810' },
-        { nome:'MODERNA PLUS - Arte',                                    codigo:'0004P260101218810' },
-        { nome:'360° ARTE',                                              codigo:'0024P260101218810' },
-        { nome:'ARTE POR TODA PARTE',                                    codigo:'0025P260101218810' },
-        { nome:'IDENTIDADE SARAIVA - Arte',                              codigo:'0081P260101218810' },
         { nome:'SER PROTAGONISTA - Arte',                                codigo:'0092P260101218810' },
         { nome:'DO SEU JEITO - Arte',                                    codigo:'0109P260101218810' },
       ],
@@ -3125,11 +3272,6 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA SuperAÇÃO! - Redação',                          codigo:'0003P260101218810' },
-        { nome:'MODERNA PLUS - Redação',                                 codigo:'0004P260101218810' },
-        { nome:'360° REDAÇÃO',                                           codigo:'0024P260101218810' },
-        { nome:'REDAÇÃO POR TODA PARTE',                                 codigo:'0025P260101218810' },
-        { nome:'IDENTIDADE SARAIVA - Redação',                           codigo:'0081P260101218810' },
         { nome:'Redação Ormundo & Minolta',                              codigo:'0003P260101218810' },
       ],
       'default_vu': [
@@ -3148,7 +3290,6 @@ const PNLD2026 = {
         { nome:'MODERNA PLUS - Espanhol: Sentidos en lengua española',   codigo:'0008P260101221817' },
         { nome:'MODERNA SuperAÇÃO! Espanhol',                            codigo:'0009P260101221817' },
         { nome:'¡SÍ, SE PUEDE! ESPAÑOL',                                 codigo:'0032P260101221817' },
-        { nome:'SÍNTESIS',                                               codigo:'0083P260101221817' },
         { nome:'PUENTES',                                                codigo:'0096P260101221817' },
       ],
       'default_vu': [
@@ -3166,7 +3307,6 @@ const PNLD2026 = {
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA EM AÇÃO - Inglês',                               codigo:'0005P260101219811' },
-        { nome:'MODERNA PLUS - Inglês',                                  codigo:'0007P260101219811' },
         { nome:'JOY!',                                                   codigo:'0030P260101219811' },
         { nome:'WAYS - ENGLISH FOR LIFE',                                codigo:'0031P260101219811' },
         { nome:'DOME',                                                   codigo:'0095P260101219811' },
@@ -3213,10 +3353,6 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA SuperAÇÃO! Educação Física',                     codigo:'0011P260101220812' },
-        { nome:'360° EDUCAÇÃO FÍSICA',                                   codigo:'0034P260101220812' },
-        { nome:'EDUCAÇÃO FÍSICA POR TODA PARTE',                         codigo:'0035P260101220812' },
-        { nome:'IDENTIDADE SARAIVA - Educação Física',                   codigo:'0084P260101220812' },
       ],
       'default_ef': [
         { nome:'SE LIGA NA EDUCAÇÃO FÍSICA',                             codigo:'0015P240100200160' },
@@ -3234,11 +3370,7 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA PLUS - Educação Digital',                        codigo:'0012P260101201813' },
-        { nome:'EDUCAÇÃO DIGITAL POR TODA PARTE',                        codigo:'0036P260101201813' },
-        { nome:'360° EDUCAÇÃO DIGITAL',                                  codigo:'0037P260101201813' },
         { nome:'INTERAÇÃO EDUCAÇÃO DIGITAL',                             codigo:'0067P260101201813' },
-        { nome:'IDENTIDADE SARAIVA - Educação Digital',                  codigo:'0085P260101201813' },
         { nome:'SER PROTAGONISTA EDUCAÇÃO DIGITAL',                      codigo:'0098P260101201813' },
         { nome:'Saberes da Educação Digital',                            codigo:'0108P260101201813' },
         { nome:'Educação Digital: Por Dentro da Matrix',                 codigo:'0116P260101201813' },
@@ -3258,12 +3390,7 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA PLUS - Biologia',                                codigo:'0016P260101203815' },
         { nome:'MODERNA SuperAÇÃO! - Biologia',                          codigo:'0017P260101203815' },
-        { nome:'360° BIOLOGIA',                                          codigo:'0040P260101203815' },
-        { nome:'BIOLOGIA POR TODA PARTE',                                codigo:'0041P260101203815' },
-        { nome:'CIÊNCIA VIVA - Biologia',                                codigo:'0080P260101203815' },
-        { nome:'IDENTIDADE SARAIVA - Biologia',                          codigo:'0087P260101203815' },
         { nome:'SER PROTAGONISTA - Biologia',                            codigo:'0100P260101203815' },
         { nome:'DO SEU JEITO - Biologia',                                codigo:'0112P260101203815' },
       ],
@@ -3281,12 +3408,7 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA PLUS - Física',                                  codigo:'0016P260101203815' },
         { nome:'MODERNA SuperAÇÃO! - Física',                            codigo:'0017P260101203815' },
-        { nome:'360° FÍSICA',                                            codigo:'0040P260101203815' },
-        { nome:'FÍSICA POR TODA PARTE',                                  codigo:'0041P260101203815' },
-        { nome:'CIÊNCIA VIVA - Física',                                  codigo:'0080P260101203815' },
-        { nome:'IDENTIDADE SARAIVA - Física',                            codigo:'0087P260101203815' },
         { nome:'SER PROTAGONISTA - Física',                              codigo:'0100P260101203815' },
         { nome:'DO SEU JEITO - Física',                                  codigo:'0112P260101203815' },
       ],
@@ -3304,12 +3426,7 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA PLUS - Química',                                 codigo:'0016P260101203815' },
         { nome:'MODERNA SuperAÇÃO! - Química',                           codigo:'0017P260101203815' },
-        { nome:'360° QUÍMICA',                                           codigo:'0040P260101203815' },
-        { nome:'QUÍMICA POR TODA PARTE',                                 codigo:'0041P260101203815' },
-        { nome:'CIÊNCIA VIVA - Química',                                 codigo:'0080P260101203815' },
-        { nome:'IDENTIDADE SARAIVA - Química',                           codigo:'0087P260101203815' },
         { nome:'SER PROTAGONISTA - Química',                             codigo:'0100P260101203815' },
         { nome:'DO SEU JEITO - Química',                                 codigo:'0112P260101203815' },
       ],
@@ -3354,12 +3471,9 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA PLUS - História',                                codigo:'0018P260101204816' },
         { nome:'MODERNA SuperAÇÃO! - História',                          codigo:'0019P260101204816' },
-        { nome:'HISTÓRIA POR TODA PARTE',                                codigo:'0047P260101204816' },
         { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - História',                  codigo:'0072P260101204816' },
         { nome:'SER PROTAGONISTA - História',                            codigo:'0103P260101204816' },
-        { nome:'DO SEU JEITO - História',                                codigo:'0113P260101204816' },
       ],
       'default_ef': [
         { nome:'ARARIBÁ CONECTA - HISTÓRIA',           codigo:'0024P240100208040' },
@@ -3392,12 +3506,9 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA PLUS - Geografia',                               codigo:'0018P260101204816' },
         { nome:'MODERNA SuperAÇÃO! - Geografia',                         codigo:'0019P260101204816' },
-        { nome:'GEOGRAFIA POR TODA PARTE',                               codigo:'0047P260101204816' },
         { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - Geografia',                 codigo:'0072P260101204816' },
         { nome:'SER PROTAGONISTA - Geografia',                           codigo:'0103P260101204816' },
-        { nome:'DO SEU JEITO - Geografia',                               codigo:'0113P260101204816' },
       ],
       'default_ef': [
         { nome:'ARARIBÁ CONECTA - GEOGRAFIA',          codigo:'0029P240100208050' },
@@ -3431,12 +3542,9 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA PLUS - Filosofia',                               codigo:'0018P260101204816' },
         { nome:'MODERNA SuperAÇÃO! - Filosofia',                         codigo:'0019P260101204816' },
-        { nome:'FILOSOFIA POR TODA PARTE',                               codigo:'0047P260101204816' },
         { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - Filosofia',                 codigo:'0072P260101204816' },
         { nome:'SER PROTAGONISTA - Filosofia',                           codigo:'0103P260101204816' },
-        { nome:'DO SEU JEITO - Filosofia',                               codigo:'0113P260101204816' },
       ],
 
       'default_vu': [
@@ -3453,9 +3561,7 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA PLUS - Sociologia',                              codigo:'0018P260101204816' },
         { nome:'MODERNA SuperAÇÃO! - Sociologia',                        codigo:'0019P260101204816' },
-        { nome:'SOCIOLOGIA POR TODA PARTE',                              codigo:'0047P260101204816' },
         { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - Sociologia',                codigo:'0072P260101204816' },
         { nome:'SER PROTAGONISTA - Sociologia',                          codigo:'0103P260101204816' },
         { nome:'DO SEU JEITO - Sociologia',                              codigo:'0113P260101204816' },
@@ -3476,7 +3582,6 @@ const PNLD2026 = {
       'default_em': [
         { nome:'MODERNA PLUS',                                           codigo:'0018P260101204816' },
         { nome:'MODERNA SuperAÇÃO!',                                     codigo:'0019P260101204816' },
-        { nome:'FILOSOFIA, SOCIOLOGIA, HISTÓRIA, GEOGRAFIA POR TODA PARTE', codigo:'0047P260101204816' },
         { nome:'INTERAÇÃO CIÊNCIAS HUMANAS E SOCIAIS APLICADAS',         codigo:'0072P260101204816' },
         { nome:'SER PROTAGONISTA CIÊNCIAS HUMANAS E SOCIAIS APLICADAS',  codigo:'0103P260101204816' },
         { nome:'DO SEU JEITO',                                           codigo:'0113P260101204816' },
@@ -3557,7 +3662,6 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
-        { nome:'LINGUAGENS EM MOVIMENTO',                                codigo:'0054P260102201000' },
         { nome:'HORIZONTES - LINGUAGENS',                                codigo:'0055P260102201000' },
         { nome:'IDENTIDADE SARAIVA - Projetos Integradores',             codigo:'0089P260102201000' },
         { nome:'Linguagens em projetos integradores',                    codigo:'0154P260102201000' },
@@ -3573,7 +3677,6 @@ const PNLD2026 = {
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA EM PROJETOS: Matemática',                        codigo:'0021P260102202000' },
-        { nome:'INTERAÇÃO PROJETOS INTEGRADORES - MATEMÁTICA',           codigo:'0077P260102202000' },
         { nome:'IDENTIDADE SARAIVA - Projetos Integradores',             codigo:'0090P260102202000' },
         { nome:'Projetos Integradores: Tempo Jovem',                     codigo:'0150P260102202000' },
       ],
@@ -3587,7 +3690,6 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA EM PROJETOS: Ciências da Natureza',              codigo:'0022P260102203000' },
         { nome:'CIÊNCIAS DA NATUREZA EM MOVIMENTO',                      codigo:'0059P260102203000' },
         { nome:'INTERAÇÃO PROJETOS INTEGRADORES - CIÊNCIAS DA NATUREZA', codigo:'0078P260102203000' },
         { nome:'Ciências da Natureza em projetos integradores',          codigo:'0156P260102203000' },
@@ -3602,7 +3704,6 @@ const PNLD2026 = {
     series: [...SERIES_EM, ...SERIES_EM_VU],
     livrosPorSerie: {
       'default_em': [
-        { nome:'MODERNA EM PROJETOS: Ciências Humanas',                  codigo:'0023P260102204000' },
         { nome:'HORIZONTES - CIÊNCIAS HUMANAS',                          codigo:'0060P260102204000' },
         { nome:'CIÊNCIAS HUMANAS EM MOVIMENTO',                          codigo:'0061P260102204000' },
         { nome:'INTERAÇÃO PROJETOS INTEGRADORES - CIÊNCIAS HUMANAS',     codigo:'0079P260102204000' },
