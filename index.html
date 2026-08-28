@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -2856,7 +2855,7 @@ function abrirModalMapaColeta() {
     ? '<p style="color:var(--gray-60);font-size:13px;padding:8px;">Nenhum pedido aprovado ou confirmado.</p>'
     : pedidos.map(p => `
       <label style="display:flex;align-items:flex-start;gap:10px;padding:8px;border-bottom:1px solid var(--gray-20);cursor:pointer;">
-        <input type="checkbox" value="${p.id}" checked style="margin-top:3px;">
+        <input type="checkbox" value="${p.id}" style="margin-top:3px;">
         <div style="font-size:12px;">
           <div style="font-weight:600;">${p.protocolo}</div>
           <div style="color:var(--gray-60);">${p.escolaOfertante} → ${p.escolaSolicitante}</div>
