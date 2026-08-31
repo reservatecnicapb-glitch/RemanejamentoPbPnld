@@ -3306,15 +3306,15 @@ async function admAvancarStatus(id) {
 // ─── CATÁLOGO PNLD 2026 ───────────────────────────────────────────────────────
 const SERIES_EM  = ['1ª série - E. Médio','2ª série - E. Médio','3ª série - E. Médio'];
 const SERIES_EM_VU = ['Volume Único - E. Médio'];
-const SERIES_EJA_INICIAIS = [];
-const SERIES_EJA_FINAIS   = [];
+const SERIES_EJA_INICIAIS = ['Etapas 1 e 2 - EJA (Anos Iniciais E. Fundamental)'];
+const SERIES_EJA_FINAIS   = ['Etapas 3 e 4 - EJA (Anos Finais E. Fundamental)'];
 const SERIES_EJA_EF56     = ['Etapas 5 e 6 - EJA (E. Fundamental)'];
 const SERIES_EJA_EM78     = ['Etapas 7 e 8 - EJA (E. Médio)'];
 const SERIES_EF = ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'];
 
 const PNLD2026 = {
   'Matemática': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA SuperAÇÃO! Matemática',                          codigo:'0014P260101202814' },
@@ -3344,6 +3344,11 @@ const PNLD2026 = {
         { nome:'GERAÇÃO ALPHA MATEMÁTICA',                   codigo:'0102P240100020020' },
         { nome:'MATEMÁTICA NOS DIAS DE HOJE',                codigo:'0106P240100020020' },
         { nome:'COLEÇÃO MATEMÁTICA EM CENA',                 codigo:'0113P240100020020' },
+      ],
+      'default_eja_iniciais': [
+        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0015P260102213000' },
+        { nome:'NOVA EJA MODERNA - Matemática',                          codigo:'0015P260102213000' },
+        { nome:'Práticas em Matemática',                                 codigo:'0015P260102213000' },
       ],
       'default_eja_finais': [
         { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0015P260102213000' },
@@ -3394,6 +3399,12 @@ const PNLD2026 = {
         { nome:'TELÁRIS ESSENCIAL: PORTUGUÊS',               codigo:'0051P240100200010' },
         { nome:'GERAÇÃO ALPHA LÍNGUA PORTUGUESA',            codigo:'0100P240100200010' },
         { nome:'COLEÇÃO METAVERSO LÍNGUA PORTUGUESA',        codigo:'0105P240100200010' },
+      ],
+      'default_eja_iniciais': [
+        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0013P260102212000' },
+        { nome:'NOVA EJA MODERNA - Leitura e Escrita',                   codigo:'0004P260102212000' },
+        { nome:'SEGUE A TRILHA EJA: Práticas de Leitura e Escrita',      codigo:'0070P260102212000' },
+        { nome:'VEM PRA EJA! - Práticas de Leitura e Escrita',           codigo:'0023P260102212000' },
       ],
       'default_eja_finais': [
         { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0013P260102212000' },
@@ -3458,7 +3469,7 @@ const PNLD2026 = {
     }
   },
   'Espanhol': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EJA_FINAIS],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA PLUS - Espanhol: Sentidos en lengua española',   codigo:'0008P260101221817' },
@@ -3471,13 +3482,16 @@ const PNLD2026 = {
         { nome:'SÍNTESIS (Volume Único)', codigo:'0083P260101221817' },
         { nome:'360° ESPANHOL (Volume Único)', codigo:'0032P260101221817' },
       ],
+      'default_eja_iniciais': [
+        { nome:'NOVA EJA MODERNA - Espanhol',                            codigo:'0009P260102217000' },
+      ],
       'default_eja_finais': [
         { nome:'NOVA EJA MODERNA - Espanhol',                            codigo:'0009P260102217000' },
       ],
     }
   },
   'Inglês': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA EM AÇÃO - Inglês',                               codigo:'0005P260101219811' },
@@ -3500,6 +3514,12 @@ const PNLD2026 = {
         { nome:'ALIVE!',                                     codigo:'0098P240100200090' },
         { nome:'IT FITS',                                    codigo:'0099P240100200090' },
         { nome:'PRÁTICAS EM LÍNGUA ESTRANGEIRA - Inglês (E. Fundamental)', codigo:'0062P260102216000' },
+      ],
+      'default_eja_iniciais': [
+        { nome:'NOVA EJA MODERNA - Inglês',                              codigo:'0008P260102216000' },
+        { nome:'Práticas em Língua Estrangeira – Inglês',                codigo:'0062P260102216000' },
+        { nome:'COLEÇÃO COMEBACK - Práticas em Línguas Estrangeiras - Inglês', codigo:'0065P260102216000' },
+        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0019P260102216000' },
       ],
       'default_eja_finais': [
         { nome:'NOVA EJA MODERNA - Inglês',                              codigo:'0008P260102216000' },
@@ -3751,7 +3771,7 @@ const PNLD2026 = {
     }
   },
   'Ciências Humanas (Hist/Geo/Fil/Soc)': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EJA_FINAIS],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA PLUS',                                           codigo:'0018P260101204816' },
@@ -3760,6 +3780,12 @@ const PNLD2026 = {
         { nome:'SER PROTAGONISTA CIÊNCIAS HUMANAS E SOCIAIS APLICADAS',  codigo:'0103P260101204816' },
         { nome:'DO SEU JEITO',                                           codigo:'0113P260101204816' },
         { nome:'ESTUDOS E DEBATES EM HISTÓRIA, GEOGRAFIA, FILOSOFIA, SOCIOLOGIA', codigo:'0165P260101204816' },
+      ],
+      'default_eja_iniciais': [
+        { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte',             codigo:'0007P260102215000' },
+        { nome:'Práticas em Ciências Humanas e Arte',                    codigo:'0061P260102215000' },
+        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0018P260102215000' },
+        { nome:'VEM PRA EJA! - Práticas em Ciências Humanas e Arte',     codigo:'0025P260102215000' },
       ],
       'default_eja_finais': [
         { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte',             codigo:'0007P260102215000' },
