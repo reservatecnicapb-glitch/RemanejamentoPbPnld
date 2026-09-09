@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -2417,7 +2415,7 @@ function remAtualizarBarraSelecaoRem() {
 
 // Gera, em lote, um documento "ORDEM DE ENTREGA" (formato GEGEP/GOADP) por escola
 // SOLICITANTE (beneficiária) a partir dos pedidos de remanejamento selecionados.
-function gerarTermosSelecionados(idsForcados) {
+async function gerarTermosSelecionados(idsForcados) {
   const ids = idsForcados || Array.from(remSelecionados);
   if (!ids.length) { alert('Selecione ao menos um pedido.'); return; }
 
@@ -2432,12 +2430,22 @@ function gerarTermosSelecionados(idsForcados) {
     porEscola.get(chave).push(p);
   });
 
+  // Busca a cidade das escolas direto do Supabase (não depende da aba Mapa ter sido aberta)
+  const ineps = [...porEscola.values()].map(peds => peds[0].inepSolicitante).filter(Boolean);
+  const municipioPorInep = {};
+  if (ineps.length > 0) {
+    const listaInep = [...new Set(ineps)].map(i => `"${i}"`).join(',');
+    const dadosEscolas = await sbGet('escolas', `inep=in.(${listaInep})&select=inep,cidade`);
+    (dadosEscolas || []).forEach(e => { municipioPorInep[String(e.inep).trim()] = e.cidade || ''; });
+  }
+
   let numOrdem = 1;
   const blocos = [];
   porEscola.forEach((peds) => {
     const base = peds[0];
-    const escolaInfo = schools.find(s => String(s.inep).trim() === String(base.inepSolicitante).trim());
-    const municipio = escolaInfo?.city || '';
+    const municipio = municipioPorInep[String(base.inepSolicitante).trim()]
+      || schools.find(s => String(s.inep).trim() === String(base.inepSolicitante).trim())?.city
+      || '';
 
     // Explode cada pedido em seus itens (um pedido pode ter múltiplos livros)
     const linhas = [];
