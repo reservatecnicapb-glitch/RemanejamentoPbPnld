@@ -1475,8 +1475,8 @@ async function fazerLogin() {
     if (greMatch) {
       const greNum = parseInt(greMatch[1]);
       const resGre = await fetch(
-        `${SUPABASE_URL}/rest/v1/usuarios_gre?gre=eq.${greNum}&senha=eq.${senha}&select=*&limit=1`,
-        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+        `${SUPABASE_URL}/rest/v1/rpc/login_gre`,
+        { method: 'POST', headers: sbHeaders(), body: JSON.stringify({ p_gre: greNum, p_senha: senha }) }
       );
       const greUsers = await resGre.json();
       if (!greUsers || greUsers.length === 0) {
@@ -1505,8 +1505,8 @@ async function fazerLogin() {
     if (comissaoMatch) {
       const loginUp = inep.toUpperCase();
       const resComissao = await fetch(
-        `${SUPABASE_URL}/rest/v1/usuarios_comissao?login=eq.${loginUp}&senha=eq.${senha}&select=*&limit=1`,
-        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+        `${SUPABASE_URL}/rest/v1/rpc/login_comissao`,
+        { method: 'POST', headers: sbHeaders(), body: JSON.stringify({ p_login: loginUp, p_senha: senha }) }
       );
       const comUsers = await resComissao.json();
       if (!comUsers || comUsers.length === 0) {
@@ -1534,10 +1534,10 @@ async function fazerLogin() {
       return;
     }
 
-    // Consulta tabela usuarios (escolas e admin)
+    // Consulta tabela usuarios (escolas e admin) via function segura
     const resUser = await fetch(
-      `${SUPABASE_URL}/rest/v1/usuarios?inep=eq.${inep}&senha=eq.${senha}&select=*&limit=1`,
-      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+      `${SUPABASE_URL}/rest/v1/rpc/login_escola`,
+      { method: 'POST', headers: sbHeaders(), body: JSON.stringify({ p_inep: inep, p_senha: senha }) }
     );
     const users = await resUser.json();
 
@@ -3560,7 +3560,7 @@ const PNLD2026 = {
       ],
       'default_eja_medio_v2': [
         { nome:'NOVA EJA MODERNA - Matemática (Etapas 7 e 8)', codigo:'0015P260102213000' },
-        { nome:'Convivências Educação de Jovens e Adultos (Etapas 7 e 8)', codigo:'0016P260005010LE' },
+        { nome:'Convivências Educação de Jovens e Adultos (Etapas 7 e 8)', codigo:'0016P26000510LE' },
       ],
 
       'default_vu': [
@@ -3749,7 +3749,7 @@ const PNLD2026 = {
       ],
       'default_eja_medio_v2': [
         { nome:'NOVA EJA MODERNA - Inglês (Etapas 7 e 8)',    codigo:'0008P260102216000' },
-        { nome:'Práticas em Língua Estrangeira Inglês (Etapas 7 e 8)', codigo:'0062P260005010LE' },
+        { nome:'Práticas em Língua Estrangeira Inglês (Etapas 7 e 8)', codigo:'0062P26000510LE' },
       ],
 
       'default_vu': [
@@ -4007,7 +4007,7 @@ const PNLD2026 = {
     }
   },
   'Ciências Humanas (Hist/Geo/Fil/Soc)': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_em': [
         { nome:'MODERNA PLUS',                                           codigo:'0018P260101204816' },
@@ -4029,6 +4029,16 @@ const PNLD2026 = {
         { nome:'Práticas em Ciências Humanas e Arte',                    codigo:'0061P260102215000' },
         { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0018P260102215000' },
         { nome:'VEM PRA EJA! - Práticas em Ciências Humanas e Arte',     codigo:'0025P260102215000' },
+      ],
+      'default_eja_medio_v1': [
+        { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte (Etapas 5 e 6)', codigo:'0007P260102215000' },
+        { nome:'RECONQUISTA - Ciências Humanas e Arte (Etapas 5 e 6)', codigo:'0018P26000509LE' },
+        { nome:'VEM PRA EJA! - Ciências Humanas e Arte (Etapas 5 e 6)', codigo:'0023P26000509LE' },
+      ],
+      'default_eja_medio_v2': [
+        { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte (Etapas 7 e 8)', codigo:'0007P260102215000' },
+        { nome:'RECONQUISTA - Ciências Humanas e Arte (Etapas 7 e 8)', codigo:'0018P26000510LE' },
+        { nome:'VEM PRA EJA! - Ciências Humanas e Arte (Etapas 7 e 8)', codigo:'0023P26000510LE' },
       ],
 
       'default_vu': [
@@ -4062,7 +4072,7 @@ const PNLD2026 = {
     }
   },
   'Práticas de Alfabetização e Matemática': {
-    series: [...SERIES_EJA_INICIAIS],
+    series: [...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS],
     livrosPorSerie: {
       'default_eja_iniciais': [
         { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0010P260101209000' },
@@ -4072,6 +4082,15 @@ const PNLD2026 = {
         { nome:'NOSSA HISTÓRIA COM AS LETRAS E OS NÚMEROS',              codigo:'0066P260101209000' },
         { nome:'LER, REFLETIR E COMUNICAR',                              codigo:'0093P260101209000' },
         { nome:'VEM PRA EJA! - Práticas de Alfabetização e de Matemática', codigo:'0020P260101209000' },
+      ],
+      'default_eja_finais': [
+        { nome:'RECONQUISTA - Educação de Jovens e Adultos',             codigo:'0010P260101209000' },
+        { nome:'NOVA EJA MODERNA - Alfabetização e Matemática',          codigo:'0001P260101209000' },
+        { nome:'Práticas de Alfabetização e de Matemática',              codigo:'0028P260101209000' },
+        { nome:'COLEÇÃO CAMINHOS DO APRENDER',                           codigo:'0052P260101209000' },
+        { nome:'NOSSA HISTÓRIA COM AS LETRAS E OS NÚMEROS',              codigo:'0066P260101209000' },
+        { nome:'LER, REFLETIR E COMUNICAR',                              codigo:'0093P260101209000' },
+        { nome:'VEM PRA EJA! - Práticas de Alfabetização e de Matemática (Etapas 3 e 4)', codigo:'0020P26000506MP' },
       ],
     }
   },
@@ -4083,7 +4102,7 @@ const PNLD2026 = {
         { nome:'NOVA EJA MODERNA - Mundo do Trabalho e Territórios',     codigo:'0003P260101211000' },
         { nome:'ATIVA MUNDO DO TRABALHO',                                 codigo:'0047P260101211000' },
         { nome:'CAMINHOS DO APRENDER – Mundo do Trabalho e Territórios', codigo:'0054P260101211000' },
-        { nome:'Práticas do Mundo do Trabalho e Territórios',            codigo:'0057P260005081LE' },
+        { nome:'Práticas do Mundo do Trabalho e Territórios',            codigo:'0057P26000508LE' },
         { nome:'VEM PRA EJA! - Mundo do Trabalho e Territórios',         codigo:'0022P260101211000' },
       ],
       'default_eja_finais': [
@@ -4091,23 +4110,8 @@ const PNLD2026 = {
         { nome:'NOVA EJA MODERNA - Mundo do Trabalho e Territórios',     codigo:'0003P260101211000' },
         { nome:'ATIVA MUNDO DO TRABALHO',                                 codigo:'0047P260101211000' },
         { nome:'CAMINHOS DO APRENDER – Mundo do Trabalho e Territórios', codigo:'0054P260101211000' },
-        { nome:'Práticas do Mundo do Trabalho e Territórios',            codigo:'0057P260005081LE' },
+        { nome:'Práticas do Mundo do Trabalho e Territórios',            codigo:'0057P26000508LE' },
         { nome:'VEM PRA EJA! - Mundo do Trabalho e Territórios',         codigo:'0022P260101211000' },
-      ],
-    }
-  },
-  'Ciências Humanas e Arte (EJA)': {
-    series: [...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
-    livrosPorSerie: {
-      'default_eja_medio_v1': [
-        { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte (Etapas 5 e 6)', codigo:'0007P260102215000' },
-        { nome:'RECONQUISTA - Ciências Humanas e Arte (Etapas 5 e 6)', codigo:'0018P260005091LE' },
-        { nome:'VEM PRA EJA! - Ciências Humanas e Arte (Etapas 5 e 6)', codigo:'0023P260005091LE' },
-      ],
-      'default_eja_medio_v2': [
-        { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte (Etapas 7 e 8)', codigo:'0007P260102215000' },
-        { nome:'RECONQUISTA - Ciências Humanas e Arte (Etapas 7 e 8)', codigo:'0018P260005010LE' },
-        { nome:'VEM PRA EJA! - Ciências Humanas e Arte (Etapas 7 e 8)', codigo:'0023P260005010LE' },
       ],
     }
   },
@@ -4200,11 +4204,11 @@ const PNLD2026 = {
     livrosPorSerie: {
       'default_eja_medio_v1': [
         { nome:'NOVA EJA MODERNA - Leitura e Escrita (Etapas 5 e 6)', codigo:'0004P260102212000' },
-        { nome:'VEM PRA EJA! - Práticas em Letras e Escritas (Etapas 5 e 6)', codigo:'0023P260005091LE' },
+        { nome:'VEM PRA EJA! - Práticas em Letras e Escritas (Etapas 5 e 6)', codigo:'0023P26000509LE' },
       ],
       'default_eja_medio_v2': [
         { nome:'NOVA EJA MODERNA - Leitura e Escrita (Etapas 7 e 8)',      codigo:'0004P260102212000' },
-        { nome:'VEM PRA EJA! - Práticas em Letras e Escritas (Etapas 7 e 8)', codigo:'0023P260005010LE' },
+        { nome:'VEM PRA EJA! - Práticas em Letras e Escritas (Etapas 7 e 8)', codigo:'0023P26000510LE' },
       ],
     }
   },
@@ -4217,22 +4221,6 @@ const PNLD2026 = {
       ],
       'default_eja_medio_v2': [
         { nome:'NOVA EJA MODERNA - Ciências da Natureza (Etapas 7 e 8)',      codigo:'0006P260102214000' },
-      ],
-    }
-  },
-
-  'Ciências Humanas e Arte - EJA': {
-    series: [...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
-    livrosPorSerie: {
-      'default_eja_medio_v1': [
-        { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte (Etapas 5 e 6)', codigo:'0007P260102215000' },
-        { nome:'RECONQUISTA - Ciências Humanas e Arte (Etapas 5 e 6)', codigo:'0018P260005091LE' },
-        { nome:'VEM PRA EJA! - Ciências Humanas e Arte (Etapas 5 e 6)', codigo:'0023P260005091LE' },
-      ],
-      'default_eja_medio_v2': [
-        { nome:'NOVA EJA MODERNA - Ciências Humanas e Arte (Etapas 7 e 8)',      codigo:'0007P260102215000' },
-        { nome:'RECONQUISTA - Ciências Humanas e Arte (Etapas 7 e 8)', codigo:'0018P260005010LE' },
-        { nome:'VEM PRA EJA! - Ciências Humanas e Arte (Etapas 7 e 8)', codigo:'0023P260005010LE' },
       ],
     }
   },
