@@ -3192,6 +3192,11 @@ async function gerarMapaColeta() {
 
   if (selecionados.length === 0) { alert('Selecione pelo menos um pedido.'); return; }
 
+  // Agrupa por escola de origem (ofertante) — assim os itens da mesma
+  // escola ficam em linhas seguidas na tabela, mesmo que os pedidos
+  // tenham sido marcados fora de ordem.
+  selecionados.sort((a, b) => (a.escolaOfertante || '').localeCompare(b.escolaOfertante || '', 'pt-BR'));
+
   const veiculo   = document.getElementById('mc-veiculo').value || '(A preencher)';
   const placa     = document.getElementById('mc-placa').value || '(A preencher)';
   const motorista = document.getElementById('mc-motorista').value || '(A preencher)';
