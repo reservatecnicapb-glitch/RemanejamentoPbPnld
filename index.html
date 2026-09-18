@@ -988,6 +988,47 @@
           <button id="btn-exportar-transporte" onclick="exportarPedidosTransporte()" class="btn btn-outline" style="font-size:12px;padding:5px 12px;display:none;"><i class="ri-truck-line"></i> Planilha de Transporte</button>
           <button id="btn-mapa-coleta" onclick="abrirModalMapaColeta()" class="btn btn-outline" style="font-size:12px;padding:5px 12px;display:none;"><i class="ri-map-pin-line"></i> Mapa de Coleta</button>
         </div>
+        <div id="adm-filtros-pedidos" style="display:none;padding:12px 20px;border-bottom:1px solid var(--gray-30);background:var(--gray-10);flex-wrap:wrap;align-items:flex-end;gap:12px;">
+          <div style="min-width:170px;">
+            <label class="form-label">Gerência Solicitante</label>
+            <div class="select-wrap">
+              <select id="adm-filtro-gre-sol" onchange="admAplicarFiltroPedidos()">
+                <option value="">Todas...</option>
+              </select>
+            </div>
+          </div>
+          <div style="min-width:170px;">
+            <label class="form-label">Gerência Ofertante</label>
+            <div class="select-wrap">
+              <select id="adm-filtro-gre-of" onchange="admAplicarFiltroPedidos()">
+                <option value="">Todas...</option>
+              </select>
+            </div>
+          </div>
+          <div style="min-width:170px;">
+            <label class="form-label">Ordenar por</label>
+            <div class="select-wrap">
+              <select id="adm-filtro-ordenar" onchange="admAplicarFiltroPedidos()">
+                <option value="data">Data do pedido</option>
+                <option value="protocolo">Protocolo</option>
+                <option value="qtd">Quantidade</option>
+                <option value="solicitante">Escola solicitante</option>
+                <option value="ofertante">Escola ofertante</option>
+                <option value="status">Status</option>
+              </select>
+            </div>
+          </div>
+          <div style="min-width:150px;">
+            <label class="form-label">Ordem</label>
+            <div class="select-wrap">
+              <select id="adm-filtro-ordem" onchange="admAplicarFiltroPedidos()">
+                <option value="desc">Decrescente</option>
+                <option value="asc">Crescente</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-outline" onclick="admLimparFiltroPedidos()" style="font-size:12px;padding:8px 14px;"><i class="ri-close-line"></i> Limpar filtros</button>
+        </div>
         <div id="ped-enviados-lista"></div>
       </div>
       <!-- Pedidos Recebidos -->
@@ -2557,6 +2598,70 @@ document.getElementById('modal-ordens-rem').addEventListener('click', function(e
   if (e.target === this) fecharOrdensRem();
 });
 
+// ─── FILTROS E ORDENAÇÃO DE PEDIDOS (ADMIN) ───────────────────────────────────
+let admFiltroPedidos = { greSol: '', greOf: '', ordenarPor: 'data', ordem: 'desc' };
+
+function admPopularFiltroGREs(lista) {
+  const selSol = document.getElementById('adm-filtro-gre-sol');
+  const selOf  = document.getElementById('adm-filtro-gre-of');
+  if (!selSol || !selOf) return;
+  const gresSol = [...new Set(lista.map(p => p.greSolicitante).filter(g => g !== null && g !== undefined && g !== ''))]
+    .sort((a,b) => Number(a) - Number(b));
+  const gresOf = [...new Set(lista.map(p => p.greOfertante).filter(g => g !== null && g !== undefined && g !== ''))]
+    .sort((a,b) => Number(a) - Number(b));
+  const montarOpcoes = (sel, lista, valorAtual) => {
+    sel.innerHTML = '<option value="">Todas...</option>' + lista.map(g => `<option value="${g}">${g}ª GRE</option>`).join('');
+    sel.value = valorAtual;
+  };
+  montarOpcoes(selSol, gresSol, admFiltroPedidos.greSol);
+  montarOpcoes(selOf, gresOf, admFiltroPedidos.greOf);
+  const selOrdenar = document.getElementById('adm-filtro-ordenar');
+  const selOrdem = document.getElementById('adm-filtro-ordem');
+  if (selOrdenar) selOrdenar.value = admFiltroPedidos.ordenarPor;
+  if (selOrdem) selOrdem.value = admFiltroPedidos.ordem;
+}
+
+function admAplicarFiltroPedidos() {
+  admFiltroPedidos = {
+    greSol: document.getElementById('adm-filtro-gre-sol')?.value || '',
+    greOf: document.getElementById('adm-filtro-gre-of')?.value || '',
+    ordenarPor: document.getElementById('adm-filtro-ordenar')?.value || 'data',
+    ordem: document.getElementById('adm-filtro-ordem')?.value || 'desc',
+  };
+  remRenderPedidos();
+}
+
+function admLimparFiltroPedidos() {
+  admFiltroPedidos = { greSol: '', greOf: '', ordenarPor: 'data', ordem: 'desc' };
+  remRenderPedidos();
+}
+
+function admFiltrarEOrdenarPedidos(lista) {
+  const { greSol, greOf, ordenarPor, ordem } = admFiltroPedidos;
+  let filtrada = lista.filter(p =>
+    (!greSol || String(p.greSolicitante) === String(greSol)) &&
+    (!greOf  || String(p.greOfertante)  === String(greOf))
+  );
+
+  const dir = ordem === 'asc' ? 1 : -1;
+  const campos = {
+    data:        p => new Date(p.data.split('/').reverse().join('-')).getTime() || 0,
+    protocolo:   p => p.protocolo || '',
+    qtd:         p => p.qtd || 0,
+    solicitante: p => (p.escolaSolicitante || '').toLowerCase(),
+    ofertante:   p => (p.escolaOfertante || '').toLowerCase(),
+    status:      p => p.status || '',
+  };
+  const extrair = campos[ordenarPor] || campos.data;
+  filtrada.sort((a, b) => {
+    const va = extrair(a), vb = extrair(b);
+    if (va < vb) return -1 * dir;
+    if (va > vb) return  1 * dir;
+    return (a.id - b.id) * dir;
+  });
+  return filtrada;
+}
+
 function remRenderPedidos() {
   const isAdmin=usuarioLogado?.isAdmin, myInep=usuarioLogado?.inep, isGre=usuarioLogado?.isGre, greNum=usuarioLogado?.gre;
   const btnExcel = document.getElementById('btn-exportar-excel');
@@ -2565,11 +2670,15 @@ function remRenderPedidos() {
   if (btnExcel) btnExcel.style.display = isAdmin ? '' : 'none';
   if (btnTransp) btnTransp.style.display = isAdmin ? '' : 'none';
   if (btnMapa) btnMapa.style.display = isAdmin ? '' : 'none';
+  const filtroDiv = document.getElementById('adm-filtros-pedidos');
+  if (filtroDiv) filtroDiv.style.display = isAdmin ? 'flex' : 'none';
   const STATUS={pendente:{label:'Aguardando aceite',bg:'#dbeafe',color:'#1351b4'},aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'},confirmado:{label:'Confirmado',bg:'#f0fdf4',color:'#14532d'}};
 
   let enviados, recebidos;
   if (isAdmin) {
     enviados = remPedidos; recebidos = [];
+    admPopularFiltroGREs(enviados);
+    enviados = admFiltrarEOrdenarPedidos(enviados);
   } else if (isGre) {
     const greN = Number(greNum);
     const aprovados = remPedidos.filter(p => p.status === 'aprovado');
@@ -2620,7 +2729,17 @@ function remRenderPedidos() {
       const podeAgir = (isAdmin || tipo === 'recebidos') && p.status === 'pendente';
       const podeConfirmar = usuarioLogado?.isComissao && p.status === 'aprovado' &&
         (p.transporte === 'proprio' || (p.transporte === 'geadm' && usuarioLogado.divisao === 'GEADM'));
-      const contraparte = `<span style="color:var(--gray-90);">${p.escolaSolicitante}</span> <span style="color:var(--gray-40);">→</span> <span style="color:var(--gray-70);">${p.escolaOfertante}</span>`;
+      const contraparte = `<div style="display:flex;align-items:center;gap:6px;">
+        <div>
+          <div style="color:var(--gray-90);">${p.escolaOfertante}</div>
+          ${p.greOfertante ? `<div style="font-size:10px;color:var(--gray-60);">${p.greOfertante}ª GRE</div>` : ''}
+        </div>
+        <span style="color:var(--gray-40);">→</span>
+        <div>
+          <div style="color:var(--gray-70);">${p.escolaSolicitante}</div>
+          ${p.greSolicitante ? `<div style="font-size:10px;color:var(--gray-60);">${p.greSolicitante}ª GRE</div>` : ''}
+        </div>
+      </div>`;
       const greClick = isGre && Number(p.greSolicitante) === Number(greNum) ? `onclick="abrirModalTransporte(${p.id})" style="cursor:pointer;"` : '';
       const TRANSP = { proprio: {label:'Transporte Próprio', bg:'#d1fae5', color:'#065f46'}, geadm: {label:'→ GEADM', bg:'#dbeafe', color:'#1351b4'} };
       const transpBadge = p.transporte ? `<span style="padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;background:${TRANSP[p.transporte]?.bg};color:${TRANSP[p.transporte]?.color};">${TRANSP[p.transporte]?.label}</span>` : (isGre ? '<span style="font-size:11px;color:#f59e0b;font-weight:600;">⚠ Definir</span>' : '');
