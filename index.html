@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1258,6 +1256,14 @@
             </div>
           </div>
           <p style="font-size:13px;font-weight:700;color:var(--gray-90);margin-bottom:8px;">Selecione os pedidos aprovados/confirmados:</p>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+            <span style="font-size:12px;font-weight:600;color:var(--gray-70);">GRE de destino:</span>
+            <select id="mc-filtro-gre" onchange="mcFiltrarPorGre()" style="padding:6px 8px;font-size:12px;border:1px solid var(--gray-40);border-radius:3px;outline:none;">
+              <option value="">Todas</option>
+            </select>
+            <button type="button" onclick="mcSelecionarTodos()" class="btn btn-outline" style="font-size:12px;padding:5px 10px;margin-left:auto;"><i class="ri-checkbox-multiple-line"></i> Selecionar todos</button>
+            <button type="button" onclick="mcLimparSelecao()" class="btn btn-outline" style="font-size:12px;padding:5px 10px;"><i class="ri-checkbox-blank-line"></i> Limpar seleção</button>
+          </div>
           <div id="mc-lista-pedidos" style="border:1px solid var(--gray-30);border-radius:4px;max-height:300px;overflow-y:auto;padding:8px;"></div>
           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
             <button onclick="fecharModalMapaColeta()" class="btn btn-outline">Cancelar</button>
@@ -3169,16 +3175,44 @@ function abrirModalMapaColeta() {
   lista.innerHTML = pedidos.length === 0
     ? '<p style="color:var(--gray-60);font-size:13px;padding:8px;">Nenhum pedido aprovado ou confirmado.</p>'
     : pedidos.map(p => `
-      <label style="display:flex;align-items:flex-start;gap:10px;padding:8px;border-bottom:1px solid var(--gray-20);cursor:pointer;">
+      <label data-gre="${p.greSolicitante || ''}" style="display:flex;align-items:flex-start;gap:10px;padding:8px;border-bottom:1px solid var(--gray-20);cursor:pointer;">
         <input type="checkbox" value="${p.id}" style="margin-top:3px;">
         <div style="font-size:12px;">
-          <div style="font-weight:600;">${p.protocolo}</div>
+          <div style="font-weight:600;">${p.protocolo} ${p.greSolicitante ? `<span style="font-weight:400;color:var(--gray-60);">— GRE ${p.greSolicitante}ª</span>` : ''}</div>
           <div style="color:var(--gray-60);">${p.escolaOfertante} → ${p.escolaSolicitante}</div>
           <div>${p.itens.map(i=>`${i.titulo} (${i.qtd} un.)`).join(' | ')}</div>
         </div>
       </label>`).join('');
+
+  // Popula o filtro de GRE com as GREs de destino presentes nos pedidos listados
+  const greSelect = document.getElementById('mc-filtro-gre');
+  const gres = [...new Set(pedidos.map(p => p.greSolicitante).filter(g => g !== undefined && g !== null && g !== ''))]
+    .sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
+  greSelect.innerHTML = '<option value="">Todas</option>' + gres.map(g => `<option value="${g}">GRE ${g}ª</option>`).join('');
+
   document.getElementById('mc-data').value = new Date().toISOString().slice(0,10);
   document.getElementById('modal-mapa-coleta').style.display = 'flex';
+}
+
+function mcFiltrarPorGre() {
+  const greEscolhida = document.getElementById('mc-filtro-gre').value;
+  document.querySelectorAll('#mc-lista-pedidos label').forEach(label => {
+    const mostra = !greEscolhida || label.dataset.gre === greEscolhida;
+    label.style.display = mostra ? 'flex' : 'none';
+  });
+}
+
+function mcSelecionarTodos() {
+  document.querySelectorAll('#mc-lista-pedidos label').forEach(label => {
+    if (label.style.display !== 'none') {
+      const cb = label.querySelector('input[type=checkbox]');
+      if (cb) cb.checked = true;
+    }
+  });
+}
+
+function mcLimparSelecao() {
+  document.querySelectorAll('#mc-lista-pedidos input[type=checkbox]').forEach(cb => cb.checked = false);
 }
 
 function fecharModalMapaColeta() {
@@ -3204,6 +3238,10 @@ async function gerarMapaColeta() {
   const dataVal   = document.getElementById('mc-data').value;
   const dataFmt   = dataVal ? new Date(dataVal+'T12:00:00').toLocaleDateString('pt-BR') : '(A preencher)';
   const destino   = document.getElementById('mc-destino').value || 'SEE/PB - João Pessoa';
+
+  // Se todos os pedidos selecionados forem da mesma GRE de destino, mostra no título
+  const gresSelecionadas = [...new Set(selecionados.map(p => p.greSolicitante).filter(g => g !== undefined && g !== null && g !== ''))];
+  const subtituloGre = gresSelecionadas.length === 1 ? `<p style="text-align:center;font-weight:bold;">GRE ${gresSelecionadas[0]}ª</p>` : '';
 
   // Gera HTML que pode ser salvo/impresso como documento
   const origens = selecionados.map((p, i) => `
@@ -3244,6 +3282,7 @@ async function gerarMapaColeta() {
   <div class="header">
     <h1>SECRETARIA DE ESTADO DA EDUCAÇÃO DA PARAÍBA — SEE/PB</h1>
     <h1>MAPA DE COLETA E ENTREGA DE LIVROS DIDÁTICOS</h1>
+    ${subtituloGre}
     <p><b>FINALIDADE:</b> Transporte/transferência de materiais escolares</p>
   </div>
 
@@ -3882,6 +3921,7 @@ const PNLD2026 = {
         { nome:'360° INGLÊS (Volume Único)', codigo:'0031P260101219811' },
         { nome:'WAYS - ENGLISH FOR LIFE POR TODA PARTE (Volume Único)', codigo:'0031P260101219811' },
         { nome:'JOY! (Volume Único)', codigo:'0030P260101219811' },
+        { nome:'ENTRE SABERES: LINGUAGENS E SUAS TECNOLOGIAS (INGLÊS) (Volume Único)', codigo:'0121P260101219811' },
       ],
     }
   },
@@ -3921,6 +3961,7 @@ const PNLD2026 = {
         { nome:'MODERNA PLUS - Educação Digital (Volume Único)', codigo:'0012P260101201813' },
         { nome:'360° EDUCAÇÃO DIGITAL (Volume Único)', codigo:'0037P260101201813' },
         { nome:'EDUCAÇÃO DIGITAL POR TODA PARTE (Volume Único)', codigo:'0036P260101201813' },
+        { nome:'SER PROTAGONISTA EDUCAÇÃO DIGITAL (Volume Único)', codigo:'0098P260101201813' },
       ],
     }
   },
