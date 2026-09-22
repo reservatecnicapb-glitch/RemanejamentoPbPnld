@@ -1267,6 +1267,7 @@
           <div id="mc-lista-pedidos" style="border:1px solid var(--gray-30);border-radius:4px;max-height:300px;overflow-y:auto;padding:8px;"></div>
           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
             <button onclick="fecharModalMapaColeta()" class="btn btn-outline">Cancelar</button>
+            <button onclick="gerarMapaColetaPorEscola()" class="btn btn-outline"><i class="ri-file-copy-2-line"></i> Gerar separado por escola</button>
             <button onclick="gerarMapaColeta()" class="btn btn-primary"><i class="ri-file-word-line"></i> Gerar Documento Word</button>
           </div>
         </div>
@@ -3324,6 +3325,133 @@ async function gerarMapaColeta() {
   </body></html>`;
 
   // Abre em nova janela para impressão/salvar como PDF
+  const janela = window.open('', '_blank');
+  janela.document.write(html);
+  janela.document.close();
+  janela.print();
+  fecharModalMapaColeta();
+}
+
+async function gerarMapaColetaPorEscola() {
+  const selecionados = [...document.querySelectorAll('#mc-lista-pedidos input[type=checkbox]:checked')]
+    .map(cb => remPedidos.find(p => p.id === parseInt(cb.value)))
+    .filter(Boolean);
+
+  if (selecionados.length === 0) { alert('Selecione pelo menos um pedido.'); return; }
+
+  const veiculo   = document.getElementById('mc-veiculo').value || '(A preencher)';
+  const placa     = document.getElementById('mc-placa').value || '(A preencher)';
+  const motorista = document.getElementById('mc-motorista').value || '(A preencher)';
+  const cpf       = document.getElementById('mc-cpf').value || '(A preencher)';
+  const dataVal   = document.getElementById('mc-data').value;
+  const dataFmt   = dataVal ? new Date(dataVal+'T12:00:00').toLocaleDateString('pt-BR') : '(A preencher)';
+  const destino   = document.getElementById('mc-destino').value || 'SEE/PB - João Pessoa';
+
+  // Agrupa TODOS os pedidos selecionados pela escola SOLICITANTE (destino).
+  // Cada grupo vira um documento separado — se uma escola tiver 3 pedidos,
+  // os 3 caem juntos no documento daquela escola.
+  const grupos = {};
+  selecionados.forEach(p => {
+    const chave = p.inepSolicitante || p.escolaSolicitante;
+    if (!grupos[chave]) {
+      grupos[chave] = { escola: p.escolaSolicitante, inep: p.inepSolicitante, gre: p.greSolicitante, pedidos: [] };
+    }
+    grupos[chave].pedidos.push(p);
+  });
+
+  const listaGrupos = Object.values(grupos).sort((a, b) =>
+    (a.escola || '').localeCompare(b.escola || '', 'pt-BR'));
+
+  const paginas = listaGrupos.map((g, idx) => {
+    // Dentro de cada escola, ordena por escola de origem (ofertante)
+    const pedidosGrupo = [...g.pedidos].sort((a, b) =>
+      (a.escolaOfertante || '').localeCompare(b.escolaOfertante || '', 'pt-BR'));
+
+    const origens = pedidosGrupo.map(p => `
+      <tr>
+        <td>${p.escolaOfertante}</td>
+        <td>${p.inepOfertante}</td>
+        <td>${p.escolaSolicitante}</td>
+        <td>${p.inepSolicitante}</td>
+      </tr>`).join('');
+
+    let itemNum = 1;
+    const materiais = pedidosGrupo.flatMap(p =>
+      p.itens.map(it => `
+      <tr>
+        <td style="text-align:center;">${String(itemNum++).padStart(2,'0')}</td>
+        <td>${it.titulo}</td>
+        <td style="text-align:center;">${it.qtd}</td>
+        <td>Unidades</td>
+        <td>${p.escolaOfertante}</td>
+      </tr>`)
+    ).join('');
+
+    return `
+  <div style="${idx > 0 ? 'page-break-before:always;' : ''}">
+    <div class="header">
+      <h1>SECRETARIA DE ESTADO DA EDUCAÇÃO DA PARAÍBA — SEE/PB</h1>
+      <h1>MAPA DE COLETA E ENTREGA DE LIVROS DIDÁTICOS</h1>
+      <p style="font-weight:bold;">Escola de Destino: ${g.escola} (INEP ${g.inep || '-'})${g.gre ? ` — GRE ${g.gre}ª` : ''}</p>
+      <p><b>FINALIDADE:</b> Transporte/transferência de materiais escolares</p>
+    </div>
+
+    <h2>DADOS DO TRANSPORTE</h2>
+    <div class="campo"><span class="label">Emitente:</span> Secretaria de Estado da Educação da Paraíba — SEE/PB</div>
+    <div class="campo"><span class="label">Tipo de operação:</span> Transferência/Doação de Livros</div>
+    <div class="campo"><span class="label">UF de origem/destino:</span> Paraíba — PB</div>
+    <div class="campo"><span class="label">Local de destino:</span> ${destino}</div>
+    <div class="campo"><span class="label">Modal:</span> Rodoviário</div>
+    <div class="campo"><span class="label">Veículo:</span> ${veiculo} &nbsp;&nbsp; <span class="label">Placa:</span> ${placa}</div>
+    <div class="campo"><span class="label">Motorista:</span> ${motorista} &nbsp;&nbsp; <span class="label">CPF:</span> ${cpf}</div>
+    <div class="campo"><span class="label">Data do transporte:</span> ${dataFmt}</div>
+
+    <h2>MAPA DE ORIGEM E DESTINO</h2>
+    <table>
+      <thead><tr>
+        <th>Escola de Origem</th><th>INEP Origem</th>
+        <th>Escola de Destino</th><th>INEP Destino</th>
+      </tr></thead>
+      <tbody>${origens}</tbody>
+    </table>
+
+    <h2>CONTROLE DOS MATERIAIS</h2>
+    <table>
+      <thead><tr>
+        <th>Item</th><th>Descrição</th><th>Quantidade</th><th>Unidade</th><th>Escola de Origem</th>
+      </tr></thead>
+      <tbody>${materiais}</tbody>
+    </table>
+
+    <div style="margin-top:40px;display:flex;justify-content:space-between;">
+      <div style="text-align:center;width:45%;">
+        <div style="border-top:1px solid #000;padding-top:6px;margin-top:50px;">Assinatura do Funcionário</div>
+      </div>
+      <div style="text-align:center;width:45%;">
+        <div style="border-top:1px solid #000;padding-top:6px;margin-top:50px;">Assinatura do Responsável</div>
+      </div>
+    </div>
+  </div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 11pt; margin: 2cm; color: #000; }
+    h2 { font-size: 13pt; border-bottom: 2px solid #000; padding-bottom: 4px; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #000; padding: 5px 8px; font-size: 10pt; }
+    th { background: #d0d0d0; font-weight: bold; text-align: center; }
+    .campo { margin: 6px 0; }
+    .label { font-weight: bold; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .header h1 { font-size: 14pt; margin: 4px 0; }
+    @media print { body { margin: 1cm; } }
+  </style>
+  </head><body>${paginas}
+  </body></html>`;
+
+  // Abre em nova janela: um documento por escola solicitante, cada um
+  // começando em página própria (imprime/salva tudo de uma vez, já separado).
   const janela = window.open('', '_blank');
   janela.document.write(html);
   janela.document.close();
