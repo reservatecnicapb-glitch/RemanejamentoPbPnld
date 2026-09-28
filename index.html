@@ -984,6 +984,7 @@
           <button id="btn-exportar-excel" onclick="exportarPedidosExcel()" class="btn btn-outline" style="font-size:12px;padding:5px 12px;display:none;"><i class="ri-file-excel-line"></i> Planilha Controle ADM</button>
           <button id="btn-exportar-transporte" onclick="exportarPedidosTransporte()" class="btn btn-outline" style="font-size:12px;padding:5px 12px;display:none;"><i class="ri-truck-line"></i> Planilha de Transporte</button>
           <button id="btn-mapa-coleta" onclick="abrirModalMapaColeta()" class="btn btn-outline" style="font-size:12px;padding:5px 12px;display:none;"><i class="ri-map-pin-line"></i> Mapa de Coleta</button>
+          <button id="btn-relatorio-coleta" onclick="exportarRelatorioColeta()" class="btn btn-outline" style="font-size:12px;padding:5px 12px;display:none;"><i class="ri-file-excel-2-line"></i> Relatório de Coleta</button>
         </div>
         <div id="adm-filtros-pedidos" style="display:none;padding:12px 20px;border-bottom:1px solid var(--gray-30);background:var(--gray-10);flex-wrap:wrap;align-items:flex-end;gap:12px;">
           <div style="min-width:170px;">
@@ -2339,7 +2340,7 @@ async function remCarregarPedidos() {
   try {
     const [data, itensData] = await Promise.all([
       sbGet('pedidos_remanejamento',
-        'order=id.asc&select=*,solicitante:escolas!pedidos_remanejamento_inep_solicitante_fkey(nome,lat,lng,gre,eja),ofertante:escolas!pedidos_remanejamento_inep_ofertante_fkey(nome,gre)'
+        'order=id.asc&select=*,solicitante:escolas!pedidos_remanejamento_inep_solicitante_fkey(nome,lat,lng,gre,eja),ofertante:escolas!pedidos_remanejamento_inep_ofertante_fkey(nome,gre,cidade)'
       ),
       sbGet('pedidos_remanejamento_itens', 'select=*')
     ]);
@@ -2359,6 +2360,7 @@ async function remCarregarPedidos() {
       ejaSolicitante: p.solicitante?.eja,
       inepOfertante:p.inep_ofertante, escolaOfertante:p.ofertante?.nome||p.inep_ofertante,
       greOfertante: p.ofertante?.gre,
+      cidadeOfertante: p.ofertante?.cidade || '',
       itens: itensPorPedido[p.id] || [],
       // Compat: primeiro item como campos principais
       titulo: (itensPorPedido[p.id]||[])[0]?.titulo || '',
@@ -2669,10 +2671,12 @@ function remRenderPedidos() {
   const btnExcel = document.getElementById('btn-exportar-excel');
   const btnTransp = document.getElementById('btn-exportar-transporte');
   const btnMapa = document.getElementById('btn-mapa-coleta');
+  const btnRelatorioColeta = document.getElementById('btn-relatorio-coleta');
   const isGeadmRP = usuarioLogado?.isComissao && usuarioLogado?.divisao === 'GEADM';
   if (btnExcel) btnExcel.style.display = isAdmin ? '' : 'none';
   if (btnTransp) btnTransp.style.display = isAdmin ? '' : 'none';
   if (btnMapa) btnMapa.style.display = (isAdmin || isGeadmRP) ? '' : 'none';
+  if (btnRelatorioColeta) btnRelatorioColeta.style.display = (isAdmin || isGeadmRP) ? '' : 'none';
   const filtroDiv = document.getElementById('adm-filtros-pedidos');
   if (filtroDiv) filtroDiv.style.display = isAdmin ? 'flex' : 'none';
   const STATUS={pendente:{label:'Aguardando aceite',bg:'#dbeafe',color:'#1351b4'},aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'},confirmado:{label:'Confirmado',bg:'#f0fdf4',color:'#14532d'}};
@@ -3056,6 +3060,86 @@ async function exportarPedidosTransporte() {
   ];
 
   XLSX.writeFile(wb, `transporte_remanejamento_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+async function exportarRelatorioColeta() {
+  const elegiveis = [...remPedidos].filter(p => p.status === 'aprovado' || p.status === 'confirmado');
+  if (elegiveis.length === 0) { alert('Nenhum pedido aprovado/confirmado para gerar o relatório.'); return; }
+
+  // Agrupa por escola ofertante (de onde vai buscar os livros), somando a quantidade total
+  const porEscola = {};
+  elegiveis.forEach(p => {
+    const key = p.inepOfertante;
+    if (!porEscola[key]) {
+      porEscola[key] = {
+        gre: p.greOfertante != null ? Number(p.greOfertante) : null,
+        cidade: p.cidadeOfertante || '',
+        inep: p.inepOfertante,
+        escola: p.escolaOfertante,
+        qtd: 0
+      };
+    }
+    porEscola[key].qtd += (p.itens || []).reduce((s, it) => s + (it.qtd || 0), 0);
+  });
+
+  const linhas = Object.values(porEscola).sort((a, b) => {
+    const ga = a.gre ?? 999, gb = b.gre ?? 999;
+    if (ga !== gb) return ga - gb;
+    return (a.escola || '').localeCompare(b.escola || '');
+  });
+
+  if (!window.XLSX) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  const TITULO = 'Relatório Consolidado de Transporte por Escola Ofertante';
+  const CABECALHO = ['GRE', 'Cidade', 'INEP', 'Escola Ofertante', 'Qtd Total'];
+  const COLS = [{wch:6},{wch:22},{wch:12},{wch:50},{wch:12}];
+
+  function montarAoa(rows) {
+    const aoa = [[TITULO], []];
+    aoa.push(CABECALHO);
+    rows.forEach(r => aoa.push([r.gre ?? '—', r.cidade, Number(r.inep), r.escola, r.qtd]));
+    return aoa;
+  }
+
+  function adicionarAba(wb, nomeAba, rows) {
+    const aoa = montarAoa(rows);
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = COLS;
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }];
+    const primeiraLinhaDado = 4; // linha 4 (1-indexed) = primeira escola
+    const ultimaLinhaDado = 3 + rows.length;
+    if (rows.length > 0) {
+      const linhaTotal = ultimaLinhaDado + 2; // pula uma linha em branco
+      const totalRowIdx = linhaTotal - 1; // 0-indexed
+      XLSX.utils.sheet_add_aoa(ws, [['Total Geral', null, null, null, { t:'n', f:`SUM(E${primeiraLinhaDado}:E${ultimaLinhaDado})` }]], { origin: { r: totalRowIdx, c: 0 } });
+      // sheet_add_aoa não escreve fórmula por objeto {f:...} em todas versões — garante via célula direta
+      const cellRef = XLSX.utils.encode_cell({ r: totalRowIdx, c: 4 });
+      ws[cellRef] = { t: 'n', f: `SUM(E${primeiraLinhaDado}:E${ultimaLinhaDado})` };
+      const ref = XLSX.utils.decode_range(ws['!ref']);
+      ref.e.r = Math.max(ref.e.r, totalRowIdx);
+      ws['!ref'] = XLSX.utils.encode_range(ref);
+    }
+    XLSX.utils.book_append_sheet(wb, ws, nomeAba.slice(0, 31));
+  }
+
+  const wb = XLSX.utils.book_new();
+  adicionarAba(wb, 'RELATORIO DE COLETA', linhas);
+
+  const gres = [...new Set(linhas.map(r => r.gre))].sort((a,b) => (a??999)-(b??999));
+  gres.forEach(g => {
+    const rowsGre = linhas.filter(r => r.gre === g);
+    const nomeAba = g != null ? `RELATORIO DE COLETA ${g}ªGRE` : 'RELATORIO DE COLETA S-GRE';
+    adicionarAba(wb, nomeAba, rowsGre);
+  });
+
+  XLSX.writeFile(wb, `relatorio_coleta_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 async function exportarPedidosExcel() {
