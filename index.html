@@ -2108,7 +2108,7 @@ function remAdicionarItem(prefix) {
   const seriesSet = new Set();
   const ordemSeries = [
     ...SERIES_EM, ...SERIES_EM_VU,
-    ...SERIES_EF,
+    ...SERIES_EF, ...SERIES_AI,
     ...SERIES_EJA_EF56, ...SERIES_EJA_EM78,
     ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS,
   ];
@@ -4094,11 +4094,33 @@ const SERIES_EJA_FINAIS   = ['Etapas 3 e 4 - EJA'];
 const SERIES_EJA_EF56     = ['Etapas 5 e 6 - EJA'];
 const SERIES_EJA_EM78     = ['Etapas 7 e 8 - EJA'];
 const SERIES_EF = ['6º ano - E. Fundamental','7º ano - E. Fundamental','8º ano - E. Fundamental','9º ano - E. Fundamental'];
+const SERIES_AI = ['1º ano - E. Fundamental','2º ano - E. Fundamental','3º ano - E. Fundamental','4º ano - E. Fundamental','5º ano - E. Fundamental'];
 
 const PNLD2026 = {
   'Matemática': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
+      'default_ai': [
+        { nome:'PRESENTE MAIS Matemática (Anos Iniciais)',                       codigo:'0016P230101020020' },
+        { nome:'BURITI MAIS Matemática (Anos Iniciais)',                         codigo:'0017P230101020020' },
+        { nome:'PITANGUÁ MAIS Matemática (Anos Iniciais)',                       codigo:'0018P230101020020' },
+        { nome:'COLEÇÃO DESAFIO - Matemática (Anos Iniciais)',                   codigo:'0019P230101020020' },
+        { nome:'UNIVERSO DAS DESCOBERTAS - Matemática (Anos Iniciais)',          codigo:'0050P230101020020' },
+        { nome:'ÁPIS MAIS - Matemática (Anos Iniciais)',                        codigo:'0056P230101020020' },
+        { nome:'DIÁLOGOS - Matemática (Anos Iniciais)',                          codigo:'0057P230101020020' },
+        { nome:'VIDA CRIANÇA - Matemática (Anos Iniciais)',                      codigo:'0075P230101020020' },
+        { nome:'DA ESCOLA PARA O MUNDO - Matemática (Anos Iniciais)',            codigo:'0082P230101020020' },
+        { nome:'BEM-ME-QUER MAIS Matemática (Anos Iniciais)',                    codigo:'0103P230101020020' },
+        { nome:'MATEMÁTICA BONJORNO (Anos Iniciais)',                            codigo:'0104P230101020020' },
+        { nome:'NOVO AKPALÔ Matemática (Anos Iniciais)',                         codigo:'0105P230101020020' },
+        { nome:'BONS AMIGOS Matemática (Anos Iniciais)',                         codigo:'0115P230101020020' },
+        { nome:'APRENDER JUNTOS Matemática (Anos Iniciais)',                     codigo:'0122P230101020020' },
+        { nome:'ENTRELAÇOS – Matemática (Anos Iniciais)',                        codigo:'0127P230101020020' },
+        { nome:'EU GOSTO – Matemática (Anos Iniciais)',                          codigo:'0137P230101020020' },
+        { nome:'A CONQUISTA - Matemática (Anos Iniciais)',                       codigo:'0142P230101020020' },
+        { nome:'PORTAIS DA MATEMÁTICA (Anos Iniciais)',                          codigo:'0145P230101020020' },
+        { nome:'AQUARELA Matemática Kits (Anos Iniciais)',                       codigo:'0151P230101020020' },
+      ],
       'default_em': [
         { nome:'MODERNA SuperAÇÃO! Matemática',                          codigo:'0014P260101202814' },
         { nome:'MODERNA EM AÇÃO - Matemática',                           codigo:'0015P260101202814' },
@@ -4161,8 +4183,19 @@ const PNLD2026 = {
     }
   },
   'Língua Portuguesa': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
+      'default_ai': [
+        { nome:'PITANGUÁ MAIS Língua Portuguesa (Anos Iniciais)',        codigo:'0007P230101010010' },
+        { nome:'COLEÇÃO DESAFIO - Língua Portuguesa (Anos Iniciais)',    codigo:'0008P230101010010' },
+        { nome:'MUNDO DE EXPLORAÇÕES - Língua Portuguesa (Anos Iniciais)', codigo:'0009P230101010010' },
+        { nome:'ÁPIS MAIS - Língua Portuguesa (Anos Iniciais)',          codigo:'0054P230101010010' },
+        { nome:'DA ESCOLA PARA O MUNDO - Língua Portuguesa (Anos Iniciais)', codigo:'0080P230101010010' },
+        { nome:'APRENDER JUNTOS Língua Portuguesa (Anos Iniciais)',      codigo:'0096P230101010010' },
+        { nome:'BEM-ME-QUER MAIS Língua Portuguesa (Anos Iniciais)',     codigo:'0101P230101010010' },
+        { nome:'ENTRELAÇOS - Língua Portuguesa (Anos Iniciais)',         codigo:'0126P230101010010' },
+        { nome:'A CONQUISTA - Língua Portuguesa (Anos Iniciais)',        codigo:'0141P230101010010' },
+      ],
       'default_em': [
         { nome:'MODERNA EM AÇÃO - Língua Portuguesa',                    codigo:'0002P260101218810' },
         { nome:'MODERNA SuperAÇÃO! - Língua Portuguesa',                 codigo:'0003P260101218810' },
@@ -4217,8 +4250,20 @@ const PNLD2026 = {
     }
   },
   'Arte': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI],
     livrosPorSerie: {
+      'default_ai': [
+        { nome:'PRESENTE MAIS Arte (Anos Iniciais)',                    codigo:'0026P230102000060' },
+        { nome:'BURITI MAIS Arte (Anos Iniciais)',                      codigo:'0027P230102000060' },
+        { nome:'MUNDO DE EXPLORAÇÕES - Arte (Anos Iniciais)',           codigo:'0029P230102000060' },
+        { nome:'ÁPIS MAIS - Arte (Anos Iniciais)',                      codigo:'0060P230102000060' },
+        { nome:'DIÁLOGOS - Arte (Anos Iniciais)',                       codigo:'0061P230102000060' },
+        { nome:'DA ESCOLA PARA O MUNDO - Arte (Anos Iniciais)',         codigo:'0086P230102000060' },
+        { nome:'BEM-ME-QUER MAIS Arte (Anos Iniciais)',                 codigo:'0108P230102000060' },
+        { nome:'BONS AMIGOS Arte (Anos Iniciais)',                      codigo:'0116P230102000060' },
+        { nome:'APRENDER JUNTOS Arte (Anos Iniciais)',                  codigo:'0118P230102000060' },
+        { nome:'A CONQUISTA - Arte (Anos Iniciais)',                    codigo:'0130P230102000060' },
+      ],
       'default_em': [
         { nome:'MODERNA EM AÇÃO - Arte',                                 codigo:'0002P260101218810' },
         { nome:'MODERNA SuperAÇÃO! - Arte',                              codigo:'0003P260101218810' },
@@ -4354,8 +4399,14 @@ const PNLD2026 = {
     }
   },
   'Educação Física': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI],
     livrosPorSerie: {
+      'default_ai': [
+        { nome:'PRESENTE MAIS Educação Física (Anos Iniciais)',         codigo:'0030P230102000160' },
+        { nome:'BURITI MAIS Educação Física (Anos Iniciais)',           codigo:'0031P230102000160' },
+        { nome:'PITANGUÁ MAIS Educação Física (Anos Iniciais)',         codigo:'0032P230102000160' },
+        { nome:'MANUAL DO PROFESSOR PARA A EDUCAÇÃO FÍSICA (Anos Iniciais)', codigo:'0071P230102000160' },
+      ],
       'default_em': [
       ],
       'default_ef': [
@@ -4485,8 +4536,26 @@ const PNLD2026 = {
     }
   },
   'História': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI],
     livrosPorSerie: {
+      'default_ai': [
+        { nome:'PRESENTE MAIS História (Anos Iniciais)',                 codigo:'0036P230102000040' },
+        { nome:'BURITI MAIS História (Anos Iniciais)',                   codigo:'0037P230102000040' },
+        { nome:'PITANGUÁ MAIS História (Anos Iniciais)',                 codigo:'0038P230102000040' },
+        { nome:'UNIVERSO DAS DESCOBERTAS História (Anos Iniciais)',      codigo:'0053P230102000040' },
+        { nome:'ÁPIS MAIS - História (Anos Iniciais)',                   codigo:'0066P230102000040' },
+        { nome:'DIÁLOGOS - História (Anos Iniciais)',                    codigo:'0067P230102000040' },
+        { nome:'COLEÇÃO GOSTO DE SABER - História (Anos Iniciais)',      codigo:'0073P230102000040' },
+        { nome:'VIDA CRIANÇA - História (Anos Iniciais)',                codigo:'0079P230102000040' },
+        { nome:'DA ESCOLA PARA O MUNDO - História (Anos Iniciais)',      codigo:'0091P230102000040' },
+        { nome:'BEM-ME-QUER MAIS História (Anos Iniciais)',              codigo:'0111P230102000040' },
+        { nome:'NOVO AKPALÔ História (Anos Iniciais)',                   codigo:'0112P230102000040' },
+        { nome:'BONS AMIGOS História (Anos Iniciais)',                   codigo:'0117P230102000040' },
+        { nome:'APRENDER JUNTOS História (Anos Iniciais)',               codigo:'0121P230102000040' },
+        { nome:'A CONQUISTA - História (Anos Iniciais)',                 codigo:'0133P230102000040' },
+        { nome:'COLEÇÃO QUATRO CANTOS História (Anos Iniciais)',         codigo:'0140P230102000040' },
+        { nome:'VIAGEM PELA HISTÓRIA (Anos Iniciais)',                   codigo:'0167P230102000040' },
+      ],
       'default_em': [
         { nome:'MODERNA SuperAÇÃO! - História',                          codigo:'0019P260101204816' },
         { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - História',                  codigo:'0072P260101204816' },
@@ -4522,8 +4591,26 @@ const PNLD2026 = {
     }
   },
   'Geografia': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI],
     livrosPorSerie: {
+      'default_ai': [
+        { nome:'PRESENTE MAIS Geografia (Anos Iniciais)',                codigo:'0033P230102000050' },
+        { nome:'BURITI MAIS Geografia (Anos Iniciais)',                  codigo:'0034P230102000050' },
+        { nome:'PITANGUÁ MAIS Geografia (Anos Iniciais)',                codigo:'0035P230102000050' },
+        { nome:'BONS AMIGOS Geografia (Anos Iniciais)',                  codigo:'0046P230102000050' },
+        { nome:'UNIVERSO DAS DESCOBERTAS Geografia (Anos Iniciais)',     codigo:'0052P230102000050' },
+        { nome:'DIÁLOGOS - Geografia (Anos Iniciais)',                   codigo:'0064P230102000050' },
+        { nome:'ÁPIS MAIS - Geografia (Anos Iniciais)',                  codigo:'0065P230102000050' },
+        { nome:'COLEÇÃO GOSTO DE SABER - Geografia (Anos Iniciais)',     codigo:'0072P230102000050' },
+        { nome:'VIDA CRIANÇA - Geografia (Anos Iniciais)',               codigo:'0078P230102000050' },
+        { nome:'DA ESCOLA PARA O MUNDO - Geografia (Anos Iniciais)',     codigo:'0088P230102000050' },
+        { nome:'BEM-ME-QUER MAIS Geografia (Anos Iniciais)',             codigo:'0109P230102000050' },
+        { nome:'NOVO AKPALÔ Geografia (Anos Iniciais)',                  codigo:'0110P230102000050' },
+        { nome:'APRENDER JUNTOS Geografia (Anos Iniciais)',              codigo:'0120P230102000050' },
+        { nome:'A CONQUISTA - Geografia (Anos Iniciais)',                codigo:'0132P230102000050' },
+        { nome:'EU GOSTO Geografia (Anos Iniciais)',                     codigo:'0146P230102000050' },
+        { nome:'VIAGEM PELA GEOGRAFIA (Anos Iniciais)',                  codigo:'0166P230102000050' },
+      ],
       'default_em': [
         { nome:'MODERNA SuperAÇÃO! - Geografia',                         codigo:'0019P260101204816' },
         { nome:'INTERAÇÃO CIÊNCIAS HUMANAS - Geografia',                 codigo:'0072P260101204816' },
@@ -4778,8 +4865,25 @@ const PNLD2026 = {
   },
 
   'Ciências': {
-    series: [...SERIES_EF],
+    series: [...SERIES_EF, ...SERIES_AI],
     livrosPorSerie: {
+      'default_ai': [
+        { nome:'PRESENTE MAIS Ciências da Natureza (Anos Iniciais)',     codigo:'0020P230101207030' },
+        { nome:'BURITI MAIS Ciências (Anos Iniciais)',                   codigo:'0021P230101207030' },
+        { nome:'PITANGUÁ MAIS Ciências da Natureza (Anos Iniciais)',     codigo:'0022P230101207030' },
+        { nome:'EU GOSTO Ciências (Anos Iniciais)',                      codigo:'0048P230101207030' },
+        { nome:'ÁPIS MAIS - Ciências (Anos Iniciais)',                   codigo:'0058P230101207030' },
+        { nome:'VIDA CRIANÇA - Ciências (Anos Iniciais)',                codigo:'0076P230101207030' },
+        { nome:'DA ESCOLA PARA O MUNDO - Ciências (Anos Iniciais)',      codigo:'0084P230101207030' },
+        { nome:'BONS AMIGOS Ciências (Anos Iniciais)',                   codigo:'0100P230101207030' },
+        { nome:'BEM-ME-QUER MAIS Ciências (Anos Iniciais)',              codigo:'0106P230101207030' },
+        { nome:'NOVO AKPALÔ Ciências (Anos Iniciais)',                   codigo:'0107P230101207030' },
+        { nome:'APRENDER JUNTOS Ciências (Anos Iniciais)',               codigo:'0124P230101207030' },
+        { nome:'ENTRELAÇOS - Ciências da Natureza (Anos Iniciais)',      codigo:'0128P230101207030' },
+        { nome:'A CONQUISTA - Ciências (Anos Iniciais)',                 codigo:'0143P230101207030' },
+        { nome:'AQUARELA Ciências Kits (Anos Iniciais)',                 codigo:'0152P230101207030' },
+        { nome:'COLEÇÃO QUATRO CANTOS Ciências (Anos Iniciais)',         codigo:'0163P230101207030' },
+      ],
       'default_ef': [
         { nome:'ARARIBÁ CONECTA - CIÊNCIAS',                codigo:'0016P240100207030' },
         { nome:'CIÊNCIAS NATURAIS - APRENDENDO COM O COTIDIANO', codigo:'0018P240100207030' },
@@ -4795,6 +4899,52 @@ const PNLD2026 = {
         { nome:'GERAÇÃO ALPHA CIÊNCIAS',                    codigo:'0101P240100207030' },
         { nome:'UNIVERSO DAS DESCOBERTAS CIÊNCIAS',         codigo:'0109P240100207030' },
         { nome:'CIÊNCIAS, TECNOLOGIA, SOCIEDADE E AMBIENTE', codigo:'0111P240100207030' },
+      ],
+    }
+  },
+
+  'Ciências Humanas - Geografia e História (Anos Iniciais)': {
+    series: [...SERIES_AI],
+    livrosPorSerie: {
+      'default_ai': [
+        { nome:'PRESENTE MAIS Ciências Humanas (Anos Iniciais)',              codigo:'0023P230101208366' },
+        { nome:'BURITI MAIS Ciências Humanas (Anos Iniciais)',                codigo:'0024P230101208366' },
+        { nome:'PITANGUÁ MAIS Ciências Humanas (Anos Iniciais)',              codigo:'0025P230101208366' },
+        { nome:'VIDA CRIANÇA - Geografia e História (Anos Iniciais)',         codigo:'0077P230101208366' },
+        { nome:'APRENDER JUNTOS Geografia e História (Anos Iniciais)',        codigo:'0125P230101208366' },
+        { nome:'ENTRELAÇOS - Ciências Humanas (Anos Iniciais)',               codigo:'0129P230101208366' },
+      ],
+    }
+  },
+
+  'Arte e Educação Física (Anos Iniciais)': {
+    series: [...SERIES_AI],
+    livrosPorSerie: {
+      'default_ai': [
+        { nome:'PRESENTE MAIS Linguagens - Educação Física (Anos Iniciais)',  codigo:'0013P230101206160' },
+        { nome:'BURITI MAIS Linguagens - Educação Física (Anos Iniciais)',    codigo:'0014P230101206160' },
+        { nome:'PITANGUÁ MAIS Linguagens - Educação Física (Anos Iniciais)',  codigo:'0015P230101206160' },
+        { nome:'ENTRELAÇOS – Arte e Educação Física (Anos Iniciais)',         codigo:'0044P230101206060' },
+      ],
+    }
+  },
+
+  'Projetos Integradores (Anos Iniciais)': {
+    series: [...SERIES_AI],
+    livrosPorSerie: {
+      'default_ai': [
+        { nome:'BURITI MAIS Projetos Integradores (Anos Iniciais)',           codigo:'0040P230102000500' },
+        { nome:'PITANGUÁ MAIS Projetos Integradores (Anos Iniciais)',         codigo:'0041P230102000500' },
+        { nome:'COLEÇÃO DESAFIO - Projetos Integradores (Anos Iniciais)',     codigo:'0042P230102000500' },
+        { nome:'DA ESCOLA PARA O MUNDO - Projetos Integradores (Anos Iniciais)', codigo:'0093P230102000500' },
+        { nome:'CONHECER E TRANSFORMAR: Projetos Integradores (Anos Iniciais)', codigo:'0113P230102000500' },
+        { nome:'NOVO AKPALÔ Projetos Integradores (Anos Iniciais)',           codigo:'0114P230102000500' },
+        { nome:'ENTRELAÇOS – Projetos Integradores (Anos Iniciais)',          codigo:'0134P230102000500' },
+        { nome:'A CONQUISTA - Projetos Integradores (Anos Iniciais)',         codigo:'0135P230102000500' },
+        { nome:'APRENDENDO COM PROJETOS (Anos Iniciais)',                     codigo:'0139P230102000500' },
+        { nome:'EXPERIMENTAR, REFLETIR E COMUNICAR: Anos Iniciais do Ensino Fundamental', codigo:'0148P230102000500' },
+        { nome:'EU GOSTO Projetos Integradores (Anos Iniciais)',              codigo:'0153P230102000500' },
+        { nome:'APRENDER E CRIAR - Projetos Integradores (Anos Iniciais)',    codigo:'0157P230102000500' },
       ],
     }
   },
@@ -4837,7 +4987,8 @@ function getLivrosPorSerie(mat, serie) {
   const isEjaMedioV1  = serie.includes('Etapas 5 e 6');
   const isEjaMedioV2  = serie.includes('Etapas 7 e 8');
   const isVolumeUnico = serie.includes('Volume Único');
-  const isEF          = serie.includes('E. Fundamental') && !serie.includes('EJA');
+  const isAI           = /^[1-5]º ano - E\. Fundamental$/.test(serie);
+  const isEF           = serie.includes('E. Fundamental') && !serie.includes('EJA') && !isAI;
   if (isEjaIniciais && m.livrosPorSerie['default_eja_iniciais']) return m.livrosPorSerie['default_eja_iniciais'];
   if (isEjaFinais   && m.livrosPorSerie['default_eja_finais'])   return m.livrosPorSerie['default_eja_finais'];
   if (isEjaMedioV1  && m.livrosPorSerie['default_eja_medio_v1']) return m.livrosPorSerie['default_eja_medio_v1'];
@@ -4845,6 +4996,7 @@ function getLivrosPorSerie(mat, serie) {
   if (isEjaMedioV1  && m.livrosPorSerie['default_eja_medio'])    return m.livrosPorSerie['default_eja_medio'];
   if (isEjaMedioV2  && m.livrosPorSerie['default_eja_medio'])    return m.livrosPorSerie['default_eja_medio'];
   if (isVolumeUnico && m.livrosPorSerie['default_vu'])           return m.livrosPorSerie['default_vu'];
+  if (isAI          && m.livrosPorSerie['default_ai'])           return m.livrosPorSerie['default_ai'];
   if (isEF          && m.livrosPorSerie['default_ef'])           return m.livrosPorSerie['default_ef'];
   return m.livrosPorSerie['default_em'] || [];
 }
@@ -4856,7 +5008,7 @@ function getLivrosPorSerie(mat, serie) {
   const selSerMap = document.getElementById('map-sel-ser');
   if (selSerMap) {
     const seriesSet = new Set();
-    const ordemSeries = [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS];
+    const ordemSeries = [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS];
     ordemSeries.forEach(s => seriesSet.add(s));
     Object.values(PNLD2026).forEach(m => (m.series||[]).forEach(s => seriesSet.add(s)));
     [...seriesSet].forEach(s => selSerMap.insertAdjacentHTML('beforeend', `<option value="${s}">${s}</option>`));
