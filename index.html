@@ -1126,10 +1126,6 @@
                 </button>
               </div>
 
-              <div>
-                <label class="form-label">Justificativa</label>
-                <textarea id="rt-justificativa" rows="3" style="width:100%;padding:8px 10px;font-size:13px;border:1px solid var(--gray-40);border-radius:3px;font-family:'Inter',sans-serif;resize:vertical;outline:none;" placeholder="Descreva o motivo da solicitação..."></textarea>
-              </div>
               <div id="rt-form-error" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:3px;padding:10px 14px;font-size:13px;color:#991b1b;"></div>
               <div style="display:flex;justify-content:flex-end;gap:8px;">
                 <button class="btn btn-outline" onclick="rtShowTab('meus')">Cancelar</button>
@@ -2050,6 +2046,11 @@ async function sbPostSilent(tabela, body) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}`, {
     method: 'POST', headers: sbHeaders(), body: JSON.stringify(body)
   });
+  if (!r.ok) {
+    let errBody = '';
+    try { errBody = await r.text(); } catch(e) {}
+    console.error(`sbPostSilent falhou em "${tabela}" (status ${r.status}):`, errBody, 'body enviado:', body);
+  }
   return r.ok;
 }
 
@@ -2108,7 +2109,7 @@ function remAdicionarItem(prefix) {
   const seriesSet = new Set();
   const ordemSeries = [
     ...SERIES_EM, ...SERIES_EM_VU,
-    ...SERIES_EF, ...SERIES_AI,
+    ...SERIES_AI, ...SERIES_EF,
     ...SERIES_EJA_EF56, ...SERIES_EJA_EM78,
     ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS,
   ];
@@ -3894,7 +3895,7 @@ async function rtCarregarPedidos() {
     municipio: p.escolas?.cidade || '', gre: '', estado: 'Paraíba',
     titulo: p.titulo, componente: p.mat, serie: p.serie,
     itens: p.itens || null,
-    qtd: p.qtd, justificativa: p.justificativa || '',
+    qtd: p.qtd,
     dataSolicitacao: new Date(p.data).toLocaleDateString('pt-BR'),
     status: p.status
   }));
@@ -4098,7 +4099,7 @@ const SERIES_AI = ['1º ano - E. Fundamental','2º ano - E. Fundamental','3º an
 
 const PNLD2026 = {
   'Matemática': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_AI, ...SERIES_EF, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_ai': [
         { nome:'PRESENTE MAIS Matemática (Anos Iniciais)',                       codigo:'0016P230101020020' },
@@ -4183,7 +4184,7 @@ const PNLD2026 = {
     }
   },
   'Língua Portuguesa': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_AI, ...SERIES_EF, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
     livrosPorSerie: {
       'default_ai': [
         { nome:'PITANGUÁ MAIS Língua Portuguesa (Anos Iniciais)',        codigo:'0007P230101010010' },
@@ -4250,7 +4251,7 @@ const PNLD2026 = {
     }
   },
   'Arte': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_AI, ...SERIES_EF],
     livrosPorSerie: {
       'default_ai': [
         { nome:'PRESENTE MAIS Arte (Anos Iniciais)',                    codigo:'0026P230102000060' },
@@ -4399,7 +4400,7 @@ const PNLD2026 = {
     }
   },
   'Educação Física': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_AI, ...SERIES_EF],
     livrosPorSerie: {
       'default_ai': [
         { nome:'PRESENTE MAIS Educação Física (Anos Iniciais)',         codigo:'0030P230102000160' },
@@ -4536,7 +4537,7 @@ const PNLD2026 = {
     }
   },
   'História': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_AI, ...SERIES_EF],
     livrosPorSerie: {
       'default_ai': [
         { nome:'PRESENTE MAIS História (Anos Iniciais)',                 codigo:'0036P230102000040' },
@@ -4591,7 +4592,7 @@ const PNLD2026 = {
     }
   },
   'Geografia': {
-    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI],
+    series: [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_AI, ...SERIES_EF],
     livrosPorSerie: {
       'default_ai': [
         { nome:'PRESENTE MAIS Geografia (Anos Iniciais)',                codigo:'0033P230102000050' },
@@ -4865,7 +4866,7 @@ const PNLD2026 = {
   },
 
   'Ciências': {
-    series: [...SERIES_EF, ...SERIES_AI],
+    series: [...SERIES_AI, ...SERIES_EF],
     livrosPorSerie: {
       'default_ai': [
         { nome:'PRESENTE MAIS Ciências da Natureza (Anos Iniciais)',     codigo:'0020P230101207030' },
@@ -5008,7 +5009,7 @@ function getLivrosPorSerie(mat, serie) {
   const selSerMap = document.getElementById('map-sel-ser');
   if (selSerMap) {
     const seriesSet = new Set();
-    const ordemSeries = [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_EF, ...SERIES_AI, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS];
+    const ordemSeries = [...SERIES_EM, ...SERIES_EM_VU, ...SERIES_AI, ...SERIES_EF, ...SERIES_EJA_EF56, ...SERIES_EJA_EM78, ...SERIES_EJA_INICIAIS, ...SERIES_EJA_FINAIS];
     ordemSeries.forEach(s => seriesSet.add(s));
     Object.values(PNLD2026).forEach(m => (m.series||[]).forEach(s => seriesSet.add(s)));
     [...seriesSet].forEach(s => selSerMap.insertAdjacentHTML('beforeend', `<option value="${s}">${s}</option>`));
@@ -5234,7 +5235,6 @@ function rtShowTab(tab) {
 
 // ─── ENVIAR PEDIDO (escola) ───────────────────────────────────────────────────
 async function rtEnviarPedido() {
-  const just   = document.getElementById('rt-justificativa').value.trim();
   const errEl  = document.getElementById('rt-form-error');
   const itensEl = document.querySelectorAll('[id^="rt-item-"]');
 
@@ -5267,13 +5267,20 @@ async function rtEnviarPedido() {
   const protocolo = gerarProtocolo('RT');
 
   // Salva cada item no Supabase
+  let falhaSalvar = false;
   for (const item of itens) {
-    await sbPostSilent('pedidos_reserva', {
+    const ok = await sbPostSilent('pedidos_reserva', {
       protocolo: protocolo,
       inep: e.inep, titulo: item.titulo, mat: item.mat,
-      serie: item.serie, qtd: item.qtd, tipo: item.tipo,
-      justificativa: just, status: 'solicitado'
+      serie: item.serie, codigo: item.codigo, qtd: item.qtd, tipo: item.tipo,
+      status: 'solicitado'
     });
+    if (!ok) falhaSalvar = true;
+  }
+  if (falhaSalvar) {
+    errEl.style.display = '';
+    errEl.textContent = 'Não foi possível salvar o pedido no sistema (verifique sua conexão ou avise o suporte). O e-mail ainda será enviado, mas o pedido pode não aparecer aqui até isso ser corrigido.';
+    console.error('Falha ao salvar pedidos_reserva no Supabase — veja os erros acima para detalhes.');
   }
 
   // Monta tabela de livros para o email
@@ -5357,7 +5364,6 @@ async function rtEnviarPedido() {
 
   // Limpa form
   document.getElementById('rt-itens-container').innerHTML = '';
-  document.getElementById('rt-justificativa').value = '';
   rtItemCount = 0;
 
   await rtCarregarPedidos();
@@ -5405,7 +5411,6 @@ function abrirComprovante(id) {
       <tr><td style="padding:8px 12px;border:1px solid var(--gray-30);font-weight:600;color:var(--gray-80);background:var(--gray-10);">Estado</td><td style="padding:8px 12px;border:1px solid var(--gray-30);color:var(--gray-90);">${p.estado}</td></tr>
       <tr><td style="padding:8px 12px;border:1px solid var(--gray-30);font-weight:600;color:var(--gray-80);background:var(--gray-10);">Data da Solicitação</td><td style="padding:8px 12px;border:1px solid var(--gray-30);color:var(--gray-90);">${p.dataSolicitacao}</td></tr>
       <tr><td style="padding:8px 12px;border:1px solid var(--gray-30);font-weight:600;color:var(--gray-80);background:var(--gray-10);">Status</td><td style="padding:8px 12px;border:1px solid var(--gray-30);color:var(--gray-90);">${STATUS_CONFIG[p.status].label}</td></tr>
-      ${p.justificativa ? `<tr><td style="padding:8px 12px;border:1px solid var(--gray-30);font-weight:600;color:var(--gray-80);background:var(--gray-10);">Justificativa</td><td style="padding:8px 12px;border:1px solid var(--gray-30);color:var(--gray-90);">${p.justificativa}</td></tr>` : ''}
       ${linhasItens}
     </table>
     <div style="font-size:11px;color:var(--gray-60);text-align:center;border-top:1px solid var(--gray-30);padding-top:12px;">
