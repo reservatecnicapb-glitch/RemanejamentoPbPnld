@@ -1438,7 +1438,7 @@ function remAtualizarStats() {
   const ped = document.getElementById('stat-pedidos');
   const myInep = usuarioLogado?.inep;
   // Sobrando: busca total geral do banco pra mostrar no stat
-  sbGet('livros_sobrando', 'ativo=eq.true&select=qtd').then(data => {
+  sbGetAll('livros_sobrando', 'ativo=eq.true&select=qtd').then(data => {
     if (sob) sob.textContent = (data || []).reduce((s,x) => s + (x.qtd||0), 0);
   });
   if (ped) {
@@ -2033,6 +2033,25 @@ async function sbGet(tabela, params = '') {
   return r.json();
 }
 
+// Busca TODAS as linhas de uma tabela, ignorando o limite padrão de 1000
+// linhas por requisição do PostgREST/Supabase. Pagina usando o header Range
+// até que uma página volte com menos linhas do que o tamanho pedido.
+async function sbGetAll(tabela, params = '', pageSize = 1000) {
+  let todos = [];
+  let offset = 0;
+  while (true) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}?${params}`, {
+      headers: { ...sbHeaders(), 'Range-Unit': 'items', 'Range': `${offset}-${offset + pageSize - 1}` }
+    });
+    const pagina = await r.json();
+    if (!Array.isArray(pagina) || pagina.length === 0) break;
+    todos = todos.concat(pagina);
+    if (pagina.length < pageSize) break;
+    offset += pageSize;
+  }
+  return todos;
+}
+
 async function sbPost(tabela, body) {
   const headers = { ...sbHeaders(), 'Prefer': 'return=representation' };
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}`, {
@@ -2214,7 +2233,7 @@ async function remCarregarSobrando() {
     filtro = `ativo=eq.true&inep=eq.${myInep}&order=id.desc&select=*,escolas(nome,cidade,lat,lng,gre)`;
   }
 
-  const dataTodos = await sbGet('livros_sobrando', 'ativo=eq.true&order=id.desc&select=*,escolas(nome,cidade,lat,lng,gre)');
+  const dataTodos = await sbGetAll('livros_sobrando', 'ativo=eq.true&order=id.desc&select=*,escolas(nome,cidade,lat,lng,gre)');
   const mapear = (x) => ({
     id: x.id, inep: x.inep, escola: x.escolas?.nome || '', cidade: x.escolas?.cidade || '',
     lat: parseFloat(x.escolas?.lat) || -7.155, lng: parseFloat(x.escolas?.lng) || -34.865,
