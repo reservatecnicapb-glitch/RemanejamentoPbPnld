@@ -837,6 +837,7 @@
           <span class="badge badge-new" style="margin-left:4px;">NOVO</span>
         </button>
         <button class="tab-btn" data-tab="reserva"><i class="ri-archive-line"></i>Reserva Técnica</button>
+        <button class="tab-btn" data-tab="desfazimento"><i class="ri-folder-shield-2-line"></i>Desfazimento</button>
       </div>
     </div>
 
@@ -1058,6 +1059,23 @@
 
     </div><!-- /tab-content-remanejamento -->
 
+
+    <!-- CONTEÚDO DE DESFAZIMENTO -->
+    <div id="tab-content-desfazimento" style="display:none;">
+      <div class="card" style="margin-top:16px;">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--gray-30);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <i class="ri-folder-shield-2-line" style="color:#1351b4;font-size:18px;"></i>
+          <span style="font-weight:700;font-size:15px;">Desfazimento de Livros</span>
+          <span id="dz-badge" style="font-size:12px;font-weight:600;background:#dbeafe;color:#1351b4;padding:3px 10px;border-radius:12px;"></span>
+          <a href="https://drive.google.com/drive/folders/1TdrqiOkV62sZ08cHCoDGN_sElng0F9nH?hl=pt-br" target="_blank" rel="noopener" class="btn btn-outline" style="margin-left:auto;font-size:12px;padding:5px 12px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;"><i class="ri-folder-download-line"></i> Modelos</a>
+        </div>
+        <div style="padding:12px 20px;font-size:12.5px;color:var(--gray-70);border-bottom:1px solid var(--gray-30);" id="dz-ajuda">Anexe os documentos do processo de desfazimento. Somente arquivos em <b>PDF</b> (até 10 MB cada).</div>
+        <div id="dz-busca-wrap" style="display:none;padding:12px 20px;border-bottom:1px solid var(--gray-30);">
+          <input id="dz-busca" oninput="dzRender()" placeholder="Buscar escola por nome ou INEP..." style="width:100%;max-width:380px;padding:8px 10px;font-size:13px;border:1px solid var(--gray-40);border-radius:3px;font-family:'Inter',sans-serif;">
+        </div>
+        <div id="dz-conteudo"><div style="padding:30px;text-align:center;color:var(--gray-60);">Carregando...</div></div>
+      </div>
+    </div><!-- /tab-content-desfazimento -->
 
     <!-- CONTEÚDO DE RESERVA TÉCNICA -->
     <div id="tab-content-reserva" style="display:none;">
@@ -1470,6 +1488,7 @@ function showMain() {
       tabRem.classList.add('active');
       document.getElementById('tab-content-remanejamento').style.display = '';
       document.getElementById('tab-content-reserva').style.display = 'none';
+      document.getElementById('tab-content-desfazimento').style.display = 'none';
     }
     // Ativa sub-aba sobrando por padrão
     document.querySelectorAll('[data-rem]').forEach(b => b.classList.toggle('active', b.dataset.rem === 'sobrando'));
@@ -1735,6 +1754,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     const tab = btn.dataset.tab;
     document.getElementById('tab-content-remanejamento').style.display = tab === 'remanejamento' ? '' : 'none';
     document.getElementById('tab-content-reserva').style.display       = tab === 'reserva'        ? '' : 'none';
+    document.getElementById('tab-content-desfazimento').style.display  = tab === 'desfazimento'  ? '' : 'none';
   });
 });
 
@@ -2922,6 +2942,12 @@ function abrirTermo(id) {
           </tr>
         </thead>
         <tbody>${linhasTabela}</tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" style="border:1px solid #ccc;padding:6px 8px;text-align:right;font-weight:700;">TOTAL DE LIVROS</td>
+            <td style="border:1px solid #ccc;padding:6px 8px;text-align:center;font-weight:700;">${itens.reduce((s,i)=>s+(parseInt(i.qtd)||0),0)}</td>
+          </tr>
+        </tfoot>
       </table>
 
       <p style="text-align:justify;">
@@ -3069,6 +3095,7 @@ async function exportarPedidosTransporte() {
     'Status Entrega':     p.statusEntrega || 'Aguardando coleta',
   }));
 
+  linhas.push({ 'Escola Solicitante': 'TOTAL DE LIVROS', 'Qtd Total': linhas.reduce((s, l) => s + (l['Qtd Total'] || 0), 0) });
   const ws = XLSX.utils.json_to_sheet(linhas);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Transporte');
@@ -3193,6 +3220,7 @@ async function exportarPedidosExcel() {
     'Data':             p.data
   }));
 
+  linhas.push({ 'Escola Solicitante': 'TOTAL DE LIVROS', 'Qtd Total': linhas.reduce((s, l) => s + (l['Qtd Total'] || 0), 0) });
   const ws = XLSX.utils.json_to_sheet(linhas);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Pedidos');
@@ -3374,6 +3402,11 @@ async function gerarMapaColeta() {
       <th>Item</th><th>Descrição</th><th>Quantidade</th><th>Unidade</th><th>Escola de Origem</th>
     </tr></thead>
     <tbody>${materiais}</tbody>
+  <tfoot><tr>
+      <td colspan="2" style="text-align:right;font-weight:bold;">TOTAL DE LIVROS</td>
+      <td style="text-align:center;font-weight:bold;">${selecionados.flatMap(p => p.itens).reduce((s,it)=>s+(parseInt(it.qtd)||0),0)}</td>
+      <td colspan="2"></td>
+    </tr></tfoot>
   </table>
 
   <div style="margin-top:40px;display:flex;justify-content:space-between;">
@@ -3483,6 +3516,11 @@ async function gerarMapaColetaPorEscola() {
         <th>Item</th><th>Descrição</th><th>Quantidade</th><th>Unidade</th><th>Escola de Origem</th>
       </tr></thead>
       <tbody>${materiais}</tbody>
+      <tfoot><tr>
+      <td colspan="2" style="text-align:right;font-weight:bold;">TOTAL DE LIVROS</td>
+      <td style="text-align:center;font-weight:bold;">${pedidosGrupo.flatMap(p => p.itens).reduce((s,it)=>s+(parseInt(it.qtd)||0),0)}</td>
+      <td colspan="2"></td>
+    </tr></tfoot>
     </table>
 
     <div style="margin-top:40px;display:flex;justify-content:space-between;">
@@ -3687,6 +3725,12 @@ function tdMontarPagina(grupo, tipo, idx) {
         </tr>
       </thead>
       <tbody>${linhasTabela}</tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4" style="border:1px solid #ccc;padding:6px 8px;text-align:right;font-weight:700;">TOTAL DE LIVROS</td>
+          <td style="border:1px solid #ccc;padding:6px 8px;text-align:center;font-weight:700;">${itens.reduce((s,i)=>s+(parseInt(i.qtd)||0),0)}</td>
+        </tr>
+      </tfoot>
     </table>
 
     <p style="text-align:justify;">${declaracaoEscola}, e ${declaracaoSee}.</p>
@@ -5333,6 +5377,12 @@ async function rtEnviarPedido() {
           </tr>
         </thead>
         <tbody>${tabelaLinhas}</tbody>
+        <tfoot>
+          <tr style="background:#f0f0f0;">
+            <td colspan="5" style="padding:8px;border:1px solid #ccc;text-align:right;font-weight:700;">TOTAL DE LIVROS</td>
+            <td style="padding:8px;border:1px solid #ccc;text-align:center;font-weight:700;">${itens.reduce((s,i)=>s+i.qtd,0)}</td>
+          </tr>
+        </tfoot>
       </table>
       <br>
       <p><strong>Autorizo a entrega _____________________________, em ______/______/________</strong></p>
@@ -5395,7 +5445,8 @@ async function rtEnviarPedido() {
 function abrirComprovante(id) {
   const p = rtPedidos.find(x => x.id === id);
   if (!p) return;
-  const itens = p.itens || [{ titulo: p.titulo, mat: p.componente, serie: p.serie, codigo: '—', qtd: p.qtd }];
+  const itens = p.itens || rtPedidos.filter(x => x.protocolo === p.protocolo).map(x => ({ titulo: x.titulo, mat: x.componente, serie: x.serie, codigo: '—', qtd: x.qtd }));
+  const totalLivros = itens.reduce((s, i) => s + (parseInt(i.qtd) || 0), 0);
   const linhasItens = itens.map((item, i) => `
     <tr><td colspan="2" style="padding:6px 12px;border:1px solid var(--gray-30);background:#f0f8f4;font-weight:700;color:var(--green);font-size:12px;">Livro ${i+1}</td></tr>
     <tr>
@@ -5409,7 +5460,9 @@ function abrirComprovante(id) {
     <tr>
       <td style="padding:8px 12px;border:1px solid var(--gray-30);font-weight:600;color:var(--gray-80);background:var(--gray-10);">Quantidade</td>
       <td style="padding:8px 12px;border:1px solid var(--gray-30);color:var(--gray-90);">${item.qtd} exemplares</td>
-    </tr>`).join('');
+    </tr>`).join('') + `
+    <tr><td style="padding:10px 12px;border:1px solid var(--gray-30);font-weight:700;background:#f0f8f4;color:var(--green);">TOTAL DE LIVROS</td>
+    <td style="padding:10px 12px;border:1px solid var(--gray-30);font-weight:700;background:#f0f8f4;color:var(--green);">${totalLivros} exemplares</td></tr>`;
 
   document.getElementById('comprovante-body').innerHTML = `
     <div style="text-align:center;margin-bottom:24px;">
@@ -5588,6 +5641,9 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (btn.dataset.tab === 'reserva') {
       rtAtualizarView();
     }
+    if (btn.dataset.tab === 'desfazimento') {
+      dzCarregar();
+    }
     if (btn.dataset.tab === 'remanejamento') {
       remAtualizarStats();
       remShowTab('mapa');
@@ -5681,6 +5737,166 @@ function fecharEstatisticas() {
 document.getElementById('modal-estatisticas').addEventListener('click', function(e) {
   if (e.target === this) fecharEstatisticas();
 });
+
+// ─── DESFAZIMENTO ─────────────────────────────────────────────────────────────
+const DZ_BUCKET = 'desfazimento';
+const DZ_MAX_MB = 10;
+const DZ_TIPOS = [
+  { id:'inventario',          label:'Inventário' , modelo:'1AJjrNkiF5Q_mnuiwUaaw1l346h6jR17xpppUmy6E8KE' },
+  { id:'laudo',               label:'Laudo' , modelo:'10COO1NDXOPo5alNJ7uvrlq_DvkGWThfNEDbHViqJxZY' },
+  { id:'termo_doacao',        label:'Termo de Doação' , modelo:'1ZiFkJRzUP3pfpVgNDMWes7evITk9hbh_63UTObY7FRA' },
+  { id:'termo_transferencia', label:'Termo de Transferência de Posse' , modelo:'1KepWWiXT94NypEzV7j_R0ZOJrAj80uL4xMLkmWyKgiE' },
+  { id:'convite',             label:'Convite' , modelo:'1e-spPXPR7MHQvmBdAD12tpVTXDaCrXtB3rHsRJVUfgI' },
+  { id:'nomeacao',            label:'Nomeação' , modelo:'1W53mRMDm74x2fmkJy_K0S0aSiGTv16Z45QztkKUmU1w' },
+  { id:'ata',                 label:'Ata' , modelo:'1b9eBkKYRLhlJrAKKa45Vsq02-_rzuQHjpzcX78P5Hd0' },
+  { id:'fotos',               label:'Fotos Comprobatórias' },
+];
+let dzDocs = [];
+let dzEscolas = {};
+let dzErro = '';
+
+const dzEsc = (t) => String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dzUrl = (path) => `${SUPABASE_URL}/storage/v1/object/public/${DZ_BUCKET}/${path.split('/').map(encodeURIComponent).join('/')}`;
+
+async function dzCarregar() {
+  const isEscola = !usuarioLogado?.isAdmin && !usuarioLogado?.isGre && !usuarioLogado?.isComissao;
+  document.getElementById('dz-busca-wrap').style.display = isEscola ? 'none' : '';
+  document.getElementById('dz-conteudo').innerHTML = '<div style="padding:30px;text-align:center;color:var(--gray-60);">Carregando...</div>';
+  dzErro = '';
+  const filtro = isEscola ? `inep=eq.${usuarioLogado.inep}&order=id.asc&select=*` : 'order=id.asc&select=*';
+  const data = await sbGet('desfazimento_docs', filtro);
+  if (!Array.isArray(data)) {
+    dzErro = (data && data.message) ? data.message : 'Erro ao carregar os documentos.';
+    dzDocs = [];
+  } else dzDocs = data;
+  if (!isEscola) {
+    const esc = await sbGet('escolas', 'select=inep,nome,cidade,gre&order=nome');
+    dzEscolas = {};
+    (Array.isArray(esc) ? esc : []).forEach(e => { dzEscolas[String(e.inep).trim()] = e; });
+  }
+  dzRender();
+}
+
+function dzListaArquivos(docs, podeExcluir) {
+  if (docs.length === 0) return '<span style="font-size:12px;color:var(--gray-60);">Nenhum arquivo enviado</span>';
+  return docs.map(d => `
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12.5px;">
+      <i class="ri-file-pdf-2-line" style="color:#be123c;"></i>
+      <a href="${dzUrl(d.caminho)}" target="_blank" rel="noopener" style="color:#1351b4;text-decoration:none;word-break:break-all;">${dzEsc(d.nome_arquivo)}</a>
+      <span style="color:var(--gray-60);font-size:11px;white-space:nowrap;">${d.data ? new Date(d.data).toLocaleDateString('pt-BR') : ''}</span>
+      ${podeExcluir ? `<button class="btn-sm-action" title="Remover" onclick="dzExcluir(${d.id})" style="color:#cc2222;"><i class="ri-delete-bin-line"></i></button>` : ''}
+    </div>`).join('');
+}
+
+function dzRender() {
+  const el = document.getElementById('dz-conteudo');
+  const badge = document.getElementById('dz-badge');
+  if (dzErro) {
+    el.innerHTML = `<div style="padding:24px 20px;color:#991b1b;font-size:13px;">${dzEsc(dzErro)}<br><span style="color:var(--gray-70);">Verifique se a tabela <b>desfazimento_docs</b> e o bucket <b>${DZ_BUCKET}</b> foram criados no Supabase.</span></div>`;
+    badge.textContent = '';
+    return;
+  }
+  const isEscola = !usuarioLogado?.isAdmin && !usuarioLogado?.isGre && !usuarioLogado?.isComissao;
+
+  if (isEscola) {
+    const enviados = DZ_TIPOS.filter(t => dzDocs.some(d => d.tipo === t.id)).length;
+    badge.textContent = `${enviados} de ${DZ_TIPOS.length} documentos`;
+    el.innerHTML = DZ_TIPOS.map(t => {
+      const docs = dzDocs.filter(d => d.tipo === t.id);
+      return `<div style="padding:14px 20px;border-bottom:1px solid var(--gray-30);display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+        <div style="flex:0 0 240px;display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;">
+          <i class="${docs.length ? 'ri-checkbox-circle-fill' : 'ri-checkbox-blank-circle-line'}" style="color:${docs.length ? '#065f46' : 'var(--gray-50)'};font-size:18px;"></i>
+          <div>${t.label}${t.modelo ? `<br><a href="https://docs.google.com/document/d/${t.modelo}/export?format=docx" target="_blank" rel="noopener" style="font-size:11.5px;font-weight:500;color:#1351b4;text-decoration:none;"><i class="ri-download-2-line"></i> Baixar modelo (.docx)</a>` : ''}</div>
+        </div>
+        <div style="flex:1;min-width:220px;">${dzListaArquivos(docs, true)}</div>
+        <div>
+          <label class="btn btn-outline" style="font-size:12px;padding:5px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+            <i class="ri-upload-2-line"></i> Anexar PDF
+            <input type="file" accept="application/pdf,.pdf" multiple style="display:none;" onchange="dzEnviar('${t.id}', this)">
+          </label>
+        </div>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // Visão admin / GRE / comissão
+  const termo = (document.getElementById('dz-busca')?.value || '').trim().toLowerCase();
+  const porInep = {};
+  dzDocs.forEach(d => { (porInep[String(d.inep).trim()] ||= []).push(d); });
+  let ineps = Object.keys(porInep);
+  if (usuarioLogado?.isGre && !usuarioLogado?.isAdmin) {
+    ineps = ineps.filter(i => Number(dzEscolas[i]?.gre) === Number(usuarioLogado.gre));
+  }
+  if (termo) ineps = ineps.filter(i => i.includes(termo) || (dzEscolas[i]?.nome || '').toLowerCase().includes(termo));
+  ineps.sort((a,b) => (dzEscolas[a]?.nome || a).localeCompare(dzEscolas[b]?.nome || b));
+  badge.textContent = `${ineps.length} escola${ineps.length !== 1 ? 's' : ''} com documentos`;
+  if (ineps.length === 0) {
+    el.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--gray-60);">Nenhuma escola enviou documentos ainda.</div>';
+    return;
+  }
+  el.innerHTML = ineps.map(i => {
+    const e = dzEscolas[i] || {};
+    const docs = porInep[i];
+    const chips = DZ_TIPOS.map(t => {
+      const ok = docs.some(d => d.tipo === t.id);
+      return `<span style="font-size:10.5px;padding:2px 7px;border-radius:10px;background:${ok ? '#d1fae5' : 'var(--gray-20)'};color:${ok ? '#065f46' : 'var(--gray-60)'};">${t.label}</span>`;
+    }).join(' ');
+    const detalhes = DZ_TIPOS.map(t => {
+      const ds = docs.filter(d => d.tipo === t.id);
+      return `<div style="display:flex;gap:12px;padding:6px 0;border-top:1px solid var(--gray-20);flex-wrap:wrap;">
+        <div style="flex:0 0 220px;font-weight:600;font-size:12.5px;">${t.label}</div>
+        <div style="flex:1;min-width:200px;">${dzListaArquivos(ds, !!usuarioLogado?.isAdmin)}</div></div>`;
+    }).join('');
+    return `<details style="border-bottom:1px solid var(--gray-30);padding:12px 20px;">
+      <summary style="cursor:pointer;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <span style="font-weight:700;font-size:13px;">${dzEsc(e.nome || i)}</span>
+        <span style="font-family:monospace;font-size:11px;color:var(--gray-60);">${dzEsc(i)}</span>
+        <span style="font-size:12px;color:var(--gray-60);">${dzEsc(e.cidade || '')}${e.gre ? ' · GRE ' + dzEsc(e.gre) : ''}</span>
+        <span style="font-size:12px;font-weight:600;color:#1351b4;">${docs.length} arquivo${docs.length !== 1 ? 's' : ''}</span>
+      </summary>
+      <div style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap;">${chips}</div>
+      ${detalhes}
+    </details>`;
+  }).join('');
+}
+
+async function dzEnviar(tipo, input) {
+  const arquivos = [...(input.files || [])];
+  input.value = '';
+  if (arquivos.length === 0) return;
+  const erros = [];
+  for (const f of arquivos) {
+    const ehPdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+    if (!ehPdf) { erros.push(`"${f.name}": só é permitido PDF.`); continue; }
+    if (f.size > DZ_MAX_MB * 1024 * 1024) { erros.push(`"${f.name}": maior que ${DZ_MAX_MB} MB.`); continue; }
+    const seguro = f.name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '_');
+    const caminho = `${usuarioLogado.inep}/${tipo}/${Date.now()}_${seguro}`;
+    try {
+      const r = await fetch(`${SUPABASE_URL}/storage/v1/object/${DZ_BUCKET}/${caminho}`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/pdf' },
+        body: f
+      });
+      if (!r.ok) { console.error('Upload falhou:', r.status, await r.text()); erros.push(`"${f.name}": falha no envio.`); continue; }
+      const ok = await sbPostSilent('desfazimento_docs', { inep: String(usuarioLogado.inep), tipo, nome_arquivo: f.name, caminho });
+      if (!ok) erros.push(`"${f.name}": enviado, mas não foi possível registrar.`);
+    } catch (e) { console.error(e); erros.push(`"${f.name}": erro de conexão.`); }
+  }
+  if (erros.length) alert(erros.join('\n'));
+  await dzCarregar();
+}
+
+async function dzExcluir(id) {
+  const d = dzDocs.find(x => x.id === id);
+  if (!d || !confirm(`Remover o arquivo "${d.nome_arquivo}"?`)) return;
+  await fetch(`${SUPABASE_URL}/storage/v1/object/${DZ_BUCKET}/${d.caminho}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+  });
+  await sbDelete('desfazimento_docs', `id=eq.${id}`);
+  await dzCarregar();
+}
 
 // ─── INICIAR NA TELA DE LOGIN ─────────────────────────────────────────────────
 // Tenta restaurar sessão salva
