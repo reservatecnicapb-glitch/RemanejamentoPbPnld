@@ -2713,6 +2713,7 @@ function remRenderPedidos() {
   const btnMapa = document.getElementById('btn-mapa-coleta');
   const btnRelatorioColeta = document.getElementById('btn-relatorio-coleta');
   const isGeadmRP = usuarioLogado?.isComissao && usuarioLogado?.divisao === 'GEADM';
+  const isComOf = !!usuarioLogado?.isComissao && usuarioLogado?.divisao !== 'GEADM'; // GEECI/GEECT/GEEJA: aceitam pedidos das suas escolas ofertantes
   if (btnExcel) btnExcel.style.display = isAdmin ? '' : 'none';
   if (btnTransp) btnTransp.style.display = isAdmin ? '' : 'none';
   if (btnMapa) btnMapa.style.display = (isAdmin || isGeadmRP) ? '' : 'none';
@@ -2737,14 +2738,8 @@ function remRenderPedidos() {
       enviados  = remPedidos.filter(p => p.transporte === 'geadm' && (p.status === 'aprovado' || p.status === 'confirmado'));
       recebidos = [];
     } else if (comissaoIneps) {
-      const base = remPedidos.filter(p => {
-        if ((p.status !== 'aprovado' && p.status !== 'confirmado') || p.transporte !== 'proprio') return false;
-        const serieEJA = p.serie?.toUpperCase().includes('EJA');
-        if (usuarioLogado.divisao === 'GEEJA') return serieEJA;
-        if (usuarioLogado.divisao === 'GEECI') return !serieEJA && comissaoIneps.has(String(p.inepSolicitante).trim());
-        if (usuarioLogado.divisao === 'GEECT') return !serieEJA && comissaoIneps.has(String(p.inepSolicitante).trim());
-        return true;
-      });
+      // Pedidos cujas escolas OFERTANTES pertencem à divisão (ela aceita/recusa)
+      const base = remPedidos.filter(p => comissaoIneps.has(String(p.inepOfertante).trim()));
       enviados  = base;
       recebidos = [];
     } else {
@@ -2773,7 +2768,7 @@ function remRenderPedidos() {
       <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray-80);">Ação</th>
     </tr></thead><tbody>${lista.map((p,i) => {
       const s = STATUS[p.status]||STATUS.pendente;
-      const podeAgir = (isAdmin || tipo === 'recebidos') && p.status === 'pendente';
+      const podeAgir = (isAdmin || isComOf || tipo === 'recebidos') && p.status === 'pendente';
       const podeConfirmar = usuarioLogado?.isComissao && p.status === 'aprovado' &&
         (p.transporte === 'proprio' || (p.transporte === 'geadm' && usuarioLogado.divisao === 'GEADM'));
       const contraparte = `<div style="display:flex;align-items:center;gap:6px;">
@@ -2812,10 +2807,10 @@ function remRenderPedidos() {
         <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:right;">
           ${podeConfirmar ? `<button onclick="comissaoConfirmarPedido(${p.id})" style="padding:5px 12px;font-size:11px;background:#14532d;color:white;border:none;border-radius:3px;cursor:pointer;font-weight:600;"><i class="ri-check-double-line"></i> Confirmar</button>`
           : (p.status === 'aprovado' || p.status === 'confirmado') ? renderTermoBotoes(p)
-          : isAdmin && p.status === 'pendente' ? `<div style="display:flex;gap:4px;justify-content:flex-end;">
+          : (isAdmin || isComOf) && p.status === 'pendente' ? `<div style="display:flex;gap:4px;justify-content:flex-end;">
             <button onclick="remAtualizarPedido(${p.id},'aprovado')" style="padding:5px 10px;font-size:11px;background:#d1fae5;color:#065f46;border:none;border-radius:3px;cursor:pointer;font-weight:600;">✓ Aceitar</button>
             <button onclick="remAtualizarPedidoDireto(${p.id},'recusado')" style="padding:5px 10px;font-size:11px;background:#ffe4e6;color:#be123c;border:none;border-radius:3px;cursor:pointer;font-weight:600;">✗ Recusar</button>
-            <button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button>
+            ${isAdmin ? `<button onclick="remApagarPedido(${p.id})" class="btn-sm-action" style="color:#cc2222;" title="Apagar"><i class="ri-delete-bin-line"></i></button>` : ''}
           </div>`
           : isAdmin ? `<div style="display:flex;gap:4px;justify-content:flex-end;">
             ${p.status === 'recusado' ? `<button onclick="remReativarPedido(${p.id})" class="btn-sm-action" style="color:#065f46;" title="Reativar"><i class="ri-refresh-line"></i></button>` : ''}
@@ -3914,7 +3909,8 @@ async function adminAceitarPedido(transporte = 'geadm') {
 }
 
 async function remAtualizarPedido(id, status) {
-  if (status === 'aprovado' && usuarioLogado?.isAdmin) {
+  const comissaoOfertante = usuarioLogado?.isComissao && usuarioLogado?.divisao !== 'GEADM';
+  if (status === 'aprovado' && (usuarioLogado?.isAdmin || comissaoOfertante)) {
     abrirModalAceiteAdmin(id);
     return;
   }
@@ -5777,14 +5773,26 @@ async function dzCarregar() {
   dzRender();
 }
 
-function dzListaArquivos(docs, podeExcluir) {
+function dzStatusBadge(d) {
+  const st = d.status || 'pendente';
+  const m = { pendente:['Aguardando análise','#fef3c7','#92400e'], aprovado:['Aprovado','#d1fae5','#065f46'], rejeitado:['Rejeitado','#fee2e2','#991b1b'] }[st] || ['Aguardando análise','#fef3c7','#92400e'];
+  return `<span style="font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:10px;background:${m[1]};color:${m[2]};white-space:nowrap;">${m[0]}</span>`;
+}
+
+function dzListaArquivos(docs, podeExcluir, podeAvaliar) {
   if (docs.length === 0) return '<span style="font-size:12px;color:var(--gray-60);">Nenhum arquivo enviado</span>';
   return docs.map(d => `
-    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12.5px;">
+    <div style="padding:4px 0;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;flex-wrap:wrap;">
       <i class="ri-file-pdf-2-line" style="color:#be123c;"></i>
       <a href="${dzUrl(d.caminho)}" target="_blank" rel="noopener" style="color:#1351b4;text-decoration:none;word-break:break-all;">${dzEsc(d.nome_arquivo)}</a>
       <span style="color:var(--gray-60);font-size:11px;white-space:nowrap;">${d.data ? new Date(d.data).toLocaleDateString('pt-BR') : ''}</span>
+      ${dzStatusBadge(d)}
+      ${podeAvaliar && d.status !== 'aprovado' ? `<button class="btn-sm-action" title="Aprovar" onclick="dzAvaliar(${d.id},'aprovado')" style="color:#065f46;"><i class="ri-check-line"></i> Aprovar</button>` : ''}
+      ${podeAvaliar && d.status !== 'rejeitado' ? `<button class="btn-sm-action" title="Rejeitar" onclick="dzAvaliar(${d.id},'rejeitado')" style="color:#cc2222;"><i class="ri-close-line"></i> Rejeitar</button>` : ''}
       ${podeExcluir ? `<button class="btn-sm-action" title="Remover" onclick="dzExcluir(${d.id})" style="color:#cc2222;"><i class="ri-delete-bin-line"></i></button>` : ''}
+    </div>
+    ${d.status === 'rejeitado' && d.motivo ? `<div style="margin:3px 0 0 22px;font-size:12px;color:#991b1b;">Motivo: ${dzEsc(d.motivo)}</div>` : ''}
     </div>`).join('');
 }
 
@@ -5799,13 +5807,15 @@ function dzRender() {
   const isEscola = !usuarioLogado?.isAdmin && !usuarioLogado?.isGre && !usuarioLogado?.isComissao;
 
   if (isEscola) {
-    const enviados = DZ_TIPOS.filter(t => dzDocs.some(d => d.tipo === t.id)).length;
-    badge.textContent = `${enviados} de ${DZ_TIPOS.length} documentos`;
+    const enviados = DZ_TIPOS.filter(t => dzDocs.some(d => d.tipo === t.id && d.status === 'aprovado')).length;
+    badge.textContent = `${enviados} de ${DZ_TIPOS.length} aprovados`;
     el.innerHTML = DZ_TIPOS.map(t => {
       const docs = dzDocs.filter(d => d.tipo === t.id);
+      const aprov = docs.some(d => d.status === 'aprovado');
+      const rejOnly = docs.length > 0 && !aprov && docs.every(d => d.status === 'rejeitado');
       return `<div style="padding:14px 20px;border-bottom:1px solid var(--gray-30);display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
         <div style="flex:0 0 240px;display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;">
-          <i class="${docs.length ? 'ri-checkbox-circle-fill' : 'ri-checkbox-blank-circle-line'}" style="color:${docs.length ? '#065f46' : 'var(--gray-50)'};font-size:18px;"></i>
+          <i class="${rejOnly ? 'ri-close-circle-fill' : (docs.length ? 'ri-checkbox-circle-fill' : 'ri-checkbox-blank-circle-line')}" style="color:${rejOnly ? '#cc2222' : (aprov ? '#065f46' : (docs.length ? '#d97706' : 'var(--gray-50)'))};font-size:18px;"></i>
           <div>${t.label}${t.modelo ? `<br><a href="https://docs.google.com/document/d/${t.modelo}/export?format=docx" target="_blank" rel="noopener" style="font-size:11.5px;font-weight:500;color:#1351b4;text-decoration:none;"><i class="ri-download-2-line"></i> Baixar modelo (.docx)</a>` : ''}</div>
         </div>
         <div style="flex:1;min-width:220px;">${dzListaArquivos(docs, true)}</div>
@@ -5839,14 +5849,17 @@ function dzRender() {
     const e = dzEscolas[i] || {};
     const docs = porInep[i];
     const chips = DZ_TIPOS.map(t => {
-      const ok = docs.some(d => d.tipo === t.id);
-      return `<span style="font-size:10.5px;padding:2px 7px;border-radius:10px;background:${ok ? '#d1fae5' : 'var(--gray-20)'};color:${ok ? '#065f46' : 'var(--gray-60)'};">${t.label}</span>`;
+      const ds = docs.filter(d => d.tipo === t.id);
+      const c = ds.length === 0 ? ['var(--gray-20)','var(--gray-60)']
+        : ds.some(d => d.status === 'aprovado') ? ['#d1fae5','#065f46']
+        : ds.every(d => d.status === 'rejeitado') ? ['#fee2e2','#991b1b'] : ['#fef3c7','#92400e'];
+      return `<span style="font-size:10.5px;padding:2px 7px;border-radius:10px;background:${c[0]};color:${c[1]};">${t.label}</span>`;
     }).join(' ');
     const detalhes = DZ_TIPOS.map(t => {
       const ds = docs.filter(d => d.tipo === t.id);
       return `<div style="display:flex;gap:12px;padding:6px 0;border-top:1px solid var(--gray-20);flex-wrap:wrap;">
         <div style="flex:0 0 220px;font-weight:600;font-size:12.5px;">${t.label}</div>
-        <div style="flex:1;min-width:200px;">${dzListaArquivos(ds, !!usuarioLogado?.isAdmin)}</div></div>`;
+        <div style="flex:1;min-width:200px;">${dzListaArquivos(ds, !!usuarioLogado?.isAdmin, !!usuarioLogado?.isAdmin)}</div></div>`;
     }).join('');
     return `<details style="border-bottom:1px solid var(--gray-30);padding:12px 20px;">
       <summary style="cursor:pointer;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
@@ -5854,6 +5867,7 @@ function dzRender() {
         <span style="font-family:monospace;font-size:11px;color:var(--gray-60);">${dzEsc(i)}</span>
         <span style="font-size:12px;color:var(--gray-60);">${dzEsc(e.cidade || '')}${e.gre ? ' · GRE ' + dzEsc(e.gre) : ''}</span>
         <span style="font-size:12px;font-weight:600;color:#1351b4;">${docs.length} arquivo${docs.length !== 1 ? 's' : ''}</span>
+        ${docs.some(d => !d.status || d.status === 'pendente') ? `<span style="font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:10px;background:#fef3c7;color:#92400e;">${docs.filter(d => !d.status || d.status === 'pendente').length} p/ analisar</span>` : ''}
       </summary>
       <div style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap;">${chips}</div>
       ${detalhes}
@@ -5884,6 +5898,20 @@ async function dzEnviar(tipo, input) {
     } catch (e) { console.error(e); erros.push(`"${f.name}": erro de conexão.`); }
   }
   if (erros.length) alert(erros.join('\n'));
+  await dzCarregar();
+}
+
+async function dzAvaliar(id, status) {
+  const d = dzDocs.find(x => x.id === id);
+  if (!d || !usuarioLogado?.isAdmin) return;
+  let motivo = null;
+  if (status === 'rejeitado') {
+    motivo = prompt(`Motivo da rejeição de "${d.nome_arquivo}" (a escola vai ver):`, '');
+    if (motivo === null) return;
+    motivo = motivo.trim() || null;
+  }
+  const ok = await sbPatch('desfazimento_docs', `id=eq.${id}`, { status, motivo });
+  if (!ok) { alert('Não foi possível salvar. Rode o SQL que adiciona as colunas status e motivo na tabela desfazimento_docs.'); return; }
   await dzCarregar();
 }
 
