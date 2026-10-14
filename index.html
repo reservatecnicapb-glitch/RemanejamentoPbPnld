@@ -3953,7 +3953,7 @@ async function rtCarregarPedidos() {
     id: p.id, protocolo: p.protocolo,
     inep: p.inep, escola: p.escolas?.nome || p.inep,
     municipio: p.escolas?.cidade || '', gre: '', estado: 'Paraíba',
-    titulo: p.titulo, componente: p.mat, serie: p.serie,
+    titulo: p.titulo, componente: p.mat, serie: p.serie, codigo: p.codigo, tipo: p.tipo,
     itens: p.itens || null,
     qtd: p.qtd,
     dataSolicitacao: new Date(p.data).toLocaleDateString('pt-BR'),
@@ -5340,9 +5340,35 @@ async function rtEnviarPedido() {
     itens.push({ mat, serie: ser, titulo: livNome, codigo: livCod, qtd, tipo });
   }
 
+  if (window._rtEnviando) return;
+  window._rtEnviando = true;
+  try {
   errEl.style.display = 'none';
   const e = usuarioLogado;
-  const protocolo = gerarProtocolo('RT');
+
+  // Uma escola só tem 1 pedido em aberto (status "Solicitado"): novos livros entram nele
+  await rtCarregarPedidos();
+  const abertos = rtPedidos.filter(p => String(p.inep) === String(e.inep) && p.status === 'solicitado');
+  const protocolo = abertos.length ? abertos[0].protocolo : gerarProtocolo('RT');
+  const existentes = abertos.filter(p => p.protocolo === protocolo);
+
+  // Bloqueia livro repetido (já no pedido aberto ou duas vezes neste envio)
+  const vistosNovos = new Set();
+  const repetidos = [];
+  for (const item of itens) {
+    const k = item.codigo + '|' + item.tipo;
+    if (vistosNovos.has(k) || existentes.some(x => x.codigo === item.codigo && x.tipo === item.tipo)) repetidos.push(item.titulo + ' (' + item.tipo + ')');
+    vistosNovos.add(k);
+  }
+  if (repetidos.length) {
+    errEl.style.display = '';
+    errEl.textContent = 'Estes livros já estão no seu pedido em aberto' + (abertos.length ? ' (protocolo ' + protocolo + ')' : '') + ' ou foram repetidos aqui: ' + repetidos.join('; ') + '. Remova-os desta solicitação ou cancele o pedido anterior em "Meus pedidos".';
+    return;
+  }
+  const itensEmail = [
+    ...existentes.map(x => ({ mat: x.componente, serie: x.serie, titulo: x.titulo, tipo: x.tipo || 'Aluno', qtd: parseInt(x.qtd) || 0 })),
+    ...itens
+  ];
 
   // Salva cada item no Supabase
   let falhaSalvar = false;
@@ -5363,7 +5389,7 @@ async function rtEnviarPedido() {
 
   // Monta tabela de livros para o email
   // Monta o email completo como HTML
-  const tabelaLinhas = itens.map((item, i) => `
+  const tabelaLinhas = itensEmail.map((item, i) => `
     <tr>
       <td style="text-align:center;padding:6px 8px;border:1px solid #ccc;">${i+1}</td>
       <td style="padding:6px 8px;border:1px solid #ccc;">${item.mat}</td>
@@ -5395,7 +5421,7 @@ async function rtEnviarPedido() {
         <tfoot>
           <tr style="background:#f0f0f0;">
             <td colspan="5" style="padding:8px;border:1px solid #ccc;text-align:right;font-weight:700;">TOTAL DE LIVROS</td>
-            <td style="padding:8px;border:1px solid #ccc;text-align:center;font-weight:700;">${itens.reduce((s,i)=>s+i.qtd,0)}</td>
+            <td style="padding:8px;border:1px solid #ccc;text-align:center;font-weight:700;">${itensEmail.reduce((s,i)=>s+i.qtd,0)}</td>
           </tr>
         </tfoot>
       </table>
@@ -5453,7 +5479,9 @@ async function rtEnviarPedido() {
   await rtCarregarPedidos();
   rtShowTab('meus');
   rtRenderMeusPedidos();
-  if (rtPedidos.length > 0) abrirComprovante(rtPedidos[rtPedidos.length - 1].id);
+  const meuPedido = rtPedidos.find(p => p.protocolo === protocolo);
+  if (meuPedido) abrirComprovante(meuPedido.id);
+  } finally { window._rtEnviando = false; }
 }
 
 // ─── COMPROVANTE ──────────────────────────────────────────────────────────────
