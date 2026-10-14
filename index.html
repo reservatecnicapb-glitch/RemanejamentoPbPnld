@@ -2088,6 +2088,7 @@ async function sbPostSilent(tabela, body) {
   if (!r.ok) {
     let errBody = '';
     try { errBody = await r.text(); } catch(e) {}
+    window._sbUltimoErro = `status ${r.status}: ${errBody}`;
     console.error(`sbPostSilent falhou em "${tabela}" (status ${r.status}):`, errBody, 'body enviado:', body);
   }
   return r.ok;
@@ -3960,6 +3961,25 @@ async function rtCarregarPedidos() {
   }));
 }
 
+// Agrupa as linhas (1 por livro) em um pedido por protocolo
+function rtAgrupar(lista) {
+  const mapa = new Map();
+  lista.forEach(p => {
+    const k = p.protocolo || ('id' + p.id);
+    if (!mapa.has(k)) mapa.set(k, { ...p, ids: [], itensGrupo: [], qtd: 0 });
+    const g = mapa.get(k);
+    g.ids.push(p.id);
+    g.itensGrupo.push({ titulo: p.titulo, componente: p.componente, serie: p.serie, qtd: p.qtd });
+    g.qtd += parseInt(p.qtd) || 0;
+  });
+  return [...mapa.values()];
+}
+function rtLivrosHtml(p) {
+  return p.itensGrupo.map(i => `<div style="margin-bottom:4px;">
+    <div style="font-weight:600;color:var(--gray-90);">${i.titulo} <span style="font-family:monospace;color:var(--gray-70);">×${i.qtd}</span></div>
+    <div style="font-size:11px;color:var(--gray-60);">${i.componente} · ${i.serie}</div></div>`).join('');
+}
+
 const STATUS_CONFIG = {
   solicitado:    { label: 'Solicitado',         color: '#1351b4', bg: '#dbeafe', icon: 'ri-file-text-line' },
   em_separacao:  { label: 'Em separação',       color: '#92400e', bg: '#fef3c7', icon: 'ri-archive-2-line' },
@@ -3995,7 +4015,7 @@ function rtPreencherCabecalho() {
 
 function rtRenderMeusPedidos() {
   if (!usuarioLogado) return;
-  const meus = rtPedidos.filter(p => p.inep === usuarioLogado.inep);
+  const meus = rtAgrupar(rtPedidos.filter(p => p.inep === usuarioLogado.inep));
   const badge = document.getElementById('rt-count-badge');
   badge.textContent = meus.length + ' pedido' + (meus.length !== 1 ? 's' : '');
   const el = document.getElementById('rt-lista-escola');
@@ -4022,10 +4042,7 @@ function rtRenderMeusPedidos() {
         const s = STATUS_CONFIG[p.status];
         return `<tr style="${i%2===1?'background:rgba(0,0,0,.015)':''}">
           <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);font-family:monospace;font-weight:700;color:var(--gray-90);">${p.protocolo}</td>
-          <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);">
-            <div style="font-weight:600;color:var(--gray-90);">${p.titulo}</div>
-            <div style="font-size:11px;color:var(--gray-60);">${p.componente} · ${p.serie}</div>
-          </td>
+          <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);">${rtLivrosHtml(p)}</td>
           <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;font-family:monospace;font-weight:700;">${p.qtd}</td>
           <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);color:var(--gray-80);font-size:12px;">${p.dataSolicitacao}</td>
           <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;">
@@ -4046,9 +4063,14 @@ function rtRenderMeusPedidos() {
   </table></div>`;
 }
 
+function rtFiltroPedido(id) {
+  const p = rtPedidos.find(x => x.id === id);
+  return p && p.protocolo ? `protocolo=eq.${encodeURIComponent(p.protocolo)}` : `id=eq.${id}`;
+}
+
 async function rtCancelarPedido(id) {
   if (!confirm('Cancelar este pedido? Esta ação não pode ser desfeita.')) return;
-  await sbDelete('pedidos_reserva', `id=eq.${id}`);
+  await sbDelete('pedidos_reserva', rtFiltroPedido(id));
   await rtCarregarPedidos();
   rtRenderMeusPedidos();
 }
@@ -4064,11 +4086,11 @@ function admShowTab(tab) {
 }
 
 function admRenderLista(filtro) {
-  const lista = rtPedidos.filter(p =>
+  const lista = rtAgrupar(rtPedidos.filter(p =>
     filtro === 'todos'     ? true :
     filtro === 'pendentes' ? p.status !== 'entregue' :
     p.status === 'entregue'
-  );
+  ));
   document.getElementById('adm-count-badge').textContent = lista.length + ' pedido' + (lista.length !== 1 ? 's' : '');
   const el = document.getElementById('rt-lista-admin');
   if (lista.length === 0) {
@@ -4102,10 +4124,7 @@ function admRenderLista(filtro) {
             <div style="font-weight:600;color:var(--gray-90);font-size:12px;">${p.escola}</div>
             <div style="font-size:11px;color:var(--gray-60);">INEP ${p.inep} · ${p.municipio}</div>
           </td>
-          <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);">
-            <div style="font-weight:600;color:var(--gray-90);">${p.titulo}</div>
-            <div style="font-size:11px;color:var(--gray-60);">${p.componente} · ${p.serie}</div>
-          </td>
+          <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);">${rtLivrosHtml(p)}</td>
           <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;font-family:monospace;font-weight:700;">${p.qtd}</td>
           <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);color:var(--gray-80);font-size:12px;">${p.dataSolicitacao}</td>
           <td style="padding:12px 16px;border-bottom:1px solid var(--gray-30);text-align:center;">
@@ -4129,7 +4148,7 @@ function admRenderLista(filtro) {
 
 async function rtApagarPedido(id) {
   if (!confirm('Apagar este pedido de reserva técnica permanentemente?')) return;
-  await sbDelete('pedidos_reserva', `id=eq.${id}`);
+  await sbDelete('pedidos_reserva', rtFiltroPedido(id));
   await rtCarregarPedidos();
   admRenderLista(admFiltro);
 }
@@ -4140,7 +4159,7 @@ async function admAvancarStatus(id) {
   const idx = STATUS_ORDEM.indexOf(p.status);
   if (idx < STATUS_ORDEM.length - 1) {
     const novoStatus = STATUS_ORDEM[idx + 1];
-    await sbPatch('pedidos_reserva', `id=eq.${id}`, { status: novoStatus });
+    await sbPatch('pedidos_reserva', rtFiltroPedido(id), { status: novoStatus });
     await rtCarregarPedidos();
     admRenderLista(admFiltro);
   }
@@ -5338,7 +5357,7 @@ async function rtEnviarPedido() {
   }
   if (falhaSalvar) {
     errEl.style.display = '';
-    errEl.textContent = 'Não foi possível salvar o pedido no sistema (verifique sua conexão ou avise o suporte). O e-mail ainda será enviado, mas o pedido pode não aparecer aqui até isso ser corrigido.';
+    errEl.textContent = 'Não foi possível salvar o pedido no sistema (' + (window._sbUltimoErro || 'erro desconhecido') + '). O e-mail ainda será enviado, mas o pedido pode não aparecer aqui até isso ser corrigido.';
     console.error('Falha ao salvar pedidos_reserva no Supabase — veja os erros acima para detalhes.');
   }
 
@@ -5737,16 +5756,34 @@ document.getElementById('modal-estatisticas').addEventListener('click', function
 // ─── DESFAZIMENTO ─────────────────────────────────────────────────────────────
 const DZ_BUCKET = 'desfazimento';
 const DZ_MAX_MB = 10;
-const DZ_TIPOS = [
-  { id:'inventario',          label:'Inventário' , modelo:'1AJjrNkiF5Q_mnuiwUaaw1l346h6jR17xpppUmy6E8KE' },
-  { id:'laudo',               label:'Laudo' , modelo:'10COO1NDXOPo5alNJ7uvrlq_DvkGWThfNEDbHViqJxZY' },
-  { id:'termo_doacao',        label:'Termo de Doação' , modelo:'1ZiFkJRzUP3pfpVgNDMWes7evITk9hbh_63UTObY7FRA' },
-  { id:'termo_transferencia', label:'Termo de Transferência de Posse' , modelo:'1KepWWiXT94NypEzV7j_R0ZOJrAj80uL4xMLkmWyKgiE' },
-  { id:'convite',             label:'Convite' , modelo:'1e-spPXPR7MHQvmBdAD12tpVTXDaCrXtB3rHsRJVUfgI' },
+const DZ_TIPOS_ALL = [
   { id:'nomeacao',            label:'Nomeação' , modelo:'1W53mRMDm74x2fmkJy_K0S0aSiGTv16Z45QztkKUmU1w' },
   { id:'ata',                 label:'Ata' , modelo:'1b9eBkKYRLhlJrAKKa45Vsq02-_rzuQHjpzcX78P5Hd0' },
+  { id:'inventario',          label:'Inventário' , modelo:'1AJjrNkiF5Q_mnuiwUaaw1l346h6jR17xpppUmy6E8KE' },
+  { id:'laudo',               label:'Laudo' , modelo:'10COO1NDXOPo5alNJ7uvrlq_DvkGWThfNEDbHViqJxZY' },
+  { id:'convite',             label:'Convite' , modelo:'1e-spPXPR7MHQvmBdAD12tpVTXDaCrXtB3rHsRJVUfgI' },
+  { id:'termo_transferencia', label:'Termo de Transferência de Posse' , modelo:'1KepWWiXT94NypEzV7j_R0ZOJrAj80uL4xMLkmWyKgiE' },
+  { id:'termo_doacao',        label:'Termo de Doação' , modelo:'1ZiFkJRzUP3pfpVgNDMWes7evITk9hbh_63UTObY7FRA' },
   { id:'fotos',               label:'Fotos Comprobatórias' },
 ];
+const DZ_CATEGORIAS = [
+  { id:'medio',    label:'(2021-2025) Médio',        semPosse:false },
+  { id:'finais',   label:'(2024-2027) Anos Finais',  semPosse:false },
+  { id:'iniciais', label:'(2023-2026) Anos Iniciais',semPosse:true  },
+  { id:'infantil', label:'(2023-2026) Ed. Infantil', semPosse:true  },
+];
+let dzCat = 'medio';
+function dzTiposDe(cat) {
+  const c = DZ_CATEGORIAS.find(x => x.id === cat);
+  return DZ_TIPOS_ALL.filter(t => !(c && c.semPosse && (t.id === 'convite' || t.id === 'termo_transferencia')));
+}
+const dzCatDoc = (d) => d.categoria || 'medio';
+function dzTrocarCat(id) { dzCat = id; dzRender(); }
+function dzAbasHtml() {
+  return `<div style="display:flex;gap:6px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--gray-30);background:var(--gray-10);">` +
+    DZ_CATEGORIAS.map(c => `<button onclick="dzTrocarCat('${c.id}')" style="padding:7px 14px;font-size:12.5px;font-weight:600;font-family:'Inter',sans-serif;border-radius:4px;cursor:pointer;border:1px solid ${c.id === dzCat ? '#1351b4' : 'var(--gray-40)'};background:${c.id === dzCat ? '#1351b4' : '#fff'};color:${c.id === dzCat ? '#fff' : 'var(--gray-80)'};">${c.label}</button>`).join('') + `</div>`;
+}
+
 let dzDocs = [];
 let dzEscolas = {};
 let dzErro = '';
@@ -5807,10 +5844,12 @@ function dzRender() {
   const isEscola = !usuarioLogado?.isAdmin && !usuarioLogado?.isGre && !usuarioLogado?.isComissao;
 
   if (isEscola) {
-    const enviados = DZ_TIPOS.filter(t => dzDocs.some(d => d.tipo === t.id && d.status === 'aprovado')).length;
-    badge.textContent = `${enviados} de ${DZ_TIPOS.length} aprovados`;
-    el.innerHTML = DZ_TIPOS.map(t => {
-      const docs = dzDocs.filter(d => d.tipo === t.id);
+    const TIPOS = dzTiposDe(dzCat);
+    const docsCat = dzDocs.filter(d => dzCatDoc(d) === dzCat);
+    const enviados = TIPOS.filter(t => docsCat.some(d => d.tipo === t.id && d.status === 'aprovado')).length;
+    badge.textContent = `${enviados} de ${TIPOS.length} aprovados`;
+    el.innerHTML = dzAbasHtml() + TIPOS.map(t => {
+      const docs = docsCat.filter(d => d.tipo === t.id);
       const aprov = docs.some(d => d.status === 'aprovado');
       const rejOnly = docs.length > 0 && !aprov && docs.every(d => d.status === 'rejeitado');
       return `<div style="padding:14px 20px;border-bottom:1px solid var(--gray-30);display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
@@ -5833,7 +5872,7 @@ function dzRender() {
   // Visão admin / GRE / comissão
   const termo = (document.getElementById('dz-busca')?.value || '').trim().toLowerCase();
   const porInep = {};
-  dzDocs.forEach(d => { (porInep[String(d.inep).trim()] ||= []).push(d); });
+  dzDocs.filter(d => dzCatDoc(d) === dzCat).forEach(d => { (porInep[String(d.inep).trim()] ||= []).push(d); });
   let ineps = Object.keys(porInep);
   if (usuarioLogado?.isGre && !usuarioLogado?.isAdmin) {
     ineps = ineps.filter(i => Number(dzEscolas[i]?.gre) === Number(usuarioLogado.gre));
@@ -5842,20 +5881,20 @@ function dzRender() {
   ineps.sort((a,b) => (dzEscolas[a]?.nome || a).localeCompare(dzEscolas[b]?.nome || b));
   badge.textContent = `${ineps.length} escola${ineps.length !== 1 ? 's' : ''} com documentos`;
   if (ineps.length === 0) {
-    el.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--gray-60);">Nenhuma escola enviou documentos ainda.</div>';
+    el.innerHTML = dzAbasHtml() + '<div style="padding:40px 20px;text-align:center;color:var(--gray-60);">Nenhuma escola enviou documentos nesta aba ainda.</div>';
     return;
   }
-  el.innerHTML = ineps.map(i => {
+  el.innerHTML = dzAbasHtml() + ineps.map(i => {
     const e = dzEscolas[i] || {};
     const docs = porInep[i];
-    const chips = DZ_TIPOS.map(t => {
+    const chips = dzTiposDe(dzCat).map(t => {
       const ds = docs.filter(d => d.tipo === t.id);
       const c = ds.length === 0 ? ['var(--gray-20)','var(--gray-60)']
         : ds.some(d => d.status === 'aprovado') ? ['#d1fae5','#065f46']
         : ds.every(d => d.status === 'rejeitado') ? ['#fee2e2','#991b1b'] : ['#fef3c7','#92400e'];
       return `<span style="font-size:10.5px;padding:2px 7px;border-radius:10px;background:${c[0]};color:${c[1]};">${t.label}</span>`;
     }).join(' ');
-    const detalhes = DZ_TIPOS.map(t => {
+    const detalhes = dzTiposDe(dzCat).map(t => {
       const ds = docs.filter(d => d.tipo === t.id);
       return `<div style="display:flex;gap:12px;padding:6px 0;border-top:1px solid var(--gray-20);flex-wrap:wrap;">
         <div style="flex:0 0 220px;font-weight:600;font-size:12.5px;">${t.label}</div>
@@ -5885,7 +5924,7 @@ async function dzEnviar(tipo, input) {
     if (!ehPdf) { erros.push(`"${f.name}": só é permitido PDF.`); continue; }
     if (f.size > DZ_MAX_MB * 1024 * 1024) { erros.push(`"${f.name}": maior que ${DZ_MAX_MB} MB.`); continue; }
     const seguro = f.name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '_');
-    const caminho = `${usuarioLogado.inep}/${tipo}/${Date.now()}_${seguro}`;
+    const caminho = `${usuarioLogado.inep}/${dzCat}/${tipo}/${Date.now()}_${seguro}`;
     try {
       const r = await fetch(`${SUPABASE_URL}/storage/v1/object/${DZ_BUCKET}/${caminho}`, {
         method: 'POST',
@@ -5893,7 +5932,7 @@ async function dzEnviar(tipo, input) {
         body: f
       });
       if (!r.ok) { console.error('Upload falhou:', r.status, await r.text()); erros.push(`"${f.name}": falha no envio.`); continue; }
-      const ok = await sbPostSilent('desfazimento_docs', { inep: String(usuarioLogado.inep), tipo, nome_arquivo: f.name, caminho });
+      const ok = await sbPostSilent('desfazimento_docs', { inep: String(usuarioLogado.inep), tipo, nome_arquivo: f.name, caminho, categoria: dzCat });
       if (!ok) erros.push(`"${f.name}": enviado, mas não foi possível registrar.`);
     } catch (e) { console.error(e); erros.push(`"${f.name}": erro de conexão.`); }
   }
