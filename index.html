@@ -5352,27 +5352,40 @@ async function rtEnviarPedido() {
   const protocolo = abertos.length ? abertos[0].protocolo : gerarProtocolo('RT');
   const existentes = abertos.filter(p => p.protocolo === protocolo);
 
-  // Bloqueia livro repetido (já no pedido aberto ou duas vezes neste envio)
+  // Livro repetido NO MESMO envio: bloqueia. Livro que já está no pedido aberto: atualiza a quantidade.
   const vistosNovos = new Set();
-  const repetidos = [];
+  const dupNoEnvio = [];
   for (const item of itens) {
     const k = item.codigo + '|' + item.tipo;
-    if (vistosNovos.has(k) || existentes.some(x => x.codigo === item.codigo && x.tipo === item.tipo)) repetidos.push(item.titulo + ' (' + item.tipo + ')');
+    if (vistosNovos.has(k)) dupNoEnvio.push(item.titulo + ' (' + item.tipo + ')');
     vistosNovos.add(k);
   }
-  if (repetidos.length) {
+  if (dupNoEnvio.length) {
     errEl.style.display = '';
-    errEl.textContent = 'Estes livros já estão no seu pedido em aberto' + (abertos.length ? ' (protocolo ' + protocolo + ')' : '') + ' ou foram repetidos aqui: ' + repetidos.join('; ') + '. Remova-os desta solicitação ou cancele o pedido anterior em "Meus pedidos".';
+    errEl.textContent = 'Você adicionou o mesmo livro mais de uma vez nesta solicitação: ' + dupNoEnvio.join('; ') + '. Deixe apenas uma linha por livro.';
     return;
   }
+  const paraAtualizar = [];   // { linha existente, nova qtd }
+  const paraInserir = [];
+  for (const item of itens) {
+    const ex = existentes.find(x => x.codigo === item.codigo && x.tipo === item.tipo);
+    if (ex) paraAtualizar.push({ ex, qtd: item.qtd }); else paraInserir.push(item);
+  }
   const itensEmail = [
-    ...existentes.map(x => ({ mat: x.componente, serie: x.serie, titulo: x.titulo, tipo: x.tipo || 'Aluno', qtd: parseInt(x.qtd) || 0 })),
-    ...itens
+    ...existentes.map(x => {
+      const up = paraAtualizar.find(u => u.ex.id === x.id);
+      return { mat: x.componente, serie: x.serie, titulo: x.titulo, tipo: x.tipo || 'Aluno', qtd: up ? up.qtd : (parseInt(x.qtd) || 0) };
+    }),
+    ...paraInserir
   ];
 
-  // Salva cada item no Supabase
+  // Salva no Supabase: atualiza a quantidade dos livros já pedidos e insere os novos
   let falhaSalvar = false;
-  for (const item of itens) {
+  for (const u of paraAtualizar) {
+    const ok = await sbPatch('pedidos_reserva', `id=eq.${u.ex.id}`, { qtd: u.qtd });
+    if (!ok) { falhaSalvar = true; window._sbUltimoErro = 'não foi possível atualizar a quantidade'; }
+  }
+  for (const item of paraInserir) {
     const ok = await sbPostSilent('pedidos_reserva', {
       protocolo: protocolo,
       inep: e.inep, titulo: item.titulo, mat: item.mat,
