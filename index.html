@@ -5356,8 +5356,8 @@ async function rtEnviarPedido() {
   const vistosNovos = new Set();
   const dupNoEnvio = [];
   for (const item of itens) {
-    const k = item.codigo + '|' + item.tipo;
-    if (vistosNovos.has(k)) dupNoEnvio.push(item.titulo + ' (' + item.tipo + ')');
+    const k = item.codigo + '|' + item.serie + '|' + item.tipo;
+    if (vistosNovos.has(k)) dupNoEnvio.push(item.titulo + ' — ' + item.serie + ' (' + item.tipo + ')');
     vistosNovos.add(k);
   }
   if (dupNoEnvio.length) {
@@ -5368,7 +5368,7 @@ async function rtEnviarPedido() {
   const paraAtualizar = [];   // { linha existente, nova qtd }
   const paraInserir = [];
   for (const item of itens) {
-    const ex = existentes.find(x => x.codigo === item.codigo && x.tipo === item.tipo);
+    const ex = existentes.find(x => x.codigo === item.codigo && x.serie === item.serie && x.tipo === item.tipo);
     if (ex) paraAtualizar.push({ ex, qtd: item.qtd }); else paraInserir.push(item);
   }
   const itensEmail = [
