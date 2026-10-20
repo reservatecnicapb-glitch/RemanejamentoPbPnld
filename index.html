@@ -2444,7 +2444,7 @@ function renderTermoBotoes(p) {
   const isSolicitante = usuarioLogado?.inep === p.inepSolicitante;
   const podeAssinar   = (isOfertante && !p.assinaturaOfertante) || (isSolicitante && !p.assinaturaSolicitante);
   const assinadas     = (p.assinaturaOfertante ? 1 : 0) + (p.assinaturaSolicitante ? 1 : 0);
-  const podePrint = p.termoAssinado || usuarioLogado?.isAdmin || usuarioLogado?.isGre || usuarioLogado?.isComissao;
+  const podePrint = !usuarioLogado?.isComissao && (p.termoAssinado || usuarioLogado?.isAdmin || usuarioLogado?.isGre); // comissões não geram termos
 
   // GRE e GEADM podem progredir status após termo assinado
   const isGre    = usuarioLogado?.isGre;
@@ -2707,6 +2707,17 @@ function admFiltrarEOrdenarPedidos(lista) {
   return filtrada;
 }
 
+// Pedidos que o usuário pode usar em mapa de coleta / planilha de transporte
+function remPedidosDoEscopo(lista) {
+  if (usuarioLogado?.isAdmin) return lista;
+  if (usuarioLogado?.isComissao) {
+    if (usuarioLogado.divisao === 'GEADM') return lista.filter(p => p.transporte === 'geadm');
+    if (comissaoIneps) return lista.filter(p => comissaoIneps.has(String(p.inepOfertante).trim()));
+    return [];
+  }
+  return lista;
+}
+
 function remRenderPedidos() {
   const isAdmin=usuarioLogado?.isAdmin, myInep=usuarioLogado?.inep, isGre=usuarioLogado?.isGre, greNum=usuarioLogado?.gre;
   const btnExcel = document.getElementById('btn-exportar-excel');
@@ -2716,11 +2727,13 @@ function remRenderPedidos() {
   const isGeadmRP = usuarioLogado?.isComissao && usuarioLogado?.divisao === 'GEADM';
   const isComOf = !!usuarioLogado?.isComissao && usuarioLogado?.divisao !== 'GEADM'; // GEECI/GEECT/GEEJA: aceitam pedidos das suas escolas ofertantes
   if (btnExcel) btnExcel.style.display = isAdmin ? '' : 'none';
-  if (btnTransp) btnTransp.style.display = isAdmin ? '' : 'none';
-  if (btnMapa) btnMapa.style.display = (isAdmin || isGeadmRP) ? '' : 'none';
+  const btnTermos = document.getElementById('rem-btn-selecionar');
+  if (btnTermos) btnTermos.style.display = usuarioLogado?.isComissao ? 'none' : '';
+  if (btnTransp) btnTransp.style.display = (isAdmin || usuarioLogado?.isComissao) ? '' : 'none';
+  if (btnMapa) btnMapa.style.display = (isAdmin || usuarioLogado?.isComissao) ? '' : 'none';
   if (btnRelatorioColeta) btnRelatorioColeta.style.display = (isAdmin || isGeadmRP) ? '' : 'none';
   const filtroDiv = document.getElementById('adm-filtros-pedidos');
-  if (filtroDiv) filtroDiv.style.display = isAdmin ? 'flex' : 'none';
+  if (filtroDiv) filtroDiv.style.display = (isAdmin || usuarioLogado?.isComissao) ? 'flex' : 'none';
   const STATUS={pendente:{label:'Aguardando aceite',bg:'#dbeafe',color:'#1351b4'},aprovado:{label:'Aprovado',bg:'#d1fae5',color:'#065f46'},recusado:{label:'Recusado',bg:'#ffe4e6',color:'#be123c'},confirmado:{label:'Confirmado',bg:'#f0fdf4',color:'#14532d'}};
 
   let enviados, recebidos;
@@ -2738,11 +2751,14 @@ function remRenderPedidos() {
     if (divisao === 'GEADM') {
       enviados  = remPedidos.filter(p => p.transporte === 'geadm' && (p.status === 'aprovado' || p.status === 'confirmado'));
       recebidos = [];
+      admPopularFiltroGREs(enviados);
+      enviados = admFiltrarEOrdenarPedidos(enviados);
     } else if (comissaoIneps) {
       // Pedidos cujas escolas OFERTANTES pertencem à divisão (ela aceita/recusa)
       const base = remPedidos.filter(p => comissaoIneps.has(String(p.inepOfertante).trim()));
-      enviados  = base;
       recebidos = [];
+      admPopularFiltroGREs(base);
+      enviados  = admFiltrarEOrdenarPedidos(base);
     } else {
       enviados = []; recebidos = [];
     }
@@ -2864,12 +2880,11 @@ function abrirTermo(id) {
   }
 
   const podeVisualizar = true; // todos podem ver o termo após confirmado
-  const podePrintTermo =
+  const podePrintTermo = !usuarioLogado?.isComissao && (
     duasAssinaram ||
     p.termoAssinado ||
     usuarioLogado?.isAdmin ||
-    usuarioLogado?.isGre ||
-    usuarioLogado?.isComissao;
+    usuarioLogado?.isGre);
 
   const itens = p.itens && p.itens.length > 0 ? p.itens : [{ titulo: p.titulo, qtd: p.qtd, serie: p.serie, mat: p.mat }];
   const minLinhas = Math.max(itens.length, 5);
@@ -3067,7 +3082,7 @@ async function comissaoConfirmarPedido(id) {
 }
 
 async function exportarPedidosTransporte() {
-  const todos = [...remPedidos].filter(p => p.status === 'aprovado' || p.status === 'confirmado').sort((a,b) => a.id - b.id);
+  const todos = remPedidosDoEscopo([...remPedidos]).filter(p => p.status === 'aprovado' || p.status === 'confirmado').sort((a,b) => a.id - b.id);
   if (todos.length === 0) { alert('Nenhum pedido aprovado para exportar.'); return; }
 
   if (!window.XLSX) {
@@ -3254,8 +3269,8 @@ document.getElementById('modal-aceite-admin').addEventListener('click', function
 });
 
 function abrirModalMapaColeta() {
-  const isGeadmMC = usuarioLogado?.isComissao && usuarioLogado?.divisao === 'GEADM' && !usuarioLogado?.isAdmin;
-  const pedidos = remPedidos.filter(p => (p.status === 'aprovado' || p.status === 'confirmado') && (!isGeadmMC || p.transporte === 'geadm'));
+  const isGeadmMC = usuarioLogado?.isComissao && !usuarioLogado?.isAdmin; // comissões não usam o "combinado"
+  const pedidos = remPedidosDoEscopo(remPedidos).filter(p => p.status === 'aprovado' || p.status === 'confirmado');
   const btnCombinado = document.getElementById('mc-btn-combinado');
   if (btnCombinado) btnCombinado.style.display = isGeadmMC ? 'none' : '';
   const lista = document.getElementById('mc-lista-pedidos');
@@ -3563,7 +3578,7 @@ document.getElementById('modal-mapa-coleta').addEventListener('click', function(
 let _tdPedidosElegiveis = [];
 
 function tdPodeImprimir(p) {
-  return p.termoAssinado || usuarioLogado?.isAdmin || usuarioLogado?.isGre || usuarioLogado?.isComissao;
+  return !usuarioLogado?.isComissao && (p.termoAssinado || usuarioLogado?.isAdmin || usuarioLogado?.isGre);
 }
 
 function tdTipoAtual() {
