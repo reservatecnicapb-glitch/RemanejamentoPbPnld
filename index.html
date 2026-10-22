@@ -1005,6 +1005,18 @@
             </div>
           </div>
           <div style="min-width:170px;">
+            <label class="form-label">Tipo de escola (solicitante)</label>
+            <div class="select-wrap">
+              <select id="adm-filtro-tipo" onchange="admAplicarFiltroPedidos()">
+                <option value="">Todos...</option>
+                <option value="parcial">Parcial (não integral)</option>
+                <option value="integral">Integral</option>
+                <option value="tecnica">Técnica / Profissional</option>
+                <option value="eja">EJA</option>
+              </select>
+            </div>
+          </div>
+          <div style="min-width:170px;">
             <label class="form-label">Ordenar por</label>
             <div class="select-wrap">
               <select id="adm-filtro-ordenar" onchange="admAplicarFiltroPedidos()">
@@ -2381,7 +2393,7 @@ async function remCarregarPedidos() {
   try {
     const [data, itensData] = await Promise.all([
       sbGet('pedidos_remanejamento',
-        'order=id.asc&select=*,solicitante:escolas!pedidos_remanejamento_inep_solicitante_fkey(nome,lat,lng,gre,eja),ofertante:escolas!pedidos_remanejamento_inep_ofertante_fkey(nome,gre,cidade)'
+        'order=id.asc&select=*,solicitante:escolas!pedidos_remanejamento_inep_solicitante_fkey(nome,lat,lng,gre,eja,tempo_integral,profissional),ofertante:escolas!pedidos_remanejamento_inep_ofertante_fkey(nome,gre,cidade)'
       ),
       sbGet('pedidos_remanejamento_itens', 'select=*')
     ]);
@@ -2399,6 +2411,8 @@ async function remCarregarPedidos() {
       latSol:parseFloat(p.solicitante?.lat)||0, lngSol:parseFloat(p.solicitante?.lng)||0,
       greSolicitante: p.solicitante?.gre,
       ejaSolicitante: p.solicitante?.eja,
+      integralSolicitante: p.solicitante?.tempo_integral,
+      profissionalSolicitante: p.solicitante?.profissional,
       inepOfertante:p.inep_ofertante, escolaOfertante:p.ofertante?.nome||p.inep_ofertante,
       greOfertante: p.ofertante?.gre,
       cidadeOfertante: p.ofertante?.cidade || '',
@@ -2644,7 +2658,7 @@ document.getElementById('modal-ordens-rem').addEventListener('click', function(e
 });
 
 // ─── FILTROS E ORDENAÇÃO DE PEDIDOS (ADMIN) ───────────────────────────────────
-let admFiltroPedidos = { greSol: '', greOf: '', ordenarPor: 'data', ordem: 'desc' };
+let admFiltroPedidos = { greSol: '', greOf: '', tipo: '', ordenarPor: 'data', ordem: 'desc' };
 
 function admPopularFiltroGREs(lista) {
   const selSol = document.getElementById('adm-filtro-gre-sol');
@@ -2662,6 +2676,8 @@ function admPopularFiltroGREs(lista) {
   montarOpcoes(selOf, gresOf, admFiltroPedidos.greOf);
   const selOrdenar = document.getElementById('adm-filtro-ordenar');
   const selOrdem = document.getElementById('adm-filtro-ordem');
+  const selTipo = document.getElementById('adm-filtro-tipo');
+  if (selTipo) selTipo.value = admFiltroPedidos.tipo;
   if (selOrdenar) selOrdenar.value = admFiltroPedidos.ordenarPor;
   if (selOrdem) selOrdem.value = admFiltroPedidos.ordem;
 }
@@ -2670,6 +2686,7 @@ function admAplicarFiltroPedidos() {
   admFiltroPedidos = {
     greSol: document.getElementById('adm-filtro-gre-sol')?.value || '',
     greOf: document.getElementById('adm-filtro-gre-of')?.value || '',
+    tipo: document.getElementById('adm-filtro-tipo')?.value || '',
     ordenarPor: document.getElementById('adm-filtro-ordenar')?.value || 'data',
     ordem: document.getElementById('adm-filtro-ordem')?.value || 'desc',
   };
@@ -2677,15 +2694,25 @@ function admAplicarFiltroPedidos() {
 }
 
 function admLimparFiltroPedidos() {
-  admFiltroPedidos = { greSol: '', greOf: '', ordenarPor: 'data', ordem: 'desc' };
+  admFiltroPedidos = { greSol: '', greOf: '', tipo: '', ordenarPor: 'data', ordem: 'desc' };
   remRenderPedidos();
 }
 
 function admFiltrarEOrdenarPedidos(lista) {
-  const { greSol, greOf, ordenarPor, ordem } = admFiltroPedidos;
+  const { greSol, greOf, tipo, ordenarPor, ordem } = admFiltroPedidos;
+  const tipoOk = p => {
+    if (!tipo) return true;
+    const integ = !!p.integralSolicitante, prof = !!p.profissionalSolicitante, eja = !!p.ejaSolicitante;
+    if (tipo === 'parcial') return !integ && !prof;
+    if (tipo === 'integral') return integ && !prof;
+    if (tipo === 'tecnica') return prof;
+    if (tipo === 'eja') return eja;
+    return true;
+  };
   let filtrada = lista.filter(p =>
     (!greSol || String(p.greSolicitante) === String(greSol)) &&
-    (!greOf  || String(p.greOfertante)  === String(greOf))
+    (!greOf  || String(p.greOfertante)  === String(greOf)) &&
+    tipoOk(p)
   );
 
   const dir = ordem === 'asc' ? 1 : -1;
@@ -2712,7 +2739,8 @@ function remPedidosDoEscopo(lista) {
   if (usuarioLogado?.isAdmin) return lista;
   if (usuarioLogado?.isComissao) {
     if (usuarioLogado.divisao === 'GEADM') return lista.filter(p => p.transporte === 'geadm');
-    if (comissaoIneps) return lista.filter(p => comissaoIneps.has(String(p.inepOfertante).trim()));
+    // comissão gera arquivos só dos pedidos em que a escola SOLICITANTE é dela (não os que ela só recebe)
+    if (comissaoIneps) return lista.filter(p => comissaoIneps.has(String(p.inepSolicitante).trim()));
     return [];
   }
   return lista;
