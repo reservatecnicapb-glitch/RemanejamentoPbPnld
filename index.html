@@ -5882,6 +5882,7 @@ async function dzCarregar() {
   document.getElementById('dz-busca-wrap').style.display = isEscola ? 'none' : '';
   document.getElementById('dz-conteudo').innerHTML = '<div style="padding:30px;text-align:center;color:var(--gray-60);">Carregando...</div>';
   dzErro = '';
+  if (usuarioLogado?.isComissao && !comissaoIneps && usuarioLogado.divisao !== 'GEADM') { try { await carregarInepsComissao(); } catch(e) { console.error(e); } }
   const filtro = isEscola ? `inep=eq.${usuarioLogado.inep}&order=id.asc&select=*` : 'order=id.asc&select=*';
   const data = await sbGet('desfazimento_docs', filtro);
   if (!Array.isArray(data)) {
@@ -5963,6 +5964,9 @@ function dzRender() {
   if (usuarioLogado?.isGre && !usuarioLogado?.isAdmin) {
     ineps = ineps.filter(i => Number(dzEscolas[i]?.gre) === Number(usuarioLogado.gre));
   }
+  if (usuarioLogado?.isComissao && !usuarioLogado?.isAdmin && usuarioLogado.divisao !== 'GEADM') {
+    ineps = comissaoIneps ? ineps.filter(i => comissaoIneps.has(i)) : [];
+  }
   if (termo) ineps = ineps.filter(i => i.includes(termo) || (dzEscolas[i]?.nome || '').toLowerCase().includes(termo));
   ineps.sort((a,b) => (dzEscolas[a]?.nome || a).localeCompare(dzEscolas[b]?.nome || b));
   badge.textContent = `${ineps.length} escola${ineps.length !== 1 ? 's' : ''} com documentos`;
@@ -5984,7 +5988,7 @@ function dzRender() {
       const ds = docs.filter(d => d.tipo === t.id);
       return `<div style="display:flex;gap:12px;padding:6px 0;border-top:1px solid var(--gray-20);flex-wrap:wrap;">
         <div style="flex:0 0 220px;font-weight:600;font-size:12.5px;">${t.label}</div>
-        <div style="flex:1;min-width:200px;">${dzListaArquivos(ds, !!usuarioLogado?.isAdmin, !!usuarioLogado?.isAdmin)}</div></div>`;
+        <div style="flex:1;min-width:200px;">${dzListaArquivos(ds, !!usuarioLogado?.isAdmin, dzPodeAvaliar(i))}</div></div>`;
     }).join('');
     return `<details style="border-bottom:1px solid var(--gray-30);padding:12px 20px;">
       <summary style="cursor:pointer;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
@@ -6026,9 +6030,16 @@ async function dzEnviar(tipo, input) {
   await dzCarregar();
 }
 
+// Admin avalia tudo; comissão (GEECI/GEECT/GEEJA) avalia só as escolas da sua divisão
+function dzPodeAvaliar(inep) {
+  if (usuarioLogado?.isAdmin) return true;
+  if (usuarioLogado?.isComissao && usuarioLogado.divisao !== 'GEADM') return !!comissaoIneps && comissaoIneps.has(String(inep).trim());
+  return false;
+}
+
 async function dzAvaliar(id, status) {
   const d = dzDocs.find(x => x.id === id);
-  if (!d || !usuarioLogado?.isAdmin) return;
+  if (!d || !dzPodeAvaliar(d.inep)) return;
   let motivo = null;
   if (status === 'rejeitado') {
     motivo = prompt(`Motivo da rejeição de "${d.nome_arquivo}" (a escola vai ver):`, '');
