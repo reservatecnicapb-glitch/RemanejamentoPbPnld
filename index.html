@@ -1092,6 +1092,18 @@
     <!-- CONTEÚDO DE RESERVA TÉCNICA -->
     <div id="tab-content-reserva" style="display:none;">
 
+      <!-- Livros disponíveis (clique abre o detalhamento) -->
+      <div class="stats-grid" style="margin-bottom:16px;">
+        <div class="stat-card" onclick="rtDispAbrir()" style="cursor:pointer;" title="Ver livros disponíveis">
+          <div class="stat-icon green"><i class="ri-book-open-line"></i></div>
+          <div><div class="stat-number" id="rt-stat-ai">0</div><div class="stat-label">Anos Iniciais<br>disponíveis ↗</div></div>
+        </div>
+        <div class="stat-card" onclick="rtDispAbrir()" style="cursor:pointer;" title="Ver livros disponíveis">
+          <div class="stat-icon teal"><i class="ri-book-2-line"></i></div>
+          <div><div class="stat-number" id="rt-stat-af">0</div><div class="stat-label">Anos Finais<br>disponíveis ↗</div></div>
+        </div>
+      </div>
+
       <!-- ESCOLA: formulário de solicitação -->
       <div id="rt-escola-view">
 
@@ -1115,7 +1127,6 @@
           </div>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
             <span style="font-size:12px;color:var(--gray-60);"><i class="ri-time-line"></i> Pedidos em ordem de chegada</span>
-            <button class="btn btn-outline" onclick="rtDispAbrir()" style="font-size:12px;padding:6px 12px;"><i class="ri-book-open-line"></i> Livros Disponíveis</button>
           </div>
         </div>
 
@@ -1175,7 +1186,6 @@
           <div style="display:flex;align-items:center;gap:8px;">
             <span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:3px;font-size:12px;font-weight:700;"><i class="ri-shield-user-line"></i> MODO ADMINISTRADOR</span>
             <span style="font-size:13px;color:var(--gray-80);">Visualizando todos os pedidos</span>
-            <button class="btn btn-outline" onclick="rtDispAbrir()" style="font-size:12px;padding:6px 12px;"><i class="ri-book-open-line"></i> Livros Disponíveis</button>
           </div>
           <div class="sub-tabs" style="background:var(--gray-10);border:1px solid var(--gray-30);border-radius:4px;padding:4px;display:inline-flex;gap:4px;">
             <button class="sub-tab active" id="adm-tab-todos" onclick="admShowTab('todos')"><i class="ri-list-unordered"></i> Todos</button>
@@ -4059,6 +4069,14 @@ const STATUS_ORDEM = ['solicitado', 'em_separacao', 'saiu_entrega', 'entregue'];
 let rtDispLista = [];
 let rtDispErro = '';
 
+async function rtDispTotais() {
+  const d = await sbGetAll('reserva_disponiveis', 'ativo=eq.true&select=qtd,etapa');
+  if (!Array.isArray(d)) return;
+  const soma = e => d.filter(x => x.etapa === e).reduce((a, x) => a + (Number(x.qtd) || 0), 0);
+  document.getElementById('rt-stat-ai').textContent = soma('Anos Iniciais');
+  document.getElementById('rt-stat-af').textContent = soma('Anos Finais');
+}
+
 function rtDispFechar() { document.getElementById('modal-rt-disp').style.display = 'none'; }
 document.getElementById('modal-rt-disp').addEventListener('click', function(e) { if (e.target === this) rtDispFechar(); });
 
@@ -4072,6 +4090,7 @@ async function rtDispAbrir() {
   sm.innerHTML = '<option value="">Todos os componentes</option>' + [...new Set(rtDispLista.map(x => x.mat).filter(Boolean))].sort().map(m => `<option value="${dzEsc(m)}">${dzEsc(m)}</option>`).join('');
   sm.value = v;
   rtDispRender();
+  rtDispTotais();
 }
 
 function rtDispRender() {
@@ -4114,6 +4133,7 @@ function rtDispRender() {
 
 // ─── RESERVA TÉCNICA — VIEWS ──────────────────────────────────────────────────
 function rtAtualizarView() {
+  rtDispTotais();
   const isAdmin = usuarioLogado && usuarioLogado.isAdmin;
   document.getElementById('rt-escola-view').style.display = isAdmin ? 'none' : '';
   document.getElementById('rt-admin-view').style.display  = isAdmin ? ''     : 'none';
