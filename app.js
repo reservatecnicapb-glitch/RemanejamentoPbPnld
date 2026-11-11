@@ -3494,10 +3494,6 @@ const PNLD2026 = {
         { nome:'FILOSOFIA, SOCIOLOGIA, HISTÓRIA, GEOGRAFIA POR TODA PARTE (Volume Único)', codigo:'0047P260101204816' },
         { nome:'DO SEU JEITO (Volume Único)', codigo:'0113P260101204816' },
       ],
-
-      'default_eja_medio_v1': [
-        { nome:'Reconquista Educação de Jovens e Adultos (Etapas 5 e 6)', codigo:'0018P26000509LE' },
-      ],
     }
   },
   'Linguagens e Cultura Digital': {
@@ -3729,17 +3725,6 @@ const PNLD2026 = {
     }
   },
 
-  'Ciências da Natureza - EJA': {
-    series: [...SERIES_EJA_EF56, ...SERIES_EJA_EM78],
-    livrosPorSerie: {
-      'default_eja_medio_v1': [
-        { nome:'NOVA EJA MODERNA - Ciências da Natureza (Etapas 5 e 6)', codigo:'0006P260102214000' },
-      ],
-      'default_eja_medio_v2': [
-        { nome:'NOVA EJA MODERNA - Ciências da Natureza (Etapas 7 e 8)',      codigo:'0006P260102214000' },
-      ],
-    }
-  },
 
 };
 
