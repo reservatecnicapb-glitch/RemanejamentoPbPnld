@@ -4543,7 +4543,7 @@ function dzListaArquivos(docs, podeExcluir, podeAvaliar) {
       ${podeAvaliar && d.status !== 'rejeitado' ? `<button title="Rejeitar" onclick="dzAvaliar(${d.id},'rejeitado')" style="display:inline-flex;align-items:center;gap:4px;width:auto;height:auto;padding:3px 10px;font-size:12px;font-family:'Inter',sans-serif;font-weight:600;border-radius:4px;cursor:pointer;white-space:nowrap;background:#fff;color:#cc2222;border:1px solid #cc2222;"><i class="ri-close-line"></i> Rejeitar</button>` : ''}
       ${podeExcluir ? `<button title="Remover" onclick="dzExcluir(${d.id})" style="display:inline-flex;align-items:center;gap:4px;width:auto;height:auto;padding:3px 10px;font-size:12px;font-family:'Inter',sans-serif;font-weight:600;border-radius:4px;cursor:pointer;white-space:nowrap;background:#fff;color:#6b7280;border:1px solid #d1d5db;"><i class="ri-delete-bin-line"></i></button>` : ''}
     </div>
-    ${d.status === 'rejeitado' && d.motivo ? `<div style="margin:3px 0 0 22px;font-size:12px;color:#991b1b;">Motivo: ${dzEsc(d.motivo)}</div>` : ''}
+    ${d.status === 'rejeitado' && d.motivo ? `<div style="margin:3px 0 0 22px;font-size:12px;color:#991b1b;"><b>Motivo da rejeição:</b> ${dzEsc(d.motivo)}</div>` : ''}
     </div>`).join('');
 }
 
@@ -4664,15 +4664,38 @@ function dzPodeAvaliar(inep) {
   return false;
 }
 
+let dzRejeitarId = null;
+
 async function dzAvaliar(id, status) {
   const d = dzDocs.find(x => x.id === id);
   if (!d || !dzPodeAvaliar(d.inep)) return;
-  let motivo = null;
   if (status === 'rejeitado') {
-    motivo = prompt(`Motivo da rejeição de "${d.nome_arquivo}" (a escola vai ver):`, '');
-    if (motivo === null) return;
-    motivo = motivo.trim() || null;
+    dzRejeitarId = id;
+    document.getElementById('dz-rej-arquivo').textContent = d.nome_arquivo;
+    const t = document.getElementById('dz-rej-motivo');
+    t.value = d.motivo || '';
+    document.getElementById('dz-rej-erro').style.display = 'none';
+    document.getElementById('modal-dz-rejeitar').style.display = 'flex';
+    setTimeout(() => t.focus(), 50);
+    return;
   }
+  await dzSalvarAvaliacao(id, status, null);
+}
+
+function dzRejeitarFechar() {
+  document.getElementById('modal-dz-rejeitar').style.display = 'none';
+  dzRejeitarId = null;
+}
+
+async function dzRejeitarConfirmar() {
+  const motivo = document.getElementById('dz-rej-motivo').value.trim();
+  if (!motivo) { document.getElementById('dz-rej-erro').style.display = 'block'; return; }
+  const id = dzRejeitarId;
+  dzRejeitarFechar();
+  await dzSalvarAvaliacao(id, 'rejeitado', motivo);
+}
+
+async function dzSalvarAvaliacao(id, status, motivo) {
   const ok = await sbPatch('desfazimento_docs', `id=eq.${id}`, { status, motivo });
   if (!ok) { alert('Não foi possível salvar. Rode o SQL que adiciona as colunas status e motivo na tabela desfazimento_docs.'); return; }
   await dzCarregar();
